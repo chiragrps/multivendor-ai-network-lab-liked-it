@@ -1,0 +1,11 @@
+# DCN Junos MCP Server (Read-Only) — Dependencies
+junos-eznc>=2.7.4
+jxmlease>=1.0.3
+lxml>=6.0.0
+mcp[cli]>=1.12.2
+ncclient>=0.6.15
+paramiko>=3.5.1,<4.0
+uvicorn>=0.30.0
+starlette>=0.37.0
+pydantic-settings>=2.0.0
+anyio>=4.0.0

@@ -1,0 +1,33 @@
+id: acl_block
+title: ACL or security policy blocks legitimate traffic
+category: security
+severity: high
+description: >
+  Identify the policy / ACL line that drops a known-good flow and propose a permit edit.
+  Read-only by default — does NOT auto-modify policies.
+
+inputs:
+  device:   { required: true }
+  src_ip:   { required: true }
+  dst_ip:   { required: true }
+  dst_port: { required: false }
+  vendor:   { required: false }
+
+steps:
+  - id: collect_running_config
+    type: check
+    canonical_task: running_config
+    description: Pull current security policies / ACLs.
+
+  - id: collect_log
+    type: check
+    canonical_task: log_recent
+    description: Search for deny / drop messages matching src/dst/port.
+
+  - id: analyze
+    type: ai
+    description: |
+      Identify the matching deny line. Propose a permit edit with explicit
+      src/dst/port (avoid any/any). Show before/after diff. Do NOT push.
+
+post_checks: []

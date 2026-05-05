@@ -1,0 +1,10 @@
+DE-FRA,localhost,de-fra-core-01,2201,frr
+DE-FRA,localhost,de-fra-core-02,2202,frr
+UK-LON,localhost,uk-lon-core-01,2203,frr
+NL-AMS,localhost,nl-ams-core-01,2204,frr
+US-NYC,localhost,us-nyc-core-01,2207,frr
+DE-FRA,localhost,de-fra-edge-01,2205,frr
+UK-LON,localhost,uk-lon-edge-01,2208,frr
+NL-AMS,localhost,nl-ams-edge-01,2209,frr
+UK-LON,localhost,uk-lon-dist-01,2206,frr
+DE-FRA,localhost,de-fra-dist-01,2210,frr

@@ -1,0 +1,1401 @@
+! Command: show running-config
+! device: ams-eos-rt-01 (DCS-7280CR3K-32D4A, EOS-4.29.2F)
+!
+! boot system flash:EOS-4.29.2F-x86_64.swi
+!
+enable password sha512 $6$wK8THFC2nD8OCYJh$s5n29hrHjtQHDrSwHsRA5VsFMoVnTr1rCyZi/QRiVHd8Apvr.ywNZXu21sAA/OkqshKvZLC/wWqIeLLPKYcea1
+aaa root secret sha512 $6$jBcBc9Mlsj/yPaRq$.a7RoGtTUonjO/RVEpE5.5aLHROXppJJiejFkhuOrRa2TQT0Ry.hI5cAwTMn9kVvpJa3XdEOjnm7E3lBgtcAu.
+no username admin
+!
+username netadmin1 privilege 15 role network-admin nopassword
+
+username netops privilege 15 role network-admin secret sha512 $6$y9QjOUblLXKjw7A6$825sRxvVu5z618ABEgfcSvQQNKgoUu8iaz7fdfLMbCgrM.mOcjrvpK9Us0Fk1JCpL7uFlrpD/ppEmQQLfep.l0
+
+username netadmin2 privilege 15 role network-admin nopassword
+
+username gnmi role gnmi secret sha512 $6$nQ85BjjyJ4uwv2eG$tULwklHeDEnjz1A2INH3Tjw1.tXje/uir.jTlMLMjwWo9vOjVJ7bzRZmWIGCp5FlSSFo1mUPmivMmePVGqxvW1
+username netadmin3 privilege 15 role network-admin nopassword
+
+username netadmin4 privilege 15 role network-admin nopassword
+
+username netadmin5 privilege 15 role network-admin nopassword
+
+username netops2 privilege 15 role network-admin secret sha512 $6$YjcCymwt$Z5BPzqlfNLAlO9zT5Rnp89dV0Op.BEv37o6ibKqRtdhqi2DD7kuNY/V/AQ6S4KPUCWqKZrAk7jYFFhhe3bF2j/
+username netadmin6 privilege 15 role network-admin nopassword
+
+username netops3 privilege 15 role network-admin nopassword
+
+!
+trace Octa setting */9
+trace OpenConfig setting */9
+!
+hardware counter feature traffic-policy in
+!
+transceiver qsfp default-mode 4x10G
+!
+service routing protocols model multi-agent
+!
+no lldp run
+!
+logging host 192.168.100.100
+logging source-interface Loopback0
+!
+hostname ams-eos-rt-01
+ip name-server vrf default 192.168.100.53
+ip name-server vrf default 192.168.100.53
+dns domain net.netlab.local
+!
+snmp-server engineID local 00c52c443d42
+snmp-server location AMS1
+snmp-server view all iso included
+snmp-server group snmp_group_ro v3 priv read all
+snmp-server user snmp_monitor_amer snmp_group_ro v3 localized 00c52c443d42 auth sha a569f9de0791dc87e398b08d6beb633aa3616b53 priv aes b6ea0ed68da9f2c5b4261dd8cda6ef28
+snmp-server user snmp_monitor_apac snmp_group_ro v3 localized 00c52c443d42 auth sha 5898b7b357dc83c04a62e52d483b228d2b587ad8 priv aes 915c28c97f23e6e1ac93cdac095f04c2
+snmp-server user snmp_monitor_emea snmp_group_ro v3 localized 00c52c443d42 auth sha 6498c3bd709f03c23d88b343f0c32af991e52335 priv aes b930e688955e4c928e2e48770225a760
+snmp-server user snmp_telemetry snmp_group_ro v3 localized 00c52c443d42 auth sha 2b62057ea8477c30fce16f76e99984de56da29dd priv aes 715b03487c5dba6a34ae4fd1a53a8bf2
+!
+spanning-tree mode mstp
+!
+service unsupported-transceiver LabUnlockKey 00000000
+!
+vrf selection policy
+!
+banner motd
+=================================================================
+WARNING!
+This is a private computer system. Unauthorized access or use
+is prohibited and subject to prosecution and/or disciplinary
+action. All use of this system constitutes consent to
+monitoring at all times and users are not entitled to any
+expectation of privacy. If monitoring reveals possible evidence
+of violation of criminal statutes, this evidence and any other
+related information, including identification information about
+the user, may be provided to law enforcement officials.
+If monitoring reveals violations of security regulations or
+unauthorized use, employees who violate security regulations or
+make unauthorized use of this system are subject to appropriate
+disciplinary action.
+=================================================================
+EOF
+!
+management api http-commands
+   no shutdown
+!
+management console
+   idle-timeout 15
+!
+management api gnmi
+   transport grpc default
+      port 32767
+      listen-addresses 10.3.254.133
+   provider eos-native
+!
+aaa authorization exec default local
+!
+interface Port-Channel1
+   description ams1-rt-01
+   mtu 9202
+   no switchport
+   ip address 203.0.113.1/31
+   ipv6 address 2a07:7940:bb::7/127
+   isis enable BB
+   isis metric 10
+   isis network point-to-point
+!
+interface Port-Channel2
+   traffic-policy input filter-internet-traffic-combined
+   description ams1-PEER-Microsoft
+   no switchport
+   ip address 104.44.58.112/31
+   ipv6 address 2a01:111:2000:1::3dd9/126
+!
+interface Ethernet1/1
+   description ams1-rt-01
+   channel-group 1 mode active
+   lacp timer fast
+!
+interface Ethernet2/1
+   description ams1-rt-01
+   channel-group 1 mode active
+   lacp timer fast
+!
+interface Ethernet3/1
+!
+interface Ethernet4/1
+   description ams1-PEER-Microsoft-CAS-116880-L1N0H0
+   channel-group 2 mode active
+   lacp timer fast
+!
+interface Ethernet5/1
+   description ams-eos-rt-01-WL-fra4-rt-02-LE-305750
+   mtu 9202
+   no switchport
+   ip address 203.0.113.1/31
+   ipv6 address 2a07:7940:bb::29/127
+   isis enable BB
+   isis metric 550
+   isis network point-to-point
+!
+interface Ethernet6/1
+!
+interface Ethernet7/1
+!
+interface Ethernet8/1
+!
+interface Ethernet9/1
+!
+interface Ethernet10/1
+!
+interface Ethernet11/1
+!
+interface Ethernet12/1
+!
+interface Ethernet13/1
+!
+interface Ethernet14/1
+!
+interface Ethernet15/1
+!
+interface Ethernet16/1
+!
+interface Ethernet17/1
+!
+interface Ethernet18/1
+!
+interface Ethernet19/1
+!
+interface Ethernet20/1
+!
+interface Ethernet21/1
+!
+interface Ethernet22/1
+!
+interface Ethernet23/1
+!
+interface Ethernet24/1
+!
+interface Ethernet25/1
+   speed forced 10000full
+!
+interface Ethernet25/2
+!
+interface Ethernet25/3
+!
+interface Ethernet25/4
+!
+interface Ethernet27/1
+   speed forced 10000full
+!
+interface Ethernet27/2
+!
+interface Ethernet27/3
+!
+interface Ethernet27/4
+!
+interface Ethernet29/1
+   speed forced 10000full
+!
+interface Ethernet29/2
+!
+interface Ethernet29/3
+!
+interface Ethernet29/4
+!
+interface Ethernet31/1
+   description ams1-ntw-infra-01
+   speed forced 10000full
+   no switchport
+   ip address 10.2.249.14/31
+   isis enable BB
+   isis metric 10
+   isis network point-to-point
+!
+interface Ethernet31/2
+!
+interface Ethernet31/3
+!
+interface Ethernet31/4
+!
+interface Ethernet33/1
+!
+interface Ethernet34/1
+!
+interface Ethernet35/1
+!
+interface Ethernet36/1
+!
+interface Loopback0
+   ip address 10.3.254.133/32
+   ipv6 address 2a07:7940:0:ffff:13::2/128
+   isis enable BB
+   isis metric 10
+   isis passive
+!
+interface Management1
+   ip address 10.5.5.52/24
+!
+hardware tcam
+   profile acro-custom
+      feature traffic-policy cpu ipv4
+         key size limit 160
+         key field dst-ip icmp-type-code ip-frag ip-protocol l4-dst-port l4-src-port src-ip tcp-control ttl
+         action count set-drop-precedence set-policer
+      !
+      feature traffic-policy cpu ipv6
+         key field dst-ipv6 ipv6-next-header l4-dst-port l4-src-port src-ipv6-high src-ipv6-low tcp-control ttl
+         action count set-drop-precedence set-policer
+      !
+      feature traffic-policy port ipv4
+         key size limit 160
+         policy policer unshared action size 5 bits
+         policy policer unshared qualifier size 9 bits
+         key field dscp dst-ip-label icmp-type-code ip-frag ip-fragment-offset ip-length ip-protocol l4-dst-port l4-src-port src-ip-label tcp-control ttl
+         action count drop log set-unshared-policer
+         packet ipv4 forwarding bridged
+         packet ipv4 forwarding routed
+         packet mpls ipv4 forwarding bridged
+         packet mpls ipv4 forwarding mpls
+      !
+      feature traffic-policy port ipv4 egress
+         key size limit 160
+         key field dscp dst-ip-label ip-frag ip-protocol l4-dst-port l4-src-port src-ip-label tcp-control
+         action count drop log
+         packet ipv4 forwarding routed
+         packet mpls ipv4 forwarding mpls
+      !
+      feature traffic-policy port ipv6
+         key field dst-ipv6-label hop-limit ipv6-length ipv6-next-header ipv6-traffic-class l4-dst-port l4-src-port src-ipv6-label tcp-control
+         action count drop log set-unshared-policer
+         packet ipv6 forwarding bridged
+         packet ipv6 forwarding routed
+         packet mpls ipv6 forwarding bridged
+         packet mpls ipv6 forwarding mpls
+      !
+      feature traffic-policy port ipv6 egress
+         key field dscp dst-ipv6-label ipv6-next-header l4-dst-port l4-src-port src-ipv6-label tcp-control
+         action count drop log
+         packet ipv6 forwarding routed
+         packet mpls ipv6 forwarding mpls
+   system profile acro-custom
+!
+ipv6 access-list filter-all-in-one-v6
+   10 permit tcp any any eq bgp
+   11 permit icmpv6 any any
+   12 permit tcp any any established
+!
+ip access-list filter-all-in-one
+   10 remark #allow-tcp-est
+   20 permit tcp any any established
+   30 remark #accept-bfd
+   40 permit udp 10.2.0.0/16 any eq bfd bfd-echo multihop-bfd
+   50 remark #accept-bgp-dst/src
+   60 permit tcp 10.2.254.0/23 10.2.254.0/23 eq bgp
+   70 permit tcp 10.3.254.0/23 10.3.254.0/23 eq bgp
+   80 permit tcp 10.4.254.0/23 10.4.254.0/23 eq bgp
+   90 permit tcp 10.4.128.0/17 10.4.128.0/17 eq bgp
+   100 permit tcp 10.5.128.0/17 10.5.128.0/17 eq bgp
+   110 permit tcp 10.2.249.0/24 10.2.249.0/24 eq bgp
+   120 permit tcp 10.2.250.0/24 10.2.250.0/24 eq bgp
+   130 remark #allow-pxe
+   140 permit tcp host 0.0.0.0 any eq 67 68 69 4011
+   150 permit tcp 10.2.0.0/16 any eq 67 68 69 4011
+   160 remark #accept-dns
+   170 permit udp host 192.168.100.53 host 10.3.254.133 eq domain
+   180 permit udp host 192.168.100.53 host 10.3.254.133 eq domain
+   190 remark #accept-icmp
+   200 permit icmp any any
+   210 remark #accept-netconf-mgmt
+   220 permit tcp 10.1.0.0/16 host 10.3.254.133 eq netconf-ssh
+   221 permit tcp 10.1.0.0/16 host 10.3.254.133 eq https
+   230 remark #accept-ntp
+   240 permit udp host 192.168.100.53 host 10.3.254.133 eq ntp
+   250 permit udp host 10.1.247.49 host 10.3.254.133 eq ntp
+   260 permit udp host 192.168.100.100 host 10.3.254.133 eq ntp
+   270 permit udp host 10.1.243.49 host 10.3.254.133 eq ntp
+   320 remark #accept-grpc-gnmi
+   330 permit tcp host 192.168.100.100 host 10.3.254.133 eq 32767
+   335 permit tcp host 10.1.247.240 host 10.3.254.133 eq 32767
+   338 permit tcp host 192.168.100.53 host 10.3.254.133 eq 32767
+   340 remark #accept-snmp
+   350 permit udp host 192.168.100.100 host 10.3.254.133 range snmp snmptrap
+   355 permit udp host 10.1.247.240 host 10.3.254.133 range snmp snmptrap
+   360 permit udp host 192.168.100.100 host 10.3.254.133 range snmp snmptrap
+   370 permit udp host 192.168.100.100 host 10.3.254.133 range snmp snmptrap
+   380 permit udp host 10.1.243.199 host 10.3.254.133 range snmp snmptrap
+   390 permit udp host 192.168.100.53 host 10.3.254.133 range snmp snmptrap
+   400 permit udp host 192.168.100.53 host 10.3.254.133 range snmp snmptrap
+   410 permit udp host 192.168.100.53 host 10.3.254.133 range snmp snmptrap
+   420 permit udp host 10.1.253.149 host 10.3.254.133 range snmp snmptrap
+   430 remark #accept-ssh-mgmt
+   440 permit tcp 10.1.0.0/16 host 10.3.254.133 eq ssh
+   450 remark #accept-traceroute-icmp
+   460 permit icmp any any traceroute
+   470 remark #accept-mlag
+   480 permit tcp any any eq mlag ttl eq 255
+   490 permit udp any any eq mlag ttl eq 255
+   500 permit tcp any eq mlag any ttl eq 255
+   510 remark #accept-vrrp
+   520 permit vrrp any any
+!
+ip routing
+!
+ip community-list SET_ORIGIN_GEO_AMS1 permit 35793:21031
+ip community-list SET_TYPE_INTERNET_TRANSIT permit 1:51
+!
+ip prefix-list netlab_BGP_ADV_V4_PREFIXES
+   seq 10 permit 72.14.130.0/24
+   seq 20 permit 91.221.209.0/24
+   seq 30 permit 151.241.72.0/24
+   seq 40 permit 185.151.160.0/24
+   seq 50 permit 185.151.161.0/24
+   seq 60 permit 185.151.162.0/24
+   seq 70 permit 185.151.163.0/24
+   seq 80 permit 185.174.140.0/24
+   seq 90 permit 185.174.141.0/24
+   seq 100 permit 185.174.142.0/24
+   seq 110 permit 185.174.143.0/24
+!
+ip prefix-list ALL_UP_TO_24
+   seq 10 permit 0.0.0.0/0 le 24
+!
+ip prefix-list DEFAULT_ROUTE_V4
+   seq 10 permit 0.0.0.0/0
+!
+ip prefix-list GREATER_THAN_24
+   seq 10 permit 0.0.0.0/25 ge 25
+!
+ip prefix-list IANA_RESERVED
+   seq 5 deny 0.0.0.0/8 le 32
+   seq 10 deny 10.0.0.0/8 le 32
+   seq 15 deny 100.64.0.0/10 le 32
+   seq 20 deny 127.0.0.0/8 le 32
+   seq 25 deny 169.254.0.0/16 le 32
+   seq 30 deny 172.16.0.0/12 le 32
+   seq 35 deny 192.0.0.0/24 le 32
+   seq 40 deny 192.0.2.0/24 le 32
+   seq 45 deny 192.88.99.0/24 le 32
+   seq 50 deny 192.168.0.0/16 le 32
+   seq 55 deny 198.18.0.0/15 le 32
+   seq 60 deny 198.51.100.0/24 le 32
+   seq 65 deny 203.0.113.0/24 le 32
+   seq 70 deny 224.0.0.0/4 le 32
+   seq 75 deny 240.0.0.0/4 le 32
+!
+ip prefix-list NTW-INFRA-01_BGP_ADV_V4
+   seq 10 permit 192.168.144.0/24 le 32
+   seq 20 permit 10.1.252.0/24 le 32
+   seq 30 permit 10.2.249.0/24
+   seq 40 permit 10.3.249.0/24
+   seq 50 permit 192.168.100.53/24
+   seq 60 permit 203.0.113.1/24 le 32
+   seq 70 permit 10.5.0.0/16 le 32
+   seq 80 permit 10.1.247.0/24
+!
+ip prefix-list STANDARD_DENIAL_V4
+   seq 5 deny 0.0.0.0/8 le 32
+   seq 10 deny 10.0.0.0/8 le 32
+   seq 15 deny 100.64.0.0/10 le 32
+   seq 20 deny 127.0.0.0/8 le 32
+   seq 25 deny 169.254.0.0/16 le 32
+   seq 30 deny 172.16.0.0/12 le 32
+   seq 35 deny 192.0.0.0/24 le 32
+   seq 40 deny 192.0.2.0/24 le 32
+   seq 45 deny 192.88.99.0/24 le 32
+   seq 50 deny 192.168.0.0/16 le 32
+   seq 55 deny 198.18.0.0/15 le 32
+   seq 60 deny 198.51.100.0/24 le 32
+   seq 65 deny 203.0.113.0/24 le 32
+   seq 70 deny 224.0.0.0/4 le 32
+   seq 75 deny 240.0.0.0/4 le 32
+!
+ipv6 prefix-list netlab_BGP_ADV_V6_PREFIXES
+   seq 10 permit 2a07:7940:12::/48
+   seq 20 permit 2a07:7940:18::/48
+   seq 30 permit 2a07:7940:41::/48
+   seq 40 permit 2a07:7940:45::/48
+!
+ipv6 prefix-list ALL_UP_TO_48
+   seq 10 permit ::/0 le 48
+!
+ipv6 prefix-list DEFAULT_ROUTE_V6
+   seq 10 permit ::/0
+!
+ipv6 prefix-list GREATER_THAN_48
+   seq 10 permit ::/49 ge 49
+!
+ipv6 prefix-list STANDARD_DENIAL_V6
+   seq 10 deny ::/0
+   seq 20 deny ::1/128
+   seq 30 deny ff00::/8
+   seq 40 deny fc00::/7
+!
+ipv6 unicast-routing
+!
+system control-plane
+   ip access-group filter-all-in-one in
+   ipv6 access-group filter-all-in-one-v6 in
+!
+ip route 10.0.0.0/8 Null0
+ip route 172.16.0.0/12 Null0
+ip route 192.168.0.0/16 Null0
+!
+ntp local-interface Loopback0
+ntp server 192.168.100.100
+ntp server 10.1.243.49
+ntp server 10.1.247.49
+ntp server 192.168.100.53 prefer
+!
+role gnmi
+   10 deny mode exec command .*
+!
+route-map BB_BGP_ADV_V4 permit 10
+   match source-protocol bgp
+!
+route-map BB_BGP_ADV_V6 permit 10
+   match source-protocol bgp
+!
+route-map BB_BGP_RCV_V4 permit 10
+   match source-protocol bgp
+!
+route-map BB_BGP_RCV_V6 permit 10
+   match source-protocol bgp
+!
+route-map DENY_BGP_ALL deny 10
+!
+route-map GENERIC_BGP_ADV_V4 permit 10
+   match ip address prefix-list netlab_BGP_ADV_V4_PREFIXES
+   set community none
+!
+route-map GENERIC_BGP_ADV_V6 permit 10
+   match ipv6 address prefix-list netlab_BGP_ADV_V6_PREFIXES
+   set community none
+!
+route-map GENERIC_DIRECT_BGP_RCV_V4 deny 10
+   match ip address prefix-list DEFAULT_ROUTE_V4
+!
+route-map GENERIC_DIRECT_BGP_RCV_V4 deny 20
+   match ip address prefix-list STANDARD_DENIAL_V4
+!
+route-map GENERIC_DIRECT_BGP_RCV_V4 deny 30
+   match ip address prefix-list netlab_BGP_ADV_V4_PREFIXES
+!
+route-map GENERIC_DIRECT_BGP_RCV_V4 deny 40
+   match origin-as validity invalid
+!
+route-map GENERIC_DIRECT_BGP_RCV_V4 permit 50
+   match ip address prefix-list ALL_UP_TO_24
+   match source-protocol bgp
+   set community none
+   set local-preference 3200
+!
+route-map GENERIC_DIRECT_BGP_RCV_V6 deny 10
+   match ipv6 address prefix-list DEFAULT_ROUTE_V6
+!
+route-map GENERIC_DIRECT_BGP_RCV_V6 deny 20
+   match ipv6 address prefix-list STANDARD_DENIAL_V6
+!
+route-map GENERIC_DIRECT_BGP_RCV_V6 deny 30
+   match ipv6 address prefix-list netlab_BGP_ADV_V6_PREFIXES
+!
+route-map GENERIC_DIRECT_BGP_RCV_V6 deny 40
+   match origin-as validity invalid
+!
+route-map GENERIC_DIRECT_BGP_RCV_V6 permit 50
+   match source-protocol bgp
+   match ipv6 address prefix-list ALL_UP_TO_48
+   set community none
+   set local-preference 3200
+!
+route-map GENERIC_ISP_BGP_RCV_V4 permit 10
+   match ip address prefix-list DEFAULT_ROUTE_V4
+   set community none
+!
+route-map GENERIC_ISP_BGP_RCV_V4 deny 20
+   match ip address prefix-list GREATER_THAN_24
+!
+route-map GENERIC_ISP_BGP_RCV_V4 deny 30
+   match ip address prefix-list STANDARD_DENIAL_V4
+!
+route-map GENERIC_ISP_BGP_RCV_V4 deny 40
+   match ip address prefix-list netlab_BGP_ADV_V4_PREFIXES
+!
+route-map GENERIC_ISP_BGP_RCV_V4 deny 50
+   match origin-as validity invalid
+!
+route-map GENERIC_ISP_BGP_RCV_V4 permit 60
+   match ip address prefix-list ALL_UP_TO_24
+   match source-protocol bgp
+   set community none
+   set local-preference 500
+!
+route-map GENERIC_ISP_BGP_RCV_V6 permit 10
+   match ipv6 address prefix-list DEFAULT_ROUTE_V6
+   set community none
+!
+route-map GENERIC_ISP_BGP_RCV_V6 deny 20
+   match ipv6 address prefix-list GREATER_THAN_48
+!
+route-map GENERIC_ISP_BGP_RCV_V6 deny 30
+   match ipv6 address prefix-list STANDARD_DENIAL_V6
+!
+route-map GENERIC_ISP_BGP_RCV_V6 deny 40
+   match ipv6 address prefix-list netlab_BGP_ADV_V6_PREFIXES
+!
+route-map GENERIC_ISP_BGP_RCV_V6 deny 50
+   match origin-as validity invalid
+!
+route-map GENERIC_ISP_BGP_RCV_V6 permit 60
+   match source-protocol bgp
+   match ipv6 address prefix-list ALL_UP_TO_48
+   set community none
+   set local-preference 500
+!
+route-map GENERIC_IX_BGP_RCV_V4 deny 10
+   match ip address prefix-list DEFAULT_ROUTE_V4
+   set community none
+!
+route-map GENERIC_IX_BGP_RCV_V4 deny 20
+   match ip address prefix-list GREATER_THAN_24
+!
+route-map GENERIC_IX_BGP_RCV_V4 deny 30
+   match ip address prefix-list STANDARD_DENIAL_V4
+!
+route-map GENERIC_IX_BGP_RCV_V4 deny 40
+   match ip address prefix-list netlab_BGP_ADV_V4_PREFIXES
+!
+route-map GENERIC_IX_BGP_RCV_V4 deny 50
+   match origin-as validity invalid
+!
+route-map GENERIC_IX_BGP_RCV_V4 permit 60
+   match ip address prefix-list ALL_UP_TO_24
+   match source-protocol bgp
+   match as-path length = 1
+   set community none
+   set local-preference 1000
+!
+route-map GENERIC_IX_BGP_RCV_V4 permit 70
+   match ip address prefix-list ALL_UP_TO_24
+   match source-protocol bgp
+   match as-path length = 2
+   set community none
+   set local-preference 900
+!
+route-map GENERIC_IX_BGP_RCV_V4 permit 80
+   match ip address prefix-list ALL_UP_TO_24
+   match source-protocol bgp
+   match as-path length = 3
+   set community none
+   set local-preference 800
+!
+route-map GENERIC_IX_BGP_RCV_V4 permit 90
+   match ip address prefix-list ALL_UP_TO_24
+   match source-protocol bgp
+   match as-path length >= 3 and <= 6
+   set community none
+   set local-preference 700
+!
+route-map GENERIC_IX_BGP_RCV_V4 permit 100
+   match ip address prefix-list ALL_UP_TO_24
+   match source-protocol bgp
+   match as-path length >= 6 and <= 4000
+   set community none
+   set local-preference 50
+!
+route-map GENERIC_IX_BGP_RCV_V6 permit 10
+   match ipv6 address prefix-list DEFAULT_ROUTE_V6
+   set community none
+!
+route-map GENERIC_IX_BGP_RCV_V6 deny 20
+   match ipv6 address prefix-list GREATER_THAN_48
+!
+route-map GENERIC_IX_BGP_RCV_V6 deny 30
+   match ipv6 address prefix-list STANDARD_DENIAL_V6
+!
+route-map GENERIC_IX_BGP_RCV_V6 deny 40
+   match ipv6 address prefix-list netlab_BGP_ADV_V6_PREFIXES
+!
+route-map GENERIC_IX_BGP_RCV_V6 deny 50
+   match origin-as validity invalid
+!
+route-map GENERIC_IX_BGP_RCV_V6 permit 60
+   match source-protocol bgp
+   match ipv6 address prefix-list ALL_UP_TO_48
+   match as-path length = 1
+   set community none
+   set local-preference 1000
+!
+route-map GENERIC_IX_BGP_RCV_V6 permit 70
+   match source-protocol bgp
+   match ipv6 address prefix-list ALL_UP_TO_48
+   match as-path length = 2
+   set community none
+   set local-preference 900
+!
+route-map GENERIC_IX_BGP_RCV_V6 permit 80
+   match source-protocol bgp
+   match ipv6 address prefix-list ALL_UP_TO_48
+   match as-path length = 3
+   set community none
+   set local-preference 800
+!
+route-map GENERIC_IX_BGP_RCV_V6 permit 90
+   match source-protocol bgp
+   match ipv6 address prefix-list ALL_UP_TO_48
+   match as-path length >= 3 and <= 6
+   set community none
+   set local-preference 700
+!
+route-map GENERIC_IX_BGP_RCV_V6 permit 100
+   match source-protocol bgp
+   match ipv6 address prefix-list ALL_UP_TO_48
+   match as-path length >= 6 and <= 4000
+   set community none
+   set local-preference 50
+!
+route-map MSFT_BGP_ADV_V4 permit 10
+   match ip address prefix-list netlab_BGP_ADV_V4_PREFIXES
+   set community none
+!
+route-map MSFT_BGP_ADV_V6 permit 10
+   match ipv6 address prefix-list netlab_BGP_ADV_V6_PREFIXES
+   set community none
+!
+route-map MSFT_BGP_RCV_V4 deny 10
+   match ip address prefix-list STANDARD_DENIAL_V4
+!
+route-map MSFT_BGP_RCV_V4 deny 20
+   match ip address prefix-list netlab_BGP_ADV_V4_PREFIXES
+!
+route-map MSFT_BGP_RCV_V4 permit 30
+   match ip address prefix-list ALL_UP_TO_24
+   match source-protocol bgp
+   set community 1:4010 35793:21031
+   set local-preference 3000
+!
+route-map MSFT_BGP_RCV_V6 deny 10
+   match ipv6 address prefix-list STANDARD_DENIAL_V6
+!
+route-map MSFT_BGP_RCV_V6 deny 20
+   match ipv6 address prefix-list netlab_BGP_ADV_V6_PREFIXES
+!
+route-map MSFT_BGP_RCV_V6 permit 30
+   match source-protocol bgp
+   match ipv6 address prefix-list ALL_UP_TO_48
+   set community 1:4010 35793:21031
+   set local-preference 3000
+!
+route-map NTW-INFRA-01_BGP_ADV_V4 permit 10
+   match ip address prefix-list NTW-INFRA-01_BGP_ADV_V4
+!
+route-map NTW-INFRA-01_BGP_RCV_V4 permit 10
+   match source-protocol bgp
+   set local-preference 300
+!
+router bgp 35793
+   router-id 10.3.254.133
+   distance bgp 170 170 170
+   maximum-paths 10 ecmp 10
+   neighbor BB_V4 peer group
+   neighbor BB_V4 remote-as 35793
+   neighbor BB_V4 next-hop-self
+   neighbor BB_V4 update-source Loopback0
+   neighbor BB_V4 description CYBERNET_BACKBONE_V4
+   neighbor BB_V4 route-map BB_BGP_RCV_V4 in
+   neighbor BB_V4 route-map BB_BGP_ADV_V4 out
+   neighbor BB_V4 maximum-routes 0
+   neighbor BB_V6 peer group
+   neighbor BB_V6 remote-as 35793
+   neighbor BB_V6 next-hop-self
+   neighbor BB_V6 update-source 2a07:7940:0:ffff:13::2
+   neighbor BB_V6 description CYBERNET_BACKBONE_V6
+   neighbor BB_V6 route-map BB_BGP_RCV_V6 in
+   neighbor BB_V6 route-map BB_BGP_ADV_V6 out
+   neighbor BB_V6 maximum-routes 0
+   neighbor MSFT_PEER_V4 peer group
+   neighbor MSFT_PEER_V4 remote-as 8075
+   neighbor MSFT_PEER_V4 remove-private-as
+   neighbor MSFT_PEER_V4 update-source Port-Channel2
+   neighbor MSFT_PEER_V4 description MSFT_DIRECT_PEER_V4
+   neighbor MSFT_PEER_V4 route-map MSFT_BGP_RCV_V4 in
+   neighbor MSFT_PEER_V4 route-map MSFT_BGP_ADV_V4 out
+   neighbor MSFT_PEER_V4 maximum-routes 0
+   neighbor MSFT_PEER_V6 peer group
+   neighbor MSFT_PEER_V6 remote-as 8075
+   neighbor MSFT_PEER_V6 remove-private-as
+   neighbor MSFT_PEER_V6 update-source Port-Channel2
+   neighbor MSFT_PEER_V6 description MSFT_DIRECT_PEER_V6
+   neighbor MSFT_PEER_V6 route-map MSFT_BGP_RCV_V6 in
+   neighbor MSFT_PEER_V6 route-map MSFT_BGP_ADV_V6 out
+   neighbor MSFT_PEER_V6 maximum-routes 0
+   neighbor NTW-INFRA-01_V4 peer group
+   neighbor NTW-INFRA-01_V4 remote-as 4202254005
+   neighbor NTW-INFRA-01_V4 next-hop-self
+   neighbor NTW-INFRA-01_V4 update-source Ethernet31/1
+   neighbor NTW-INFRA-01_V4 route-map NTW-INFRA-01_BGP_RCV_V4 in
+   neighbor NTW-INFRA-01_V4 route-map NTW-INFRA-01_BGP_ADV_V4 out
+   neighbor NTW-INFRA-01_V4 maximum-routes 0
+   neighbor 10.2.249.15 peer group NTW-INFRA-01_V4
+   neighbor 10.2.249.15 description ams1-ntw-infra-01
+   neighbor 10.3.254.5 peer group BB_V4
+   neighbor 10.3.254.5 description ams1-rt-01
+   neighbor 10.3.254.6 peer group BB_V4
+   neighbor 10.3.254.6 description lhr3-rt-01
+   neighbor 10.3.254.7 peer group BB_V4
+   neighbor 10.3.254.7 description fra4-rt-01
+   neighbor 10.3.254.8 peer group BB_V4
+   neighbor 10.3.254.8 description cdg1-rt-01
+   neighbor 10.3.254.134 peer group BB_V4
+   neighbor 10.3.254.134 description lhr3-rt-02
+   neighbor 10.3.254.135 peer group BB_V4
+   neighbor 10.3.254.135 description fra4-rt-02
+   neighbor 10.3.254.136 peer group BB_V4
+   neighbor 10.3.254.136 description cdg1-rt-02
+   neighbor 104.44.58.113 peer group MSFT_PEER_V4
+   neighbor 104.44.58.113 description MSFT_PEER_V4
+   neighbor 2a01:111:2000:1::3dda peer group MSFT_PEER_V6
+   neighbor 2a01:111:2000:1::3dda description MSFT_PEER_V6
+   neighbor 2a07:7940:0:ffff:12::1 peer group BB_V6
+   neighbor 2a07:7940:0:ffff:12::1 description lhr3-rt-01
+   neighbor 2a07:7940:0:ffff:12::2 peer group BB_V6
+   neighbor 2a07:7940:0:ffff:12::2 description lhr3-rt-02
+   neighbor 2a07:7940:0:ffff:13::1 peer group BB_V6
+   neighbor 2a07:7940:0:ffff:13::1 description ams1-rt-01
+   neighbor 2a07:7940:0:ffff:17::1 peer group BB_V6
+   neighbor 2a07:7940:0:ffff:17::1 description cdg1-rt-01
+   neighbor 2a07:7940:0:ffff:17::2 peer group BB_V6
+   neighbor 2a07:7940:0:ffff:17::2 description cdg1-rt-02
+   neighbor 2a07:7940:0:ffff:18::1 peer group BB_V6
+   neighbor 2a07:7940:0:ffff:18::1 description fra4-rt-01
+   neighbor 2a07:7940:0:ffff:18::2 peer group BB_V6
+   neighbor 2a07:7940:0:ffff:18::2 description fra4-rt-02
+   !
+   address-family ipv6
+      neighbor 2a01:111:2000:1::3dda activate
+      neighbor 2a07:7940:0:ffff:12::1 activate
+      neighbor 2a07:7940:0:ffff:12::2 activate
+      neighbor 2a07:7940:0:ffff:13::1 activate
+      neighbor 2a07:7940:0:ffff:17::1 activate
+      neighbor 2a07:7940:0:ffff:17::2 activate
+      neighbor 2a07:7940:0:ffff:18::1 activate
+      neighbor 2a07:7940:0:ffff:18::2 activate
+   !
+   rpki cache lhr3-ntw-vali-01
+      host 192.168.100.53 port 3323
+      local-interface Loopback0
+      !
+      transport tcp
+   !
+   rpki cache phx1-ntw-vali-01
+      host 192.168.100.100 port 3323
+      local-interface Loopback0
+      !
+      transport tcp
+!
+router isis BB
+   net 49.0001.0100.0325.4133.00
+   router-id ipv4 10.3.254.133
+   is-type level-2
+   log-adjacency-changes
+   graceful-restart
+   !
+   address-family ipv4 unicast
+   !
+   address-family ipv6 unicast
+!
+traffic-policies
+   field-set ipv4 prefix 636-to-phx1-security
+      37.35.106.192/27 45.11.130.218/32 45.11.130.219/32 45.11.130.220/32 203.0.113.1/32 82.129.4.3/32 154.43.165.0/24 185.75.32.0/27 185.151.160.128/25 185.151.162.4/32 185.151.163.0/25 195.49.23.64/28
+   !
+   field-set ipv4 prefix netlab-lighthouse
+      162.244.7.95/32 185.151.160.253/32
+   !
+   field-set ipv4 prefix netlab-office-networks
+      4.14.177.55/32 27.54.57.240/28 37.35.106.221/32 38.97.80.247/32 38.126.232.88/29 98.191.26.72/29 111.223.118.90/32 116.51.23.192/27 116.51.27.10/32 149.7.113.142/32 149.7.113.143/32 154.43.165.252/32 154.43.165.253/32 154.43.165.0/24
+   !
+   field-set ipv4 prefix bgp-locals-v4
+      10.2.249.14/32 10.3.254.133/32 104.44.58.112/32
+   !
+   field-set ipv4 prefix bgp-neighbors-v4
+      10.2.249.15/32 10.3.254.5/32 10.3.254.6/32 10.3.254.7/32 10.3.254.8/32 10.3.254.134/32 10.3.254.135/32 10.3.254.136/32 104.44.58.113/32
+   !
+   field-set ipv4 prefix dco-external-ssh
+      4.16.136.120/29 162.244.7.1/32 162.244.7.2/32 185.151.162.4/32 185.151.162.5/32
+   !
+   field-set ipv4 prefix dr2-public-subnets
+      45.9.210.128/25 45.11.129.128/27 45.254.36.128/25 45.254.37.128/25 85.215.143.0/24 89.116.175.128/25 89.117.29.128/25 89.117.171.128/25 91.221.209.0/26 91.221.209.64/26 91.221.209.128/26 93.127.161.128/25 151.241.72.64/26 151.241.72.128/25 162.244.7.128/25 164.152.125.128/25 181.215.30.0/24 185.38.27.128/25 185.151.161.0/26 185.151.161.64/26 185.151.161.128/26 185.151.161.224/27 185.151.162.128/25 185.151.163.0/26 185.151.163.64/26 185.151.163.128/25 185.174.142.0/24 185.174.143.0/24 199.83.244.128/25 199.83.246.128/26 199.193.158.128/25 212.227.69.0/24 216.105.167.0/25 216.105.167.128/25 216.245.154.128/25 216.245.155.128/25
+   !
+   field-set ipv4 prefix global-netlab-fwag
+      5.159.235.135/32 5.159.235.136/32 45.11.129.23/32 45.11.129.24/32 45.11.129.27/32 45.11.129.28/32 45.11.129.35/32 45.11.129.36/32 45.11.129.40/32 45.11.129.41/32 45.11.129.44/32 45.11.129.45/32 45.11.130.218/32 45.11.131.135/32 45.11.131.136/32 203.0.113.1/32 203.0.113.1/32 45.195.248.113/32 45.195.248.114/32 45.254.39.113/32 45.254.39.114/32 46.229.159.199/32 46.229.159.200/32 46.246.34.71/32 46.246.34.72/32 46.246.43.7/32 46.246.43.8/32 62.28.148.71/32 62.28.148.72/32 82.163.163.231/32 82.163.163.232/32 84.239.8.7/32 84.239.8.8/32 87.227.138.7/32 87.227.138.8/32 102.217.208.113/32 102.217.208.114/32 103.8.255.39/32 103.8.255.40/32 103.64.16.54/32 103.64.16.55/32 103.64.19.54/32 103.64.19.55/32 103.228.155.199/32 103.228.155.200/32 106.106.2.7/32 106.106.2.8/32 109.235.241.71/32 109.235.241.72/32 118.103.142.231/32 118.103.142.232/32 119.82.30.224/32 119.82.30.225/32 121.78.252.71/32 121.78.252.72/32 162.244.7.10/32 162.244.7.11/32 162.244.7.16/32 162.244.7.17/32 162.244.7.24/32 162.244.7.25/32 162.244.7.26/32 162.244.7.27/32 162.244.7.34/32 162.244.7.35/32 162.244.7.45/32 162.244.7.46/32 176.57.82.17/32 176.57.82.18/32 177.54.159.135/32 177.54.159.136/32 185.4.247.7/32 185.4.247.8/32 185.34.149.7/32 185.34.149.8/32 185.151.160.135/32 185.151.160.136/32 185.151.162.35/32 185.151.162.36/32 185.154.234.199/32 185.154.234.200/32 185.174.141.23/32 185.174.141.24/32 185.174.141.27/32 185.174.141.28/32 185.174.141.35/32 185.174.141.36/32 185.174.141.40/32 185.174.141.41/32 185.174.141.44/32 185.174.141.45/32 185.174.141.57/32 185.174.141.58/32 185.185.133.135/32 185.185.133.136/32 188.164.206.135/32 188.164.206.136/32 194.19.4.7/32 194.19.4.8/32 195.48.52.135/32 195.48.52.137/32 196.223.59.135/32 196.223.59.136/32 197.98.31.31/32 197.98.31.32/32 199.83.244.72/32 199.83.244.73/32 201.117.144.7/32 201.117.144.8/32 206.188.216.135/32 206.188.216.136/32 206.188.217.7/32 206.188.217.8/32 212.2.222.199/32 212.2.222.200/32 212.158.141.231/32 212.158.141.232/32 213.21.205.199/32 213.21.205.200/32 217.169.126.7/32 217.169.126.8/32
+   !
+   field-set ipv4 prefix global-netlab-prefixes
+      45.11.128.0/22 203.0.113.1/22 45.254.36.0/22 103.64.16.0/22 162.244.6.0/23 164.152.124.0/23 185.151.160.0/22 185.174.140.0/22 199.83.244.0/22 199.193.156.0/22 206.188.216.0/23 216.245.154.0/23
+   !
+   field-set ipv4 prefix internet-dns-servers-v4
+      1.1.1.1/32 4.4.4.4/32 8.8.4.4/32 8.8.8.8/32
+   !
+   field-set ipv4 prefix locals-v4
+      10.2.249.14/32 10.3.254.133/32 10.5.5.52/32 203.0.113.1/32 203.0.113.1/32 104.44.58.112/32
+   !
+   field-set ipv4 prefix not-owned-by-netlab-prefixes
+      5.159.235.128/26 5.195.206.0/26 38.47.87.0/24 45.9.208.0/22 45.195.248.0/24 46.229.159.192/27 46.246.34.64/26 46.246.43.0/26 62.28.148.64/26 62.138.203.192/26 67.227.4.0/24 72.14.130.0/24 82.163.163.224/27 82.214.82.0/26 82.221.116.192/26 84.239.8.0/26 84.244.94.160/27 85.215.110.240/28 85.215.126.0/24 85.215.127.0/24 85.215.143.0/24 87.227.138.0/26 89.116.175.0/24 89.117.29.0/24 89.117.167.0/24 89.117.171.0/24 93.127.161.0/24 94.154.123.0/26 103.8.255.32/27 103.14.27.0/25 106.106.2.0/26 109.235.241.64/26 118.103.142.224/27 121.78.252.64/26 123.100.224.0/24 151.241.72.0/24 177.54.159.128/27 181.215.30.0/24 185.4.247.0/25 185.34.149.0/26 185.38.27.0/24 185.154.234.192/26 185.185.133.128/27 185.209.82.128/28 188.164.206.128/26 192.199.198.0/24 194.19.4.0/26 195.48.52.128/27 195.48.74.32/27 195.49.21.0/26 195.49.23.64/28 195.211.24.128/26 196.223.56.128/25 196.223.57.128/25 196.223.59.128/25 201.117.144.0/26 206.252.230.32/27 212.2.222.192/26 212.158.141.224/27 212.227.69.0/24 212.227.106.0/24 217.169.126.0/25
+   !
+   field-set ipv4 prefix og-att-lte-ranges-GLB
+      94.102.70.164/32 107.80.6.220/30 107.84.152.228/30
+   !
+   field-set ipv4 prefix on-prem-customers
+      41.223.173.90/32 82.165.163.114/32 176.57.82.87/32 197.98.31.126/32 217.165.205.211/32
+   !
+   field-set ipv4 prefix on-prem-servers
+      162.244.7.47/32 162.244.7.48/32 162.244.7.49/32 162.244.7.50/32
+   !
+   field-set ipv4 prefix on-prem-servers-9092
+      164.152.125.34/32 164.152.125.35/32 164.152.125.36/32
+   !
+   field-set ipv4 prefix pondmobile-lte-ranges
+      145.40.69.0/24 147.75.51.0/24
+   !
+   field-set ipv4 prefix pondmobile-lte-ranges-AP
+      145.40.71.27/32 145.40.71.65/32
+   !
+   field-set ipv4 prefix pondmobile-lte-ranges-EU
+      5.135.235.225/32 5.135.235.226/31 5.135.235.228/31 5.196.205.209/32 5.196.205.210/31 5.196.205.212/31 51.38.214.161/32 51.38.214.162/31 51.38.214.164/31 51.210.128.33/32 51.210.128.34/31 51.210.128.36/31 54.36.39.129/32 54.36.39.130/31 54.36.39.132/31 54.37.222.145/32 54.37.222.146/31 54.37.222.148/31 92.222.211.49/32 92.222.211.50/31 92.222.211.52/31 139.178.72.24/29 139.178.72.49/32 139.178.72.50/31 139.178.72.52/31 139.178.73.17/32 139.178.73.18/31 139.178.73.20/31 139.178.73.57/32 139.178.73.58/31 139.178.73.60/31 139.178.74.8/29 139.178.74.161/32 139.178.74.162/31 139.178.74.164/31
+   !
+   field-set ipv4 prefix pondmobile-lte-ranges-US
+      145.40.69.38/31 145.40.69.40/29 147.28.187.8/29 147.28.187.48/32 147.28.187.48/30 147.28.187.52/31 147.28.187.54/32 147.28.187.56/30 147.28.187.60/32 147.75.51.166/31 147.75.51.168/29
+   !
+   field-set ipv4 prefix public-ntp-servers-v4
+      45.11.129.77/32 45.254.38.6/32 162.244.7.76/32 185.151.160.99/32
+   !
+   field-set ipv6 prefix netlab-office-networks-v6
+      2405:a280:ff80::/44 2a07:7940:fffd::/48 2a07:7940:fffe::/48 2a07:7940:ffff::/48 2a07:7947:ff40::/44 2a07:7947:ff80::/44 2a07:7947:ffc0::/44
+   !
+   field-set ipv6 prefix bgp-locals-v6
+      2a01:111:2000:1::3dd9/128 2a07:7940:0:ffff:13::2/128
+   !
+   field-set ipv6 prefix bgp-neighbors-v6
+      2a01:111:2000:1::3dda/128 2a07:7940:0:ffff:12::1/128 2a07:7940:0:ffff:12::2/128 2a07:7940:0:ffff:13::1/128 2a07:7940:0:ffff:17::1/128 2a07:7940:0:ffff:17::2/128 2a07:7940:0:ffff:18::1/128 2a07:7940:0:ffff:18::2/128
+   !
+   field-set ipv6 prefix dr2-public-ip-net-v6
+      2602:80b:6012:97::/64 2602:80b:6012:99::/64 2602:80b:6036:97::/64 2602:80b:6039:97::/64 2602:80b:603a:97::/64 2a07:7940:12:97::/64 2a07:7940:12:99::/64 2a07:7940:14:97::/64 2a07:7940:14:98::/64 2a07:7940:14:99::/64 2a07:7940:14:100::/64 2a07:7940:16:99::/64 2a07:7940:18:97::/64 2a07:7940:18:98::/64 2a07:7940:18:99::/64 2a07:7940:18:100::/64
+   !
+   field-set ipv6 prefix global-netlab-prefixes-v6
+      2405:a280:22::/48 2405:a280:32::/48 2405:a280:33::/48 2405:a280:34::/48 2405:a280:42::/48 2405:a280:43::/48 2602:80b:6012::/48 2602:80b:6013::/48 2602:80b:6014::/48 2602:80b:6015::/48 2602:80b:6016::/48 2602:80b:6022::/48 2602:80b:6032::/48 2602:80b:6033::/48 2602:80b:6034::/48 2602:80b:6035::/48 2602:80b:6036::/48 2602:80b:6037::/48 2602:80b:6038::/48 2602:80b:6039::/48 2602:80b:603a::/48 2602:80b:6042::/48 2602:80b:6044::/48 2602:80b:6045::/48 2602:80b:6046::/48 2602:80b:6047::/48 2a07:7940:12::/48 2a07:7940:13::/48 2a07:7940:15::/48 2a07:7940:16::/48 2a07:7940:17::/48 2a07:7940:18::/48 2a07:7940:41::/48 2a07:7940:42::/48 2a07:7940:44::/48 2a07:7940:45::/48 2a07:7940:46::/48 2a07:7940:47::/48 2a07:7940:48::/48
+   !
+   field-set ipv6 prefix locals-v6
+      2a01:111:2000:1::3dd9/128 2a07:7940:0:ffff:13::2/128 2a07:7940:bb::7/128 2a07:7940:bb::29/128
+   !
+   field-set ipv6 prefix not-owned-by-netlab-prefixes-v6
+      2001:8c1:5840::/48 2001:1a68:37::/48 2401:a040:10::/48 2402:1c00:101::/48 2402:6c00:d003::/48 2405:ec00:fa03::/48 2806:1080:1500::/48 2806:1080:1700::/48 2a00:1a28:1154::/48 2a00:1a28:2411::/48 2a00:1f68:ff::/48 2a00:da60:b01::/48 2a01:288:400e::/48 2a01:ae20:851:4092::/64 2a02:480:3419::/48 2a02:a40:324::/48 2a02:2160:8001::/48 2a05:a900:100::/48 2a06:e8c0:a::/48 2a07:9300:8000::/48 2a0a:a142::/48 2c0f:1f00::/48
+   !
+   traffic-policy filter-internet-traffic-combined
+      counter accept-netlab-office-networks-v4 accept-netlab-office-networks-v6 accept-any-to-dr2-public-ip-net-v4 accept-any-to-dr2-public-ip-net-v6 accept-bgp-dst-v4 accept-bgp-dst-v6 accept-bgp-src-v4 accept-bgp-src-v6 accept-cross-datacenter-traffic-v4 accept-cross-datacenter-traffic-v6 accept-cross-datacenter-vpn-esp-v4 accept-cross-datacenter-vpn-udp-v4 accept-dns-server-v4 accept-dns-traffic-v4 accept-icmp-to-netlab-prefixes-v4 accept-icmp-v6 accept-ntp-traffic-v4 accept-port-10000-10300-to-minidc-reverse-ssh-server-v4 accept-port-1194-to-netlab-prefixes-v4 accept-port-1194-to-netlab-prefixes-v6 accept-port-18443-19443-to-elk-on-prem-v4 accept-port-31032-31034-to-netlab-prefixes-v4 accept-port-443-to-netlab-lighthouse-gui-v4 accept-port-443-to-netlab-prefixes-v4 accept-port-443-to-netlab-prefixes-v6 accept-port-44445-to-netlab-prefixes-v4 accept-port-44445-to-netlab-prefixes-v6 accept-port-55555-to-netlab-prefixes-v4 accept-port-55555-to-netlab-prefixes-v6 accept-port-55556-to-netlab-prefixes-v4 accept-port-636-to-phx1-security-01-v4 accept-port-7770-7800-to-netlab-prefixes-v4 accept-port-7770-7800-to-netlab-prefixes-v6 accept-port-80-to-netlab-prefixes-v4 accept-port-80-to-netlab-prefixes-v6 accept-port-8080-to-netlab-prefixes-v4 accept-port-8080-to-netlab-prefixes-v6 accept-port-8443-to-netlab-prefixes-v4 accept-port-8443-to-netlab-prefixes-v6 accept-port-8444-to-netlab-prefixes-v4 accept-port-8444-to-netlab-prefixes-v6 accept-port-8800-8888-to-netlab-zta-v4 accept-port-9090-to-netlab-prefixes-v4 accept-port-9090-to-netlab-prefixes-v6 accept-port-9092-to-elk-on-prem-v4 accept-ports-443-to-netlab-lighthouse-v4 accept-source-port-1194-to-netlab-prefixes-v4 accept-source-port-1194-to-netlab-prefixes-v6 accept-ssh-to-device-v4 accept-tcp-established-v4 accept-tracert-udp-to-netlab-prefixes-v4 accept-tracert-udp-to-netlab-prefixes-v6 accept-traffic-to-ntp-servers-v4 accept-udp-port-44447-to-storage-test-poc-v4 allow-tcp-est-v6 block-not-allowed-traffic-from-dr2-customers-v4 discard-malicious-traffic discard-port-8443-to-netlab-lighthouse-api-v4 discard-ports-443-to-netlab-lighthouse-gui-v4 discard-unknown-v6 reject-amplified-reflection-attack-v4 reject-amplified-reflection-attack-v6 ssh-explicit-denial ssh-explicit-denial-v4
+      !
+      match rule-0-discard-malicious-traffic ipv4
+         source prefix 38.22.104.86/32 104.243.46.173/32
+         !
+         actions
+            count discard-malicious-traffic
+            drop
+      !
+      match rule-1-reject-amplified-reflection-attack ipv4
+         protocol udp source port 17, 19, 111, 137, 161, 389, 520, 751, 1434, 1900, 5353, 6881, 11211, 27015, 27960 destination port all
+         !
+         actions
+            count reject-amplified-reflection-attack-v4
+            drop
+      !
+      match rule-2-allow-tcp-est ipv4
+         protocol tcp flags established
+         !
+         actions
+            count accept-tcp-established-v4
+      !
+      match rule-3-accept-port-8443-to-netlab-lighthouse-api ipv4
+         source prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes og-att-lte-ranges-GLB pondmobile-lte-ranges-AP pondmobile-lte-ranges-EU pondmobile-lte-ranges-US
+         destination prefix field-set netlab-lighthouse
+         protocol tcp source port all destination port 8443
+         !
+         actions
+            count accept-ports-443-to-netlab-lighthouse-v4
+      !
+      match rule-4-discard-port-8443-to-netlab-lighthouse-api ipv4
+         destination prefix field-set netlab-lighthouse
+         protocol tcp source port all destination port 8443
+         !
+         actions
+            count discard-port-8443-to-netlab-lighthouse-api-v4
+            drop
+      !
+      match rule-4.1-accept-port-8800-8888-to-netlab-zta-v4 ipv4
+         destination prefix 162.244.7.9/32 185.151.160.8/32
+         protocol tcp source port all destination port 8800, 8888
+         !
+         actions
+            count accept-port-8800-8888-to-netlab-zta-v4
+      !
+      match rule-5-accept-port-443-to-netlab-lighthouse-gui ipv4
+         source prefix 162.244.6.4/32 162.244.6.5/32 185.151.160.5/32 185.151.160.6/32
+         destination prefix field-set netlab-lighthouse
+         protocol tcp source port all destination port https
+         !
+         actions
+            count accept-port-443-to-netlab-lighthouse-gui-v4
+      !
+      match rule-6-discard-ports-443-to-netlab-lighthouse-gui ipv4
+         destination prefix field-set netlab-lighthouse
+         protocol tcp source port all destination port https
+         !
+         actions
+            count discard-ports-443-to-netlab-lighthouse-gui-v4
+            drop
+      !
+      match rule-7-accept-port-443-to-netlab-prefixes ipv4
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol tcp source port all destination port https
+         !
+         actions
+            count accept-port-443-to-netlab-prefixes-v4
+      !
+      match rule-8-accept-port-44445-to-netlab-prefixes ipv4
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol tcp source port all destination port 44445
+         !
+         actions
+            count accept-port-44445-to-netlab-prefixes-v4
+      !
+      match rule-9-accept-udp-port-44447-to-storage-test-poc ipv4
+         destination prefix 206.188.216.248/29
+         protocol tcp source port all destination port 44447
+         !
+         actions
+            count accept-udp-port-44447-to-storage-test-poc-v4
+      !
+      match rule-10-accept-any-to-dr2-public-ip-net ipv4
+         destination prefix field-set dr2-public-subnets
+         protocol tcp udp esp
+         !
+         actions
+            count accept-any-to-dr2-public-ip-net-v4
+      !
+      match rule-11-accept-icmp-to-netlab-prefixes ipv4
+         protocol icmp type echo-reply echo time-exceeded timestamp-request code all
+         !
+         actions
+            count accept-icmp-to-netlab-prefixes-v4
+            police rate 1000 kbps burst-size 625 kbytes
+      !
+      match rule-12-accept-cross-datacenter-vpn-esp ipv4
+         source prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol esp
+         !
+         actions
+            count accept-cross-datacenter-vpn-esp-v4
+      !
+      match rule-13-accept-cross-datacenter-vpn-udp ipv4
+         source prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol udp source port all destination port isakmp non500-isakmp
+         !
+         actions
+            count accept-cross-datacenter-vpn-udp-v4
+      !
+      match rule-14-accept-port-31032-31034-to-netlab-prefixes ipv4
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol udp source port all destination port 31032-31034
+         !
+         actions
+            count accept-port-31032-31034-to-netlab-prefixes-v4
+      !
+      match rule-15-accept-port-9090-from-to-netlab-prefixes ipv4
+         source prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol tcp source port all destination port 9090
+         !
+         actions
+            count accept-port-9090-to-netlab-prefixes-v4
+      !
+      match rule-16-accept-tracert-udp-to-netlab-prefixes ipv4
+         destination prefix field-set global-netlab-prefixes
+         protocol udp source port all destination port 33434-33534
+         !
+         actions
+            count accept-tracert-udp-to-netlab-prefixes-v4
+            police rate 1000 kbps burst-size 625 kbytes
+      !
+      match rule-17-accept-port-80-to-netlab-prefixes ipv4
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol tcp source port all destination port www
+         !
+         actions
+            count accept-port-80-to-netlab-prefixes-v4
+      !
+      match rule-18-accept-port-7780-7900-to-netlab-prefixes ipv4
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol tcp source port all destination port 7770-7800
+         !
+         actions
+            count accept-port-7770-7800-to-netlab-prefixes-v4
+      !
+      match rule-19-accept-port-8080-to-netlab-prefixes ipv4
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol tcp source port all destination port 8080
+         !
+         actions
+            count accept-port-8080-to-netlab-prefixes-v4
+      !
+      match rule-20-accept-port-8443-to-netlab-prefixes ipv4
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol tcp source port all destination port 8443
+         !
+         actions
+            count accept-port-8443-to-netlab-prefixes-v4
+      !
+      match rule-21-accept-port-8444-to-netlab-prefixes ipv4
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol tcp source port all destination port 8444
+         !
+         actions
+            count accept-port-8444-to-netlab-prefixes-v4
+      !
+      match rule-22-accept-port-55555-to-netlab-prefixes ipv4
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol tcp source port all destination port 55555
+         !
+         actions
+            count accept-port-55555-to-netlab-prefixes-v4
+      !
+      match rule-23-accept-port-55556-to-netlab-prefixes ipv4
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol tcp source port all destination port 55556
+         !
+         actions
+            count accept-port-55556-to-netlab-prefixes-v4
+      !
+      match rule-24-accept-port-1194-to-netlab-prefixes ipv4
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol tcp source port all destination port openvpn
+         protocol udp source port all destination port openvpn
+         !
+         actions
+            count accept-port-1194-to-netlab-prefixes-v4
+      !
+      match rule-25-accept-source-port-1194-to-netlab-prefixes ipv4
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol udp source port all destination port openvpn
+         !
+         actions
+            count accept-source-port-1194-to-netlab-prefixes-v4
+      !
+      match rule-26-accept-port-10000-10300-to-minidc-reverse-ssh-server ipv4
+         destination prefix 162.244.7.51/32
+         protocol tcp source port all destination port 10000-10300
+         !
+         actions
+            count accept-port-10000-10300-to-minidc-reverse-ssh-server-v4
+      !
+      match rule-27-accept-port-636-to-phx1-security-01 ipv4
+         source prefix field-set 636-to-phx1-security
+         destination prefix 185.174.140.9/32
+         protocol tcp source port all destination port ldaps
+         !
+         actions
+            count accept-port-636-to-phx1-security-01-v4
+      !
+      match rule-28-accept-port-18443-19443-to-elk-on-prem ipv4
+         source prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes on-prem-customers
+         destination prefix field-set on_prem_servers
+         protocol tcp source port all destination port 18443, 19443
+         !
+         actions
+            count accept-port-18443-19443-to-elk-on-prem-v4
+      !
+      match rule-29-accept-dns-server ipv4
+         destination prefix field-set internet-dns-servers-v4
+         protocol tcp source port all destination port domain
+         protocol udp source port all destination port domain
+         !
+         actions
+            count accept-dns-server-v4
+      !
+      match rule-29a-accept-dns-server-inbound ipv4
+         destination prefix 185.151.160.5/32
+         protocol tcp source port all destination port domain
+         protocol udp source port all destination port domain
+         !
+         actions
+            count accept-dns-server-inbound-v4
+      !
+      match rule-30-accept-ntp-traffic ipv4
+         source prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         destination prefix field-set public-ntp-servers-v4
+         protocol udp source port ntp destination port ntp
+         !
+         actions
+            count accept-ntp-traffic-v4
+            police rate 1000 kbps burst-size 625 kbytes
+      !
+      match rule-31-accept-traffic-to-ntp-servers ipv4
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes public-ntp-servers-v4
+         protocol udp source port ntp destination port all
+         !
+         actions
+            count accept-traffic-to-ntp-servers-v4
+            police rate 1000 kbps burst-size 625 kbytes
+      !
+      match rule-32-accept-dns-traffic ipv4
+         source prefix field-set internet-dns-servers-v4
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol udp source port domain destination port all
+         !
+         actions
+            count accept-dns-traffic-v4
+            police rate 1000 kbps burst-size 625 kbytes
+      !
+      match rule-33-accept-ssh-to-device ipv4
+         source prefix field-set dco-external-ssh
+         destination prefix field-set locals-v4
+         protocol tcp source port all destination port ssh
+         !
+         actions
+            count accept-ssh-to-device-v4
+            police rate 5000 kbps burst-size 625 kbytes
+      !
+      match rule-34-ssh-explicit-denial ipv4
+         source prefix field-set netlab-office-networks global-netlab-prefixes not-owned-by-netlab-prefixes
+         protocol tcp source port all destination port ssh
+         !
+         actions
+            count ssh-explicit-denial-v4
+            drop
+      !
+      match rule-34.1-accept-port-ssh-to-dcn-jump-servers ipv4
+         destination prefix 45.254.38.8/32 162.244.7.8/32 185.151.162.8/32
+         protocol tcp source port all destination port ssh
+         !
+         actions
+            count accept-port-ssh-to-dcn-jump-servers
+      !
+      match rule-35-accept-bgp-dst ipv4
+         source prefix field-set bgp-neighbors-v4
+         destination prefix field-set bgp-locals-v4
+         protocol tcp source port all destination port bgp
+         !
+         actions
+            count accept-bgp-dst-v4
+      !
+      match rule-36-accept-bgp-src ipv4
+         source prefix field-set bgp-neighbors-v4
+         destination prefix field-set bgp-locals-v4
+         protocol tcp source port bgp destination port all
+         !
+         actions
+            count accept-bgp-src-v4
+      !
+      match rule-37-block-not-allowed-traffic-from-dr2-customers ipv4
+         source prefix field-set dr2-public-subnets
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes on-prem-customers
+         !
+         actions
+            count block-not-allowed-traffic-from-dr2-customers-v4
+            drop
+      !
+      match rule-38-accept-cross-datacenter-traffic ipv4
+         source prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         !
+         actions
+            count accept-cross-datacenter-traffic-v4
+      !
+      match rule-39-accept-netlab-office-networks ipv4
+         source prefix field-set acro_office
+         destination prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes
+         !
+         actions
+            count accept-netlab-office-networks
+      !
+      match rule-40-allow-any-to-it-fw ipv4
+         destination prefix 91.198.51.0/24 206.188.217.218/32
+         !
+         actions
+            count allow-any-to-it-fw
+      !
+      match rule-101-accept-v6-icmp ipv6
+         protocol icmpv6 type 1-4, 129, 133-137 code all
+         !
+         actions
+            count accept-icmp-v6
+            police rate 1000 kbps burst-size 625 kbytes
+      !
+      match rule-102-reject-amplified-reflection-attack ipv6
+         protocol udp source port 17, 19, 111, 137, 161, 389, 520, 751, 1434, 1900, 5353, 6881, 11211, 27015, 27960 destination port all
+         !
+         actions
+            count reject-amplified-reflection-attack-v6
+            drop
+      !
+      match rule-103-allow-tcp-est ipv6
+         protocol tcp flags established
+         !
+         actions
+            count accept-tcp-established-v6
+      !
+      match rule-104-accept-port-443-to-netlab-prefixes-v6 ipv6
+         destination prefix field-set global-netlab-prefixes-v6
+         protocol tcp source port all destination port https
+         !
+         actions
+            count accept-port-443-to-netlab-prefixes-v6
+      !
+      match rule-105-accept-port-44445-to-netlab-prefixes-v6 ipv6
+         destination prefix field-set global-netlab-prefixes-v6
+         protocol tcp source port all destination port 44445
+         !
+         actions
+            count accept-port-44445-to-netlab-prefixes-v6
+      !
+      match rule-106-accept-any-to-dr2-public-ip-net-v6 ipv6
+         destination prefix field-set dr2-public-ip-net-v6
+         protocol 6, 17, 50
+         !
+         actions
+            count accept-any-to-dr2-public-ip-net-v6
+      !
+      match rule-107-ssh-explicit-denial ipv6
+         source prefix field-set netlab-office-networks-v6 global-netlab-prefixes-v6 not-owned-by-netlab-prefixes-v6
+         protocol tcp source port all destination port ssh
+         !
+         actions
+            count ssh-explicit-denial
+            drop
+      !
+      match rule-108-accept-netlab-office-networks-v6 ipv6
+         source prefix field-set netlab-office-networks-v6
+         destination prefix field-set global-netlab-prefixes-v6
+         !
+         actions
+            count accept-netlab-office-networks-v6
+      !
+      match rule-109-accept-cross-datacenter-traffic-v6 ipv6
+         source prefix field-set global-netlab-prefixes-v6 not-owned-by-netlab-prefixes-v6
+         destination prefix field-set global-netlab-prefixes-v6 not-owned-by-netlab-prefixes-v6
+         !
+         actions
+            count accept-cross-datacenter-traffic-v6
+      !
+      match rule-110-accept-port-9090-from-to-netlab-prefixes-v6 ipv6
+         source prefix field-set global-netlab-prefixes-v6
+         destination prefix field-set global-netlab-prefixes-v6
+         protocol tcp source port all destination port 9090
+         !
+         actions
+            count accept-port-9090-to-netlab-prefixes-v6
+      !
+      match rule-111-accept-tracert-udp-to-netlab-prefixes-v6 ipv6
+         destination prefix field-set global-netlab-prefixes-v6
+         protocol udp source port all destination port 33434-33534
+         !
+         actions
+            count accept-tracert-udp-to-netlab-prefixes-v6
+            police rate 1000 kbps burst-size 625 kbytes
+      !
+      match rule-112-accept-port-80-to-netlab-prefixes-v6 ipv6
+         destination prefix field-set global-netlab-prefixes-v6
+         protocol tcp source port www destination port all
+         protocol tcp source port all destination port www
+         !
+         actions
+            count accept-port-80-to-netlab-prefixes-v6
+      !
+      match rule-113-accept-port-7780-7900-to-netlab-prefixes-v6 ipv6
+         destination prefix field-set global-netlab-prefixes-v6
+         protocol tcp source port all destination port 7770-7800
+         !
+         actions
+            count accept-port-7770-7800-to-netlab-prefixes-v6
+      !
+      match rule-114-accept-port-8080-to-netlab-prefixes-v6 ipv6
+         destination prefix field-set global-netlab-prefixes-v6
+         protocol tcp source port all destination port 8080
+         !
+         actions
+            count accept-port-8080-to-netlab-prefixes-v6
+      !
+      match rule-115-accept-port-8443-to-netlab-prefixes-v6 ipv6
+         destination prefix field-set global-netlab-prefixes-v6
+         protocol tcp source port all destination port 8443
+         !
+         actions
+            count accept-port-8443-to-netlab-prefixes-v6
+      !
+      match rule-116-accept-port-8444-to-netlab-prefixes-v6 ipv6
+         destination prefix field-set global-netlab-prefixes-v6
+         protocol tcp source port all destination port 8444
+         !
+         actions
+            count accept-port-8444-to-netlab-prefixes-v6
+      !
+      match rule-117-accept-port-55555-to-netlab-prefixes-v6 ipv6
+         destination prefix field-set global-netlab-prefixes-v6
+         protocol tcp source port all destination port 55555
+         !
+         actions
+            count accept-port-55555-to-netlab-prefixes-v6
+      !
+      match rule-118-accept-port-55556-to-netlab-prefixes-v6 ipv6
+         destination prefix field-set global-netlab-prefixes-v6
+         protocol tcp source port all destination port 55556
+         !
+         actions
+            count accept-port-55556-to-netlab-prefixes
+      !
+      match rule-119-accept-source-port-1194-to-netlab-prefixes-v6 ipv6
+         destination prefix field-set global-netlab-prefixes-v6 not-owned-by-netlab-prefixes-v6
+         protocol tcp source port all destination port openvpn
+         protocol udp source port all destination port openvpn
+         !
+         actions
+            count accept-port-1194-to-netlab-prefixes-v6
+      !
+      match rule-120-accept-source-port-1194-to-netlab-prefixes-v6 ipv6
+         destination prefix field-set global-netlab-prefixes-v6 not-owned-by-netlab-prefixes-v6
+         protocol udp source port openvpn destination port all
+         !
+         actions
+            count accept-source-port-1194-to-netlab-prefixes-v6
+      !
+      match rule-121-accept-bgp-dst ipv6
+         source prefix field-set bgp-neighbors-v6
+         destination prefix field-set bgp-locals-v6
+         protocol tcp source port all destination port bgp
+         !
+         actions
+            count accept-bgp-dst-v6
+      !
+      match rule-122-accept-bgp-src ipv6
+         source prefix field-set bgp-neighbors-v6
+         destination prefix field-set bgp-locals-v6
+         protocol tcp source port bgp destination port all
+         !
+         actions
+            count accept-bgp-src-v6
+      !
+      match rule-41-accept-port-9092-to-elk-on-prem ipv4
+         source prefix field-set global-netlab-prefixes not-owned-by-netlab-prefixes on-prem-customers
+         destination prefix field-set on-prem-servers-9092
+         protocol tcp source port all destination port 9092
+         !
+         actions
+            count accept-port-9092-to-elk-on-prem-v4
+      !
+      match ipv4-all-default ipv4
+         actions
+            drop
+      !
+      match ipv6-all-default ipv6
+         actions
+            drop
+!
+management ssh
+   idle-timeout 15
+!

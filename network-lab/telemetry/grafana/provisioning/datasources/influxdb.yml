@@ -1,0 +1,14 @@
+apiVersion: 1
+datasources:
+  - name: InfluxDB-FRR
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    isDefault: true
+    jsonData:
+      version: Flux
+      organization: dcn-lab
+      defaultBucket: network-telemetry
+      tlsSkipVerify: true
+    secureJsonData:
+      token: dcn-lab-token-secret

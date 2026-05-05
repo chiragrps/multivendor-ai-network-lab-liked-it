@@ -1,0 +1,42 @@
+{
+  "de-fra-core-01": {
+    "hostname": "de-fra-core-01", "ip": "10.200.0.11", "port": 2201,
+    "dtype": "frr", "site": "DE-FRA", "role": "core-router", "vendor": "FRRouting", "model": "frr"
+  },
+  "de-fra-core-02": {
+    "hostname": "de-fra-core-02", "ip": "10.200.0.12", "port": 2202,
+    "dtype": "frr", "site": "DE-FRA", "role": "core-router", "vendor": "FRRouting", "model": "frr"
+  },
+  "uk-lon-core-01": {
+    "hostname": "uk-lon-core-01", "ip": "10.200.0.13", "port": 2203,
+    "dtype": "frr", "site": "UK-LON", "role": "core-router", "vendor": "FRRouting", "model": "frr"
+  },
+  "nl-ams-core-01": {
+    "hostname": "nl-ams-core-01", "ip": "10.200.0.14", "port": 2204,
+    "dtype": "frr", "site": "NL-AMS", "role": "core-router", "vendor": "FRRouting", "model": "frr"
+  },
+  "us-nyc-core-01": {
+    "hostname": "us-nyc-core-01", "ip": "10.200.0.15", "port": 2207,
+    "dtype": "frr", "site": "US-NYC", "role": "core-router", "vendor": "FRRouting", "model": "frr"
+  },
+  "de-fra-edge-01": {
+    "hostname": "de-fra-edge-01", "ip": "10.200.0.21", "port": 2205,
+    "dtype": "frr", "site": "DE-FRA", "role": "edge-router", "vendor": "FRRouting", "model": "frr"
+  },
+  "uk-lon-edge-01": {
+    "hostname": "uk-lon-edge-01", "ip": "10.200.0.22", "port": 2208,
+    "dtype": "frr", "site": "UK-LON", "role": "edge-router", "vendor": "FRRouting", "model": "frr"
+  },
+  "nl-ams-edge-01": {
+    "hostname": "nl-ams-edge-01", "ip": "10.200.0.23", "port": 2209,
+    "dtype": "frr", "site": "NL-AMS", "role": "edge-router", "vendor": "FRRouting", "model": "frr"
+  },
+  "uk-lon-dist-01": {
+    "hostname": "uk-lon-dist-01", "ip": "10.200.0.31", "port": 2206,
+    "dtype": "frr", "site": "UK-LON", "role": "dist-switch", "vendor": "FRRouting", "model": "frr"
+  },
+  "de-fra-dist-01": {
+    "hostname": "de-fra-dist-01", "ip": "10.200.0.33", "port": 2210,
+    "dtype": "frr", "site": "DE-FRA", "role": "dist-switch", "vendor": "FRRouting", "model": "frr"
+  }
+}

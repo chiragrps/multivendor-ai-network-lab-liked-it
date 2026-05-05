@@ -1,0 +1,444 @@
+! Command: show running-config
+! device: fra-eos-sw-01 (DCS-7010TX-48, EOS-4.29.3M)
+!
+! boot system flash:/EOS-4.29.3M.swi
+!
+enable password sha512 $6$wK8THFC2nD8OCYJh$s5n29hrHjtQHDrSwHsRA5VsFMoVnTr1rCyZi/QRiVHd8Apvr.ywNZXu21sAA/OkqshKvZLC/wWqIeLLPKYcea1
+aaa root secret sha512 $6$jBcBc9Mlsj/yPaRq$.a7RoGtTUonjO/RVEpE5.5aLHROXppJJiejFkhuOrRa2TQT0Ry.hI5cAwTMn9kVvpJa3XdEOjnm7E3lBgtcAu.
+no username admin
+!
+username netadmin1 privilege 15 role network-admin nopassword
+
+username netops privilege 15 role network-admin secret sha512 $6$y9QjOUblLXKjw7A6$825sRxvVu5z618ABEgfcSvQQNKgoUu8iaz7fdfLMbCgrM.mOcjrvpK9Us0Fk1JCpL7uFlrpD/ppEmQQLfep.l0
+
+username netadmin2 privilege 15 role network-admin nopassword
+
+username gnmi role gnmi secret sha512 $6$nQ85BjjyJ4uwv2eG$tULwklHeDEnjz1A2INH3Tjw1.tXje/uir.jTlMLMjwWo9vOjVJ7bzRZmWIGCp5FlSSFo1mUPmivMmePVGqxvW1
+username netadmin3 privilege 15 role network-admin nopassword
+
+username netadmin4 privilege 15 role network-admin nopassword
+
+username nlucier privilege 15 role network-admin nopassword
+
+username oelliott privilege 15 role network-admin nopassword
+
+username sdaniels privilege 15 role network-admin nopassword
+
+username netadmin5 privilege 15 role network-admin nopassword
+
+username netops2 privilege 15 role network-admin secret sha512 $6$YjcCymwt$Z5BPzqlfNLAlO9zT5Rnp89dV0Op.BEv37o6ibKqRtdhqi2DD7kuNY/V/AQ6S4KPUCWqKZrAk7jYFFhhe3bF2j/
+username vmk privilege 15 role network-admin nopassword
+
+username netadmin6 privilege 15 role network-admin nopassword
+
+username netops3 privilege 15 role network-admin nopassword
+
+!
+service routing protocols model ribd
+!
+logging vrf mgmt host 192.168.100.100
+logging vrf mgmt source-interface Management1
+!
+hostname fra-eos-sw-01
+ip name-server vrf mgmt 192.168.100.100
+ip name-server vrf mgmt 192.168.100.100
+dns domain net.netlab.local
+!
+snmp-server engineID local 00c52c443d42
+snmp-server location GRU2
+snmp-server view all iso included
+snmp-server group monitoring v3 priv read all
+snmp-server group snmp_group_ro v3 priv read all
+snmp-server user snmp_monitor_amer snmp_group_ro v3 localized 00c52c443d42 auth sha a569f9de0791dc87e398b08d6beb633aa3616b53 priv aes b6ea0ed68da9f2c5b4261dd8cda6ef28
+snmp-server user snmp_monitor_apac snmp_group_ro v3 localized 00c52c443d42 auth sha 5898b7b357dc83c04a62e52d483b228d2b587ad8 priv aes 915c28c97f23e6e1ac93cdac095f04c2
+snmp-server user snmp_monitor_emea snmp_group_ro v3 localized 00c52c443d42 auth sha 6498c3bd709f03c23d88b343f0c32af991e52335 priv aes b930e688955e4c928e2e48770225a760
+snmp-server user snmp_telemetry snmp_group_ro v3 localized 00c52c443d42 auth sha 2b62057ea8477c30fce16f76e99984de56da29dd priv aes 715b03487c5dba6a34ae4fd1a53a8bf2
+snmp-server vrf mgmt
+!
+spanning-tree mode mstp
+!
+service unsupported-transceiver LabUnlockKey 00000000
+!
+vlan 21-22
+!
+vrf instance mgmt
+!
+banner motd
+=================================================================
+WARNING!
+This is a private computer system. Unauthorized access or use
+is prohibited and subject to prosecution and/or disciplinary
+action. All use of this system constitutes consent to
+monitoring at all times and users are not entitled to any
+expectation of privacy. If monitoring reveals possible evidence
+of violation of criminal statutes, this evidence and any other
+related information, including identification information about
+the user, may be provided to law enforcement officials.
+If monitoring reveals violations of security regulations or
+unauthorized use, employees who violate security regulations or
+make unauthorized use of this system are subject to appropriate
+disciplinary action.
+=================================================================
+EOF
+!
+management api http-commands
+   no shutdown
+   !
+   vrf mgmt
+      no shutdown
+!
+aaa authorization exec default local
+!
+interface Port-Channel1
+   description gru2-sw-04
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet1
+   description gru2-infra-01-ipmi
+   switchport access vlan 21
+!
+interface Ethernet2
+   description gru2-infra-01-pxe
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet3
+   description gru2-amc01-01-ipmi
+   switchport access vlan 21
+!
+interface Ethernet4
+   description gru2-amc01-01-pxe
+   shutdown
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet5
+   description gru2-amc01-02-ipmi
+   switchport access vlan 21
+!
+interface Ethernet6
+   description gru2-amc01-02-pxe
+   shutdown
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet7
+   description gru2-amc01-03-ipmi
+   switchport access vlan 21
+!
+interface Ethernet8
+   description gru2-amc01-03-pxe
+   shutdown
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet9
+   description gru2-amc01-04-ipmi
+   switchport access vlan 21
+!
+interface Ethernet10
+   description gru2-amc01-04-pxe
+   shutdown
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet11
+   description gru2-acs01-stor01-ipmi
+   switchport access vlan 21
+!
+interface Ethernet12
+   description gru2-acs01-stor01-pxe
+   shutdown
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet13
+   description gru2-acs01-stor02-ipmi
+   switchport access vlan 21
+!
+interface Ethernet14
+   description gru2-acs01-stor02-pxe
+   shutdown
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet15
+   description gru2-acs01-stor03-ipmi
+   switchport access vlan 21
+!
+interface Ethernet16
+   description gru2-acs01-stor03-pxe
+   shutdown
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet17
+   description gru2-arp01-01-ipmi
+   switchport access vlan 21
+!
+interface Ethernet18
+   description gru2-arp01-01-pxe
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet19
+   description gru2-arp01-02-ipmi
+   switchport access vlan 21
+!
+interface Ethernet20
+   description gru2-arp01-02-pxe
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet21
+   description gru2-arp01-03-ipmi
+   switchport access vlan 21
+!
+interface Ethernet22
+   description gru2-arp01-03-pxe
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet23
+!
+interface Ethernet24
+   switchport trunk native vlan 22
+!
+interface Ethernet25
+   description gru2-amc01-05-ipmi
+   switchport access vlan 21
+!
+interface Ethernet26
+   description gru2-amc01-05-pxe
+   shutdown
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet27
+   description gru2-amc01-06-ipmi
+   switchport access vlan 21
+!
+interface Ethernet28
+   description gru2-amc01-06-pxe
+   shutdown
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet29
+   description gru2-amc01-07-ipmi
+   switchport access vlan 21
+!
+interface Ethernet30
+   description gru2-amc01-07-pxe
+   shutdown
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet31
+   description gru2-amc01-08-ipmi
+   switchport access vlan 21
+!
+interface Ethernet32
+   description gru2-amc01-08-pxe
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet33
+   description gru2-amc01-09-ipmi
+   switchport access vlan 21
+!
+interface Ethernet34
+   description gru2-amc01-09-pxe
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet35
+   description gru2-acs01-stor04-ipmi
+   switchport access vlan 21
+!
+interface Ethernet36
+   description gru2-acs01-stor04-pxe
+   shutdown
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet37
+   description gru2-acs01-stor05-ipmi
+   switchport access vlan 21
+!
+interface Ethernet38
+   description gru2-acs01-stor05-pxe
+   shutdown
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet39
+   description gru2-acs01-stor06-ipmi
+   switchport access vlan 21
+!
+interface Ethernet40
+   description gru2-acs01-stor06-pxe
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet41
+   description gru2-arp01-04-ipmi
+   switchport access vlan 21
+!
+interface Ethernet42
+   description gru2-arp01-04-pxe
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet43
+   description gru2-arp01-05-ipmi
+   switchport access vlan 21
+!
+interface Ethernet44
+   description gru2-arp01-05-pxe
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet45
+   description gru2-acs02-stor10-ipmi
+   switchport access vlan 21
+!
+interface Ethernet46
+   description gru2-acs02-stor10-pxe
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet47
+   description gru2-acs02-stor11-ipmi
+   switchport access vlan 21
+!
+interface Ethernet48
+   description gru2-acs02-stor11-pxe
+   switchport trunk native vlan 22
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet49
+   description gru2-fw-02a
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Ethernet50
+   description gru2-sw-04a
+   channel-group 1 mode active
+!
+interface Ethernet51
+   description gru2-sw-04a
+   channel-group 1 mode active
+!
+interface Ethernet52
+   description gru2-fw-02b
+   switchport trunk allowed vlan 21-22
+   switchport mode trunk
+!
+interface Management1
+   vrf mgmt
+   ip address 10.1.38.102/24
+!
+interface Vlan21
+   ip address 10.246.21.252/24
+!
+ip access-list filter-all-in-one
+   10 remark #allow-tcp-est
+   20 permit tcp any any established
+   30 remark #accept-bfd
+   40 permit udp 10.2.0.0/16 any eq bfd bfd-echo multihop-bfd
+   50 remark #accept-bgp-dst
+   60 permit tcp 10.2.255.0/24 10.2.255.0/24 eq bgp
+   70 permit tcp 10.3.255.0/24 10.3.255.0/24 eq bgp
+   80 permit tcp 10.4.255.0/24 10.4.255.0/24 eq bgp
+   90 remark #accept-bgp-src
+   100 permit tcp 10.2.255.0/24 10.2.255.0/24 eq bgp
+   110 permit tcp 10.3.255.0/24 10.3.255.0/24 eq bgp
+   120 permit tcp 10.4.255.0/24 10.4.255.0/24 eq bgp
+   130 remark #allow-pxe
+   140 permit tcp host 0.0.0.0 any eq 67 68 69 4011
+   150 permit tcp 10.2.0.0/16 any eq 67 68 69 4011
+   160 remark #accept-dns
+   170 permit udp host 192.168.100.100 host 10.1.38.102 eq domain
+   180 permit udp host 192.168.100.100 host 10.1.38.102 eq domain
+   190 remark #accept-icmp
+   200 permit icmp any any
+   210 remark #accept-netconf-mgmt
+   220 permit tcp 10.1.0.0/16 host 10.1.38.102 eq netconf-ssh
+   221 permit tcp 10.1.0.0/16 host 10.1.38.102 eq https
+   230 remark #accept-ntp
+   240 permit udp host 192.168.100.53 host 10.1.38.102 eq ntp
+   250 permit udp host 10.1.247.49 host 10.1.38.102 eq ntp
+   260 permit udp host 192.168.100.100 host 10.1.38.102 eq ntp
+   270 permit udp host 10.1.243.49 host 10.1.38.102 eq ntp
+   280 permit udp host 45.11.129.77 host 10.1.38.102 eq ntp
+   290 permit udp host 45.254.38.6 host 10.1.38.102 eq ntp
+   300 permit udp host 162.244.7.76 host 10.1.38.102 eq ntp
+   310 permit udp host 185.151.160.99 host 10.1.38.102 eq ntp
+   320 remark #accept-grpc
+   330 permit tcp host 192.168.100.100 host 10.1.38.102 eq 32767
+   340 remark #accept-snmp
+   350 permit udp host 192.168.100.100 host 10.1.38.102 range snmp snmptrap
+   360 permit udp host 192.168.100.100 host 10.1.38.102 range snmp snmptrap
+   370 permit udp host 192.168.100.100 host 10.1.38.102 range snmp snmptrap
+   380 permit udp host 10.1.243.199 host 10.1.38.102 range snmp snmptrap
+   390 permit udp host 192.168.100.53 host 10.1.38.102 range snmp snmptrap
+   400 permit udp host 192.168.100.53 host 10.1.38.102 range snmp snmptrap
+   410 permit udp host 192.168.100.53 host 10.1.38.102 range snmp snmptrap
+   420 permit udp host 10.1.253.149 host 10.1.38.102 range snmp snmptrap
+   430 remark #accept-ssh-mgmt
+   440 permit tcp 10.1.0.0/16 host 10.1.38.102 eq ssh
+   450 remark #accept-ssh
+   460 permit tcp host 4.16.136.120 host 10.1.38.102 eq ssh
+   470 permit tcp host 162.244.7.1 host 10.1.38.102 eq ssh
+   480 permit tcp host 162.244.7.2 host 10.1.38.102 eq ssh
+   490 permit tcp host 185.151.160.8 host 10.1.38.102 eq ssh
+   500 remark #accept-traceroute-icmp
+   510 permit icmp any any traceroute
+   520 remark #accept-mlag
+   530 permit tcp any any eq mlag ttl eq 255
+   540 permit udp any any eq mlag ttl eq 255
+   550 permit tcp any eq mlag any ttl eq 255
+   560 remark #accept-vrrp
+   570 permit vrrp any any
+!
+no ip routing
+ip routing vrf mgmt
+!
+system control-plane
+   ip access-group filter-all-in-one in
+!
+ip route vrf mgmt 10.1.0.0/16 10.1.38.1
+!
+ntp local-interface Management1
+ntp server 192.168.100.100 prefer
+ntp server 10.1.243.49
+ntp server 10.1.247.49
+ntp server 192.168.100.53
+!
+role gnmi
+   10 deny mode exec command .*
+!

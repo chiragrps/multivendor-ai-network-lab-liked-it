@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs / runtime
+*.log
+audit/
+*.tmp
+*.bak
+
+# Secrets — never commit
+.env
+*.env
+!.env.example
+src/.env
+
+# SSH keys
+network-lab/ssh-keys/lab_key
+network-lab/ssh-keys/*_key
+network-lab/ssh-keys/id_*
+
+# Sanitization tokens — local only, never commit
+network-lab/demo-devices/sanitize_tokens.json
+
+# Playwright artifacts
+.playwright-mcp/
+phase3-*.png
+*-screenshot.png
+
+# Test caches
+.pytest_cache/
+pytest-cache-files-*/
+.coverage
+htmlcov/
+
+# Docker
+docker-compose.override.yml

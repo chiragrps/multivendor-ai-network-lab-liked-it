@@ -1,0 +1,11 @@
+hostname,ip_address,port,type,site,role,vendor,model,as_number
+de-fra-core-01,localhost,2201,frr,DE-FRA,core,Juniper,MX960,65001
+de-fra-core-02,localhost,2202,frr,DE-FRA,core,Cisco,IOS-XE,65002
+uk-lon-core-01,localhost,2203,frr,UK-LON,core,Juniper,MX480,65003
+nl-ams-core-01,localhost,2204,frr,NL-AMS,core,Cisco,NX-OS,65004
+us-nyc-core-01,localhost,2207,frr,US-NYC,core,Cisco,IOS-XE,65005
+de-fra-edge-01,localhost,2205,frr,DE-FRA,edge,Cisco,FTD,65006
+uk-lon-edge-01,localhost,2208,frr,UK-LON,edge,Cisco,IOS-XE,65007
+nl-ams-edge-01,localhost,2209,frr,NL-AMS,edge,Juniper,MX204,65008
+uk-lon-dist-01,localhost,2206,frr,UK-LON,dist,Arista,EOS,65010
+de-fra-dist-01,localhost,2210,frr,DE-FRA,dist,Arista,EOS,65009

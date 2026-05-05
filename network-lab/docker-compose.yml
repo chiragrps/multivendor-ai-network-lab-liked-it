@@ -1,0 +1,274 @@
+name: dcn-lab
+
+volumes:
+  influxdb-data:
+  grafana-data:
+
+# Single flat management network — all devices reachable, BGP peers directly
+networks:
+  lab-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.200.0.0/24
+          gateway: 10.200.0.1
+
+services:
+
+  # ── de-fra-core-01 — Core Router DE-FRA (Juniper MX960, AS65001) ─────────
+  de-fra-core-01:
+    build: .
+    container_name: de-fra-core-01
+    hostname: de-fra-core-01
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      lab-net:
+        ipv4_address: 10.200.0.11
+    volumes:
+      - ./configs/r1:/lab-config:ro
+    ports:
+      - "2201:22"
+      - "8801:8080"
+    restart: unless-stopped
+
+  # ── de-fra-core-02 — Core Router DE-FRA (Cisco IOS-XE, AS65002) ──────────
+  de-fra-core-02:
+    build: .
+    container_name: de-fra-core-02
+    hostname: de-fra-core-02
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      lab-net:
+        ipv4_address: 10.200.0.12
+    volumes:
+      - ./configs/r2:/lab-config:ro
+    ports:
+      - "2202:22"
+      - "8802:8080"
+    restart: unless-stopped
+
+  # ── uk-lon-core-01 — Core Router UK-LON (Juniper MX480, AS65003) ─────────
+  uk-lon-core-01:
+    build: .
+    container_name: uk-lon-core-01
+    hostname: uk-lon-core-01
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      lab-net:
+        ipv4_address: 10.200.0.13
+    volumes:
+      - ./configs/r3:/lab-config:ro
+    ports:
+      - "2203:22"
+      - "8803:8080"
+    restart: unless-stopped
+
+  # ── nl-ams-core-01 — Core Router NL-AMS (Cisco NX-OS, AS65004) ───────────
+  nl-ams-core-01:
+    build: .
+    container_name: nl-ams-core-01
+    hostname: nl-ams-core-01
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      lab-net:
+        ipv4_address: 10.200.0.14
+    volumes:
+      - ./configs/r4:/lab-config:ro
+    ports:
+      - "2204:22"
+      - "8804:8080"
+    restart: unless-stopped
+
+  # ── us-nyc-core-01 — Core Router US-NYC (Cisco IOS-XE, AS65005) ──────────
+  us-nyc-core-01:
+    build: .
+    container_name: us-nyc-core-01
+    hostname: us-nyc-core-01
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      lab-net:
+        ipv4_address: 10.200.0.15
+    volumes:
+      - ./configs/r5:/lab-config:ro
+    ports:
+      - "2207:22"
+      - "8805:8080"
+    restart: unless-stopped
+
+  # ── de-fra-edge-01 — Edge Router DE-FRA (Cisco FTD, AS65006) ─────────────
+  de-fra-edge-01:
+    build: .
+    container_name: de-fra-edge-01
+    hostname: de-fra-edge-01
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      lab-net:
+        ipv4_address: 10.200.0.21
+    volumes:
+      - ./configs/sw1:/lab-config:ro
+    ports:
+      - "2205:22"
+      - "8806:8080"
+    restart: unless-stopped
+
+  # ── uk-lon-edge-01 — Edge Router UK-LON (Cisco IOS-XE, AS65007) ──────────
+  uk-lon-edge-01:
+    build: .
+    container_name: uk-lon-edge-01
+    hostname: uk-lon-edge-01
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      lab-net:
+        ipv4_address: 10.200.0.22
+    volumes:
+      - ./configs/sw3:/lab-config:ro
+    ports:
+      - "2208:22"
+      - "8807:8080"
+    restart: unless-stopped
+
+  # ── nl-ams-edge-01 — Edge Router NL-AMS (Juniper MX204, AS65008) ─────────
+  nl-ams-edge-01:
+    build: .
+    container_name: nl-ams-edge-01
+    hostname: nl-ams-edge-01
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      lab-net:
+        ipv4_address: 10.200.0.23
+    volumes:
+      - ./configs/sw4:/lab-config:ro
+    ports:
+      - "2209:22"
+      - "8808:8080"
+    restart: unless-stopped
+
+  # ── uk-lon-dist-01 — Distribution Switch UK-LON (Arista EOS, AS65010) ────
+  uk-lon-dist-01:
+    build: .
+    container_name: uk-lon-dist-01
+    hostname: uk-lon-dist-01
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      lab-net:
+        ipv4_address: 10.200.0.31
+    volumes:
+      - ./configs/sw2:/lab-config:ro
+    ports:
+      - "2206:22"
+      - "8809:8080"
+    restart: unless-stopped
+
+  # ── de-fra-dist-01 — Distribution Switch DE-FRA (Arista EOS, AS65009) ────
+  de-fra-dist-01:
+    build: .
+    container_name: de-fra-dist-01
+    hostname: de-fra-dist-01
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      lab-net:
+        ipv4_address: 10.200.0.33
+    volumes:
+      - ./configs/sw5:/lab-config:ro
+    ports:
+      - "2210:22"
+      - "8810:8080"
+    restart: unless-stopped
+
+  # ── InfluxDB 2.x — Time-series telemetry storage ─────────────────────────
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    platform: linux/arm64
+    networks:
+      lab-net:
+        ipv4_address: 10.200.0.50
+    ports:
+      - "8086:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: dcnlab123
+      DOCKER_INFLUXDB_INIT_ORG: dcn-lab
+      DOCKER_INFLUXDB_INIT_BUCKET: network-telemetry
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: dcn-lab-token-secret
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    restart: unless-stopped
+
+  # ── Grafana — Dashboard visualisation ────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: grafana
+    platform: linux/arm64
+    networks:
+      lab-net:
+        ipv4_address: 10.200.0.51
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: dcnlab123
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./telemetry/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./telemetry/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - influxdb
+    restart: unless-stopped
+
+  # ── frr-telemetry — SSH collector → InfluxDB line protocol ───────────────
+  frr-telemetry:
+    build:
+      context: ./telemetry
+      dockerfile: Dockerfile
+    container_name: frr-telemetry
+    platform: linux/arm64
+    networks:
+      lab-net:
+        ipv4_address: 10.200.0.52
+    environment:
+      INFLUXDB_URL: http://influxdb:8086
+      INFLUXDB_TOKEN: dcn-lab-token-secret
+      INFLUXDB_ORG: dcn-lab
+      INFLUXDB_BUCKET: network-telemetry
+      SSH_KEY_PATH: /ssh-keys/lab_key
+      SSH_USER: root
+      POLL_INTERVAL: "10"
+    volumes:
+      - ./ssh-keys:/ssh-keys:ro
+    depends_on:
+      - influxdb
+      - de-fra-core-01
+      - de-fra-core-02
+      - uk-lon-core-01
+      - nl-ams-core-01
+      - us-nyc-core-01
+      - de-fra-edge-01
+      - uk-lon-edge-01
+      - nl-ams-edge-01
+      - uk-lon-dist-01
+      - de-fra-dist-01
+    restart: unless-stopped

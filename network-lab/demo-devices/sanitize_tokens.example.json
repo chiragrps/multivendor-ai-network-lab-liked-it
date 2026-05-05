@@ -1,0 +1,27 @@
+{
+  "_comment": "Template — copy to sanitize_tokens.json and add your own company-specific tokens.",
+  "_format": "Each entry is [regex_pattern, replacement, case_insensitive_bool].",
+  "company_names": [
+    ["YourCompany",   "netlab", true],
+    ["yourcorp\\.dev", "netlab.local", true]
+  ],
+  "as_numbers": [
+    ["1234567", "65000", false]
+  ],
+  "usernames": [
+    ["\\binternal_user1\\b", "netadmin1", false]
+  ],
+  "email_domains": [
+    ["[\\w.\\-]+@yourcompany\\.com", "admin@netlab.local", true]
+  ],
+  "public_ips": [
+    ["1\\.2\\.3\\.\\d+", "203.0.113.1", false]
+  ],
+  "snmp_strings": [
+    ["internal_snmp_string", "snmp_monitor", false]
+  ],
+  "dns_ranges": [
+    ["10\\.99\\.0\\.\\d+", "192.168.100.53", false]
+  ],
+  "misc": []
+}

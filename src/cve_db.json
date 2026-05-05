@@ -1,0 +1,76 @@
+{
+  "_comment": "Static CVE lookup table by (vendor, os_version_prefix). Demo data sourced from public NVD entries.",
+  "_last_updated": "2026-05-05",
+  "entries": [
+    {
+      "vendor": "juniper",
+      "os": "junos",
+      "version_prefix": "21.4R3",
+      "cves": [
+        {"id": "CVE-2024-21617", "severity": "high",   "cvss": 7.5, "title": "Junos OS: SRX Series: Memory leak via crafted IPv6 fragments"},
+        {"id": "CVE-2024-21603", "severity": "medium", "cvss": 6.5, "title": "Junos OS: PFE crash on certain ICMPv6 packets"}
+      ]
+    },
+    {
+      "vendor": "juniper",
+      "os": "junos",
+      "version_prefix": "20.4R3",
+      "cves": [
+        {"id": "CVE-2023-44190", "severity": "high",   "cvss": 7.5, "title": "Junos OS: J-Web authentication bypass"},
+        {"id": "CVE-2023-36842", "severity": "high",   "cvss": 8.8, "title": "Junos OS: SRX rpd PHP RCE chain"}
+      ]
+    },
+    {
+      "vendor": "juniper",
+      "os": "junos",
+      "version_prefix": "19.4R3",
+      "cves": [
+        {"id": "CVE-2022-22241", "severity": "critical", "cvss": 9.8, "title": "Junos OS: SRX/EX J-Web pre-auth RCE"},
+        {"id": "CVE-2022-22221", "severity": "high",     "cvss": 7.5, "title": "Junos OS: rpd crash on malformed BGP UPDATE"}
+      ]
+    },
+    {
+      "vendor": "arista",
+      "os": "eos",
+      "version_prefix": "4.30",
+      "cves": [
+        {"id": "CVE-2024-1234", "severity": "medium", "cvss": 5.4, "title": "EOS: eAPI session hijack via XSS in CLI output"}
+      ]
+    },
+    {
+      "vendor": "arista",
+      "os": "eos",
+      "version_prefix": "4.28",
+      "cves": [
+        {"id": "CVE-2023-24544", "severity": "high",   "cvss": 7.5, "title": "EOS: BGP UPDATE path attribute crash"},
+        {"id": "CVE-2023-24545", "severity": "medium", "cvss": 6.5, "title": "EOS: MAC mover false positive"}
+      ]
+    },
+    {
+      "vendor": "arista",
+      "os": "eos",
+      "version_prefix": "4.25",
+      "cves": [
+        {"id": "CVE-2021-28508", "severity": "critical", "cvss": 9.8, "title": "EOS: Unauthenticated REST API access"},
+        {"id": "CVE-2021-28510", "severity": "high",     "cvss": 7.5, "title": "EOS: ACL bypass on SVI interfaces"}
+      ]
+    },
+    {
+      "vendor": "frr",
+      "os": "frr",
+      "version_prefix": "8.5",
+      "cves": [
+        {"id": "CVE-2023-46752", "severity": "medium", "cvss": 6.5, "title": "FRR: bgpd remote crash via crafted MP_REACH"}
+      ]
+    },
+    {
+      "vendor": "frr",
+      "os": "frr",
+      "version_prefix": "8.4",
+      "cves": [
+        {"id": "CVE-2023-31490", "severity": "high",   "cvss": 7.5, "title": "FRR: bgpd OOB read on extended community"},
+        {"id": "CVE-2023-38802", "severity": "medium", "cvss": 6.5, "title": "FRR: ospfd crash on LSA replay"}
+      ]
+    }
+  ]
+}

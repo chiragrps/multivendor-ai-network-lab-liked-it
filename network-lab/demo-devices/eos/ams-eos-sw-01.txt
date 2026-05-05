@@ -1,0 +1,1491 @@
+! Command: show running-config
+! device: ams-eos-sw-01 (DCS-7050CX3-32S, EOS-4.29.3M)
+!
+! boot system flash:/EOS-4.29.3M.swi
+!
+enable password sha512 $6$wK8THFC2nD8OCYJh$s5n29hrHjtQHDrSwHsRA5VsFMoVnTr1rCyZi/QRiVHd8Apvr.ywNZXu21sAA/OkqshKvZLC/wWqIeLLPKYcea1
+aaa root secret sha512 $6$jBcBc9Mlsj/yPaRq$.a7RoGtTUonjO/RVEpE5.5aLHROXppJJiejFkhuOrRa2TQT0Ry.hI5cAwTMn9kVvpJa3XdEOjnm7E3lBgtcAu.
+no username admin
+!
+username netadmin1 privilege 15 role network-admin nopassword
+
+username netops privilege 15 role network-admin secret sha512 $6$y9QjOUblLXKjw7A6$825sRxvVu5z618ABEgfcSvQQNKgoUu8iaz7fdfLMbCgrM.mOcjrvpK9Us0Fk1JCpL7uFlrpD/ppEmQQLfep.l0
+
+username netadmin2 privilege 15 role network-admin nopassword
+
+username gnmi role gnmi secret sha512 $6$nQ85BjjyJ4uwv2eG$tULwklHeDEnjz1A2INH3Tjw1.tXje/uir.jTlMLMjwWo9vOjVJ7bzRZmWIGCp5FlSSFo1mUPmivMmePVGqxvW1
+username netadmin3 privilege 15 role network-admin nopassword
+
+username netadmin4 privilege 15 role network-admin nopassword
+
+username nlucier privilege 15 role network-admin nopassword
+
+username netadmin5 privilege 15 role network-admin nopassword
+
+username netops2 privilege 15 role network-admin secret sha512 $6$YjcCymwt$Z5BPzqlfNLAlO9zT5Rnp89dV0Op.BEv37o6ibKqRtdhqi2DD7kuNY/V/AQ6S4KPUCWqKZrAk7jYFFhhe3bF2j/
+username netadmin6 privilege 15 role network-admin nopassword
+
+username netops3 privilege 15 role network-admin nopassword
+
+!
+transceiver qsfp default-mode 4x10G
+!
+service routing protocols model multi-agent
+!
+logging vrf mgmt host 192.168.100.100
+logging vrf mgmt source-interface Management1
+!
+hostname ams-eos-sw-01
+ip name-server vrf mgmt 192.168.100.100
+ip name-server vrf mgmt 192.168.100.100
+dns domain net.netlab.local
+!
+snmp-server engineID local 00c52c443d42
+snmp-server location GRU2
+snmp-server view all iso included
+snmp-server group snmp_group_ro v3 priv read all
+snmp-server user snmp_monitor_amer snmp_group_ro v3 localized 00c52c443d42 auth sha a569f9de0791dc87e398b08d6beb633aa3616b53 priv aes b6ea0ed68da9f2c5b4261dd8cda6ef28
+snmp-server user snmp_monitor_apac snmp_group_ro v3 localized 00c52c443d42 auth sha 5898b7b357dc83c04a62e52d483b228d2b587ad8 priv aes 915c28c97f23e6e1ac93cdac095f04c2
+snmp-server user snmp_monitor_emea snmp_group_ro v3 localized 00c52c443d42 auth sha 6498c3bd709f03c23d88b343f0c32af991e52335 priv aes b930e688955e4c928e2e48770225a760
+snmp-server user snmp_telemetry snmp_group_ro v3 localized 00c52c443d42 auth sha 2b62057ea8477c30fce16f76e99984de56da29dd priv aes 715b03487c5dba6a34ae4fd1a53a8bf2
+snmp-server vrf mgmt
+!
+spanning-tree mode mstp
+!
+spanning-tree mst configuration
+   name GRU2
+   revision 1
+   instance 1 vlan  14
+!
+service unsupported-transceiver LabUnlockKey 00000000
+!
+vlan 10-11,14,19-20,25,28,33-34,66,97,99,115,117,119,206,208,216,218,226,228
+!
+vlan 4094
+   trunk group MLAG-SW01AB
+!
+vrf instance mgmt
+!
+banner motd
+=================================================================
+WARNING!
+This is a private computer system. Unauthorized access or use
+is prohibited and subject to prosecution and/or disciplinary
+action. All use of this system constitutes consent to
+monitoring at all times and users are not entitled to any
+expectation of privacy. If monitoring reveals possible evidence
+of violation of criminal statutes, this evidence and any other
+related information, including identification information about
+the user, may be provided to law enforcement officials.
+If monitoring reveals violations of security regulations or
+unauthorized use, employees who violate security regulations or
+make unauthorized use of this system are subject to appropriate
+disciplinary action.
+=================================================================
+EOF
+!
+management api http-commands
+   no shutdown
+   !
+   vrf mgmt
+      no shutdown
+!
+management console
+   idle-timeout 15
+!
+management api gnmi
+   transport grpc def
+      port 32767
+   provider eos-native
+!
+aaa authorization exec default local
+!
+interface Port-Channel1
+   description gru2-fw-02a
+   mtu 9214
+   switchport trunk allowed vlan 11,19-20,206,208
+   switchport mode trunk
+   mlag 1
+!
+interface Port-Channel2
+   description gru2-fw-02b
+   mtu 9214
+   switchport trunk allowed vlan 11,19-20,206,208
+   switchport mode trunk
+   mlag 2
+!
+interface Port-Channel3
+   description gru2-sw-99
+   switchport trunk allowed vlan 14
+   switchport mode trunk
+   mlag 3
+!
+interface Port-Channel4
+   description gru2-sw-03a
+   switchport trunk allowed vlan 10-11,14-15,19-25,28,30,33-34,63-64,66,97,99,115,117,119,206,208,216,218,226,228
+   switchport mode trunk
+   mlag 4
+!
+interface Port-Channel9
+   description gru2-sw-01b
+   switchport mode trunk
+   switchport trunk group MLAG-SW01AB
+!
+interface Port-Channel10
+   description gru2-infra-01
+   mtu 9214
+   switchport trunk allowed vlan 10,14,19-20,206,208
+   switchport mode trunk
+   mlag 10
+!
+interface Port-Channel11
+   description gru2-amc01-01
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 11
+!
+interface Port-Channel12
+   description gru2-amc01-02
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 12
+!
+interface Port-Channel13
+   description gru2-amc01-03
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 13
+!
+interface Port-Channel14
+   description gru2-amc01-04
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 14
+!
+interface Port-Channel15
+   description gru2-acs01-stor01
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 15
+!
+interface Port-Channel16
+   description gru2-acs01-stor02
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 16
+!
+interface Port-Channel17
+   description gru2-acs01-stor03
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 17
+!
+interface Port-Channel18
+   description gru2-amc01-05
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 18
+!
+interface Port-Channel19
+   description gru2-amc01-06
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 19
+!
+interface Port-Channel20
+   description gru2-amc01-07
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 20
+!
+interface Port-Channel21
+   description gru2-amc01-08
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 21
+!
+interface Port-Channel22
+   description gru2-amc01-09
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 22
+!
+interface Port-Channel23
+   description gru2-acs01-stor04
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 23
+!
+interface Port-Channel24
+   description gru2-acs01-stor05
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 24
+!
+interface Port-Channel25
+   description gru2-acs01-stor06
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 25
+!
+interface Port-Channel26
+   description gru2-amc01-10
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 26
+!
+interface Port-Channel27
+   description gru2-amc01-11
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 27
+!
+interface Port-Channel28
+   description gru2-amc01-12
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 28
+!
+interface Port-Channel29
+   description gru2-amc01-13
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 29
+!
+interface Port-Channel30
+   description gru2-amc01-14
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 30
+!
+interface Port-Channel31
+   description gru2-dri01-01
+   mtu 9214
+   switchport trunk allowed vlan 97,115,117,206,216,226
+   switchport mode trunk
+   mlag 31
+!
+interface Port-Channel32
+   description gru2-dri01-02
+   mtu 9214
+   switchport trunk allowed vlan 97,115,117,206,216,226
+   switchport mode trunk
+   mlag 32
+!
+interface Port-Channel33
+   description gru2-dri01-03
+   mtu 9214
+   switchport trunk allowed vlan 97,115,117,206,216,226
+   switchport mode trunk
+   mlag 33
+!
+interface Port-Channel34
+   description gru2-dri01-04
+   mtu 9214
+   switchport trunk allowed vlan 97,115,117,206,216,226
+   switchport mode trunk
+   mlag 34
+!
+interface Port-Channel35
+   description gru2-dri01-05
+   mtu 9214
+   switchport trunk allowed vlan 97,115,117,206,216,226
+   switchport mode trunk
+   mlag 35
+!
+interface Port-Channel36
+   description gru2-acs01-stor07
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 36
+!
+interface Port-Channel37
+   description gru2-acs01-stor08
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 37
+!
+interface Port-Channel38
+   description gru2-amc01-15
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 38
+!
+interface Port-Channel39
+   description gru2-amc01-16
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 39
+!
+interface Port-Channel40
+   description gru2-amc01-17
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 40
+!
+interface Port-Channel41
+   description gru2-amc01-18
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 41
+!
+interface Port-Channel42
+   description gru2-amc01-19
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 42
+!
+interface Port-Channel43
+   description gru2-dri01-06
+   mtu 9214
+   switchport trunk allowed vlan 97,115,117,206,216,226
+   switchport mode trunk
+   mlag 43
+!
+interface Port-Channel44
+   description gru2-dri01-07
+   mtu 9214
+   switchport trunk allowed vlan 97,115,117,206,216,226
+   switchport mode trunk
+   mlag 44
+!
+interface Port-Channel45
+   description gru2-dri01-08
+   mtu 9214
+   switchport trunk allowed vlan 97,115,117,206,216,226
+   switchport mode trunk
+   mlag 45
+!
+interface Port-Channel46
+   description gru2-dri01-09
+   mtu 9214
+   switchport trunk allowed vlan 97,115,117,206,216,226
+   switchport mode trunk
+   mlag 46
+!
+interface Port-Channel47
+   description gru2-dri01-10
+   mtu 9214
+   switchport trunk allowed vlan 97,115,117,206,216,226
+   switchport mode trunk
+   mlag 47
+!
+interface Port-Channel48
+   description gru2-acs01-stor09
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 48
+!
+interface Port-Channel49
+   description gru2-acs01-stor10
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 49
+!
+interface Port-Channel50
+   description gru2-arp01-01
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 50
+!
+interface Port-Channel51
+   description gru2-arp01-02
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 51
+!
+interface Port-Channel52
+   description gru2-arp01-03
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 52
+!
+interface Port-Channel53
+   description gru2-arp01-04
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 53
+!
+interface Port-Channel54
+   description gru2-arp01-05
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 54
+!
+interface Port-Channel55
+   description gru2-amc01-20
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 55
+!
+interface Port-Channel56
+   description gru2-amc01-21
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 56
+!
+interface Port-Channel57
+   description gru2-amc01-22
+   mtu 9214
+   switchport trunk allowed vlan 10-11,14,19,25,33-34,66
+   switchport mode trunk
+   mlag 57
+!
+interface Port-Channel58
+   description gru2-dri02-01
+   mtu 9214
+   switchport trunk allowed vlan 99,115,119,208,218,228
+   switchport mode trunk
+   mlag 58
+!
+interface Port-Channel59
+   description gru2-dri02-02
+   mtu 9214
+   switchport trunk allowed vlan 99,115,119,208,218,228
+   switchport mode trunk
+   mlag 59
+!
+interface Port-Channel60
+   description gru2-dri02-03
+   mtu 9214
+   switchport trunk allowed vlan 99,115,119,208,218,228
+   switchport mode trunk
+   mlag 60
+!
+interface Port-Channel61
+   description gru2-dri02-04
+   mtu 9214
+   switchport trunk allowed vlan 99,115,119,208,218,228
+   switchport mode trunk
+   mlag 61
+!
+interface Port-Channel62
+   description gru2-dri02-05
+   mtu 9214
+   switchport trunk allowed vlan 99,115,119,208,218,228
+   switchport mode trunk
+   mlag 62
+!
+interface Port-Channel63
+   description gru2-acs02-stor01
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 63
+!
+interface Port-Channel64
+   description gru2-acs02-stor02
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 64
+!
+interface Port-Channel65
+   description gru2-acs02-stor03
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 65
+!
+interface Port-Channel66
+   description gru2-acs02-stor04
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 66
+!
+interface Port-Channel67
+   description gru2-dri02-06
+   mtu 9214
+   switchport trunk allowed vlan 99,115,119,208,218,228
+   switchport mode trunk
+   mlag 67
+!
+interface Port-Channel68
+   description gru2-dri02-07
+   mtu 9214
+   switchport trunk allowed vlan 99,115,119,208,218,228
+   switchport mode trunk
+   mlag 68
+!
+interface Port-Channel69
+   description gru2-dri02-08
+   mtu 9214
+   switchport trunk allowed vlan 99,115,119,208,218,228
+   switchport mode trunk
+   mlag 69
+!
+interface Port-Channel70
+   description gru2-dri02-09
+   mtu 9214
+   switchport trunk allowed vlan 99,115,119,208,218,228
+   switchport mode trunk
+   mlag 70
+!
+interface Port-Channel71
+   description gru2-dri02-10
+   mtu 9214
+   switchport trunk allowed vlan 99,115,119,208,218,228
+   switchport mode trunk
+   mlag 71
+!
+interface Port-Channel72
+   description gru2-acs02-stor05
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 72
+!
+interface Port-Channel73
+   description gru2-acs02-stor06
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 73
+!
+interface Port-Channel74
+   description gru2-acs02-stor07
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 74
+!
+interface Port-Channel75
+   description gru2-acs02-stor09
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 75
+!
+interface Port-Channel76
+   description gru2-acs02-stor08
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 76
+!
+interface Port-Channel77
+   description gru2-acs02-stor10
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 77
+!
+interface Port-Channel78
+   description gru2-acs02-stor11
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 78
+!
+interface Port-Channel79
+   description gru2-acs02-stor12
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 79
+!
+interface Port-Channel80
+   description gru2-acs02-stor13
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 80
+!
+interface Port-Channel81
+   description gru2-acs02-stor14
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 81
+!
+interface Port-Channel82
+   description gru2-acs02-stor15
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 82
+!
+interface Port-Channel83
+   description gru2-acs02-stor16
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 83
+!
+interface Port-Channel84
+   description gru2-acs02-stor17
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 84
+!
+interface Port-Channel85
+   description gru2-acs02-stor20
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 85
+!
+interface Port-Channel86
+   description gru2-acs02-stor19
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 86
+!
+interface Port-Channel87
+   description gru2-acs02-stor18
+   mtu 9214
+   switchport trunk allowed vlan 10,20,28
+   switchport mode trunk
+   mlag 87
+!
+interface Ethernet1/1
+   description gru2-infra-01
+   speed forced 25gfull
+   channel-group 10 mode active
+   lacp timer fast
+!
+interface Ethernet1/2
+   description gru2-amc01-01
+   channel-group 11 mode active
+   lacp timer fast
+!
+interface Ethernet1/3
+   description gru2-amc01-02
+   channel-group 12 mode active
+   lacp timer fast
+!
+interface Ethernet1/4
+   description gru2-amc01-03
+   channel-group 13 mode active
+   lacp timer fast
+!
+interface Ethernet2/1
+   description gru2-amc01-04
+   speed forced 25gfull
+   channel-group 14 mode active
+   lacp timer fast
+!
+interface Ethernet2/2
+   description gru2-acs01-stor01
+   channel-group 15 mode active
+   lacp timer fast
+!
+interface Ethernet2/3
+   description gru2-acs01-stor02
+   channel-group 16 mode active
+   lacp timer fast
+!
+interface Ethernet2/4
+   description gru2-acs01-stor03
+   channel-group 17 mode active
+   lacp timer fast
+!
+interface Ethernet3/1
+   description gru2-arp01-01
+   speed forced 25gfull
+   channel-group 50 mode active
+   lacp timer fast
+!
+interface Ethernet3/2
+   description gru2-arp01-02
+   channel-group 51 mode active
+   lacp timer fast
+!
+interface Ethernet3/3
+   description gru2-arp01-03
+   channel-group 52 mode active
+   lacp timer fast
+!
+interface Ethernet3/4
+!
+interface Ethernet4/1
+   description gru2-amc01-05
+   speed forced 25gfull
+   channel-group 18 mode active
+   lacp timer fast
+!
+interface Ethernet4/2
+   description gru2-amc01-06
+   channel-group 19 mode active
+   lacp timer fast
+!
+interface Ethernet4/3
+   description gru2-amc01-07
+   channel-group 20 mode active
+   lacp timer fast
+!
+interface Ethernet4/4
+   description gru2-amc01-08
+   channel-group 21 mode active
+   lacp timer fast
+!
+interface Ethernet5/1
+   description gru2-amc01-09
+   speed forced 25gfull
+   channel-group 22 mode active
+   lacp timer fast
+!
+interface Ethernet5/2
+   description gru2-acs01-stor04
+   channel-group 23 mode active
+   lacp timer fast
+!
+interface Ethernet5/3
+   description gru2-acs01-stor05
+   channel-group 24 mode active
+   lacp timer fast
+!
+interface Ethernet5/4
+   description gru2-acs01-stor06
+   channel-group 25 mode active
+   lacp timer fast
+!
+interface Ethernet6/1
+   description gru2-arp01-04
+   speed forced 25gfull
+   channel-group 53 mode active
+   lacp timer fast
+!
+interface Ethernet6/2
+   description gru2-arp01-05
+   channel-group 54 mode active
+   lacp timer fast
+!
+interface Ethernet6/3
+   description gru2-acs02-stor10
+   speed forced 25gfull
+   channel-group 77 mode active
+   lacp timer fast
+!
+interface Ethernet6/4
+   description gru2-acs02-stor11
+   speed forced 25gfull
+   channel-group 78 mode active
+   lacp timer fast
+!
+interface Ethernet7/1
+   description gru2-amc01-10
+   speed forced 25gfull
+   channel-group 26 mode active
+   lacp timer fast
+!
+interface Ethernet7/2
+   description gru2-amc01-11
+   channel-group 27 mode active
+   lacp timer fast
+!
+interface Ethernet7/3
+   description gru2-amc01-12
+   channel-group 28 mode active
+   lacp timer fast
+!
+interface Ethernet7/4
+   description gru2-amc01-13
+   channel-group 29 mode active
+   lacp timer fast
+!
+interface Ethernet8/1
+   description gru2-amc01-14
+   speed forced 25gfull
+   channel-group 30 mode active
+   lacp timer fast
+!
+interface Ethernet8/2
+   description gru2-dri01-01
+   channel-group 31 mode active
+   lacp timer fast
+!
+interface Ethernet8/3
+   description gru2-dri01-02
+   channel-group 32 mode active
+   lacp timer fast
+!
+interface Ethernet8/4
+   description gru2-dri01-03
+   channel-group 33 mode active
+   lacp timer fast
+!
+interface Ethernet9/1
+   description gru2-dri01-04
+   speed forced 25gfull
+   channel-group 34 mode active
+   lacp timer fast
+!
+interface Ethernet9/2
+   description gru2-dri01-05
+   channel-group 35 mode active
+   lacp timer fast
+!
+interface Ethernet9/3
+   description gru2-acs01-stor07
+   channel-group 36 mode active
+   lacp timer fast
+!
+interface Ethernet9/4
+   description gru2-acs01-stor08
+   channel-group 37 mode active
+   lacp timer fast
+!
+interface Ethernet10/1
+   description gru2-amc01-15
+   speed forced 25gfull
+   channel-group 38 mode active
+   lacp timer fast
+!
+interface Ethernet10/2
+   description gru2-amc01-16
+   channel-group 39 mode active
+   lacp timer fast
+!
+interface Ethernet10/3
+   description gru2-amc01-17
+   channel-group 40 mode active
+   lacp timer fast
+!
+interface Ethernet10/4
+   description gru2-amc01-18
+   channel-group 41 mode active
+   lacp timer fast
+!
+interface Ethernet11/1
+   description gru2-amc01-19
+   speed forced 25gfull
+   channel-group 42 mode active
+   lacp timer fast
+!
+interface Ethernet11/2
+   description gru2-dri01-06
+   channel-group 43 mode active
+   lacp timer fast
+!
+interface Ethernet11/3
+   description gru2-dri01-07
+   channel-group 44 mode active
+   lacp timer fast
+!
+interface Ethernet11/4
+   description gru2-dri01-08
+   channel-group 45 mode active
+   lacp timer fast
+!
+interface Ethernet12/1
+   description gru2-dri01-09
+   speed forced 25gfull
+   channel-group 46 mode active
+   lacp timer fast
+!
+interface Ethernet12/2
+   description gru2-dri01-10
+   channel-group 47 mode active
+   lacp timer fast
+!
+interface Ethernet12/3
+   description gru2-acs01-stor09
+   channel-group 48 mode active
+   lacp timer fast
+!
+interface Ethernet12/4
+   description gru2-acs01-stor10
+   channel-group 49 mode active
+   lacp timer fast
+!
+interface Ethernet13/1
+   description gru2-amc01-20
+   speed forced 25gfull
+   channel-group 55 mode active
+   lacp timer fast
+!
+interface Ethernet13/2
+   description gru2-amc01-21
+   speed forced 25gfull
+   channel-group 56 mode active
+   lacp timer fast
+!
+interface Ethernet13/3
+   description gru2-amc01-22
+   speed forced 25gfull
+   channel-group 57 mode active
+   lacp timer fast
+!
+interface Ethernet13/4
+   description gru2-dri02-01
+   speed forced 25gfull
+   channel-group 58 mode active
+   lacp timer fast
+!
+interface Ethernet14/1
+   description gru2-dri02-02
+   speed forced 25gfull
+   channel-group 59 mode active
+   lacp timer fast
+!
+interface Ethernet14/2
+   description gru2-dri02-03
+   speed forced 25gfull
+   channel-group 60 mode active
+   lacp timer fast
+!
+interface Ethernet14/3
+   description gru2-dri02-04
+   speed forced 25gfull
+   channel-group 61 mode active
+   lacp timer fast
+!
+interface Ethernet14/4
+   description gru2-dri02-05
+   speed forced 25gfull
+   channel-group 62 mode active
+   lacp timer fast
+!
+interface Ethernet15/1
+   description gru2-acs02-stor01
+   speed forced 25gfull
+   channel-group 63 mode active
+   lacp timer fast
+!
+interface Ethernet15/2
+   description gru2-acs02-stor02
+   speed forced 25gfull
+   channel-group 64 mode active
+   lacp timer fast
+!
+interface Ethernet15/3
+   description gru2-acs02-stor03
+   speed forced 25gfull
+   channel-group 65 mode active
+   lacp timer fast
+!
+interface Ethernet15/4
+   description gru2-acs02-stor04
+   speed forced 25gfull
+   channel-group 66 mode active
+   lacp timer fast
+!
+interface Ethernet16/1
+   description gru2-dri02-06
+   speed forced 25gfull
+   channel-group 67 mode active
+   lacp timer fast
+!
+interface Ethernet16/2
+   description gru2-dri02-07
+   speed forced 25gfull
+   channel-group 68 mode active
+   lacp timer fast
+!
+interface Ethernet16/3
+   description gru2-dri02-08
+   speed forced 25gfull
+   channel-group 69 mode active
+   lacp timer fast
+!
+interface Ethernet16/4
+   description gru2-dri02-09
+   speed forced 25gfull
+   channel-group 70 mode active
+   lacp timer fast
+!
+interface Ethernet17/1
+   description gru2-dri02-10
+   speed forced 25gfull
+   channel-group 71 mode active
+   lacp timer fast
+!
+interface Ethernet17/2
+   description gru2-acs02-stor05
+   speed forced 25gfull
+   channel-group 72 mode active
+   lacp timer fast
+!
+interface Ethernet17/3
+   description gru2-acs02-stor06
+   speed forced 25gfull
+   channel-group 73 mode active
+   lacp timer fast
+!
+interface Ethernet17/4
+   description gru2-acs02-stor07
+   speed forced 25gfull
+   channel-group 74 mode active
+   lacp timer fast
+!
+interface Ethernet18/1
+   description gru2-acs02-stor09
+   speed forced 25gfull
+   channel-group 75 mode active
+   lacp timer fast
+!
+interface Ethernet18/2
+   description gru2-acs02-stor08
+   speed forced 25gfull
+   channel-group 76 mode active
+   lacp timer fast
+!
+interface Ethernet18/3
+!
+interface Ethernet18/4
+!
+interface Ethernet19/1
+   description gru2-acs02-stor12
+   speed forced 25gfull
+   channel-group 79 mode active
+   lacp timer fast
+!
+interface Ethernet19/2
+   description gru2-acs02-stor13
+   channel-group 80 mode active
+   lacp timer fast
+!
+interface Ethernet19/3
+   description gru2-acs02-stor14
+   channel-group 81 mode active
+   lacp timer fast
+!
+interface Ethernet19/4
+   description gru2-acs02-stor15
+   channel-group 82 mode active
+   lacp timer fast
+!
+interface Ethernet20/1
+   speed forced 25gfull
+!
+interface Ethernet20/2
+!
+interface Ethernet20/3
+!
+interface Ethernet20/4
+!
+interface Ethernet21/1
+   speed forced 25gfull
+!
+interface Ethernet21/2
+!
+interface Ethernet21/3
+!
+interface Ethernet21/4
+!
+interface Ethernet22/1
+   description gru2-acs02-stor20
+   speed forced 25gfull
+   channel-group 85 mode active
+   lacp timer fast
+!
+interface Ethernet22/2
+   description gru2-acs02-stor19
+   speed forced 25gfull
+   channel-group 86 mode active
+   lacp timer fast
+!
+interface Ethernet22/3
+   description gru2-acs02-stor18
+   speed forced 25gfull
+   channel-group 87 mode active
+   lacp timer fast
+!
+interface Ethernet22/4
+   description gru2-acs02-stor16
+   channel-group 83 mode active
+   lacp timer fast
+!
+interface Ethernet23/1
+   description gru2-acs02-stor17
+   speed forced 25gfull
+   channel-group 84 mode active
+   lacp timer fast
+!
+interface Ethernet23/2
+!
+interface Ethernet23/3
+!
+interface Ethernet23/4
+!
+interface Ethernet24/1
+   speed forced 25gfull
+!
+interface Ethernet24/2
+!
+interface Ethernet24/3
+!
+interface Ethernet24/4
+!
+interface Ethernet25/1
+   description gru2-rt-01
+   mtu 9202
+   speed forced 100gfull
+   no switchport
+   ip address 10.2.38.55/31
+   ipv6 address 2602:80b:60dc:3a:51:101:0:3/127
+!
+interface Ethernet26/1
+   speed forced 25gfull
+!
+interface Ethernet26/2
+!
+interface Ethernet26/3
+!
+interface Ethernet26/4
+!
+interface Ethernet27/1
+   description gru2-rt-02
+   mtu 9202
+   speed forced 100gfull
+   no switchport
+   ip address 10.2.38.247/31
+   ipv6 address 2602:80b:60dc:3a:52:101:0:3/127
+!
+interface Ethernet28/1
+   speed forced 25gfull
+!
+interface Ethernet28/2
+!
+interface Ethernet28/3
+!
+interface Ethernet28/4
+!
+interface Ethernet29/1
+   description gru2-fw-02a
+   channel-group 1 mode active
+   lacp timer fast
+!
+interface Ethernet29/2
+   description gru2-fw-02b
+   channel-group 2 mode active
+   lacp timer fast
+!
+interface Ethernet29/3
+!
+interface Ethernet29/4
+!
+interface Ethernet30/1
+   description gru2-sw-01b
+   channel-group 9 mode active
+!
+interface Ethernet31/1
+   description gru2-sw-01b
+   channel-group 9 mode active
+!
+interface Ethernet32/1
+   description gru2-sw-03a
+   channel-group 4 mode active
+   lacp timer fast
+!
+interface Ethernet33
+   description gru2-sw-99
+   channel-group 3 mode active
+!
+interface Ethernet34
+!
+interface Management1
+   vrf mgmt
+   ip address 10.1.38.101/24
+!
+interface Vlan10
+   ip address 216.245.155.2/26
+   ipv6 address 2602:80b:603a:10::2/64
+   ip virtual-router address 216.245.155.1
+   ipv6 virtual-router address 2602:80b:603a:10::1
+!
+interface Vlan11
+   ip address 216.245.155.66/26
+   ipv6 address 2602:80b:603a:11::2/64
+   ip virtual-router address 216.245.155.65
+   ipv6 virtual-router address 2602:80b:603a:11::1
+!
+interface Vlan66
+   ipv6 address 2602:80b:603a:66::2/64
+   ipv6 virtual-router address 2602:80b:603a:66::1
+!
+interface Vlan97
+   ip address 216.245.155.130/25
+   ip address 104.164.103.2/24 secondary
+   ip address 216.105.167.130/25 secondary
+   ip virtual-router address 104.164.103.1
+   ip virtual-router address 216.105.167.129
+   ip virtual-router address 216.245.155.129
+!
+interface Vlan99
+   ip address 216.105.167.2/25
+   ip address 181.215.30.2/24 secondary
+   ip virtual-router address 181.215.30.1
+   ip virtual-router address 216.105.167.1
+!
+interface Vlan216
+   ip address 10.216.0.2/16
+   ip virtual-router address 10.216.0.1
+!
+interface Vlan218
+   ip address 10.218.0.2/16
+   ip virtual-router address 10.218.0.1
+!
+interface Vlan4094
+   no autostate
+   ip address 10.2.38.250/31
+   ipv6 address 2602:80b:60dc:3a:101:121::/127
+!
+ip virtual-router mac-address 00:00:00:00:dc:01
+!
+ip access-list filter-all-in-one
+   10 remark #allow-tcp-est
+   20 permit tcp any any established
+   30 remark #accept-bfd
+   40 permit udp 10.2.0.0/16 any eq bfd bfd-echo multihop-bfd
+   50 remark #accept-bgp-dst
+   60 permit tcp 10.2.255.0/24 10.2.255.0/24 eq bgp
+   70 permit tcp 10.3.255.0/24 10.3.255.0/24 eq bgp
+   80 permit tcp 10.4.255.0/24 10.4.255.0/24 eq bgp
+   90 remark #accept-bgp-src
+   100 permit tcp 10.2.255.0/24 10.2.255.0/24 eq bgp
+   110 permit tcp 10.3.255.0/24 10.3.255.0/24 eq bgp
+   120 permit tcp 10.4.255.0/24 10.4.255.0/24 eq bgp
+   130 remark #allow-pxe
+   140 permit tcp host 0.0.0.0 any eq 67 68 69 4011
+   150 permit tcp 10.2.0.0/16 any eq 67 68 69 4011
+   160 remark #accept-dns
+   170 permit udp host 192.168.100.100 host 10.1.38.101 eq domain
+   180 permit udp host 192.168.100.100 host 10.1.38.101 eq domain
+   190 remark #accept-icmp
+   200 permit icmp any any
+   210 remark #accept-netconf-mgmt
+   220 permit tcp 10.1.0.0/16 host 10.1.38.101 eq netconf-ssh
+   221 permit tcp 10.1.0.0/16 host 10.1.38.101 eq https
+   230 remark #accept-ntp
+   240 permit udp host 192.168.100.53 host 10.1.38.101 eq ntp
+   250 permit udp host 10.1.247.49 host 10.1.38.101 eq ntp
+   260 permit udp host 192.168.100.100 host 10.1.38.101 eq ntp
+   270 permit udp host 10.1.243.49 host 10.1.38.101 eq ntp
+   280 permit udp host 45.11.129.77 host 10.1.38.101 eq ntp
+   290 permit udp host 45.254.38.6 host 10.1.38.101 eq ntp
+   300 permit udp host 162.244.7.76 host 10.1.38.101 eq ntp
+   310 permit udp host 185.151.160.99 host 10.1.38.101 eq ntp
+   320 remark #accept-grpc
+   330 permit tcp host 192.168.100.100 host 10.1.38.101 eq 32767
+   340 remark #accept-snmp
+   350 permit udp host 192.168.100.100 host 10.1.38.101 range snmp snmptrap
+   360 permit udp host 192.168.100.100 host 10.1.38.101 range snmp snmptrap
+   370 permit udp host 192.168.100.100 host 10.1.38.101 range snmp snmptrap
+   380 permit udp host 10.1.243.199 host 10.1.38.101 range snmp snmptrap
+   390 permit udp host 192.168.100.53 host 10.1.38.101 range snmp snmptrap
+   400 permit udp host 192.168.100.53 host 10.1.38.101 range snmp snmptrap
+   410 permit udp host 192.168.100.53 host 10.1.38.101 range snmp snmptrap
+   420 permit udp host 10.1.253.149 host 10.1.38.101 range snmp snmptrap
+   430 remark #accept-ssh-mgmt
+   440 permit tcp 10.1.0.0/16 host 10.1.38.101 eq ssh
+   450 permit tcp 10.1.0.0/16 host 10.2.38.51 eq ssh
+   460 permit tcp 10.1.0.0/16 host 10.2.38.250 eq ssh
+   470 permit tcp 10.1.0.0/16 host 216.245.155.1 eq ssh
+   480 permit tcp 10.1.0.0/16 host 216.245.155.2 eq ssh
+   490 remark #accept-ssh
+   500 permit tcp host 4.16.136.120 host 10.1.38.101 eq ssh
+   510 permit tcp host 4.16.136.120 host 10.2.38.51 eq ssh
+   520 permit tcp host 4.16.136.120 host 10.2.38.250 eq ssh
+   530 permit tcp host 4.16.136.120 host 216.245.155.1 eq ssh
+   540 permit tcp host 4.16.136.120 host 216.245.155.2 eq ssh
+   550 permit tcp host 162.244.7.1 host 10.1.38.101 eq ssh
+   560 permit tcp host 162.244.7.1 host 10.2.38.51 eq ssh
+   570 permit tcp host 162.244.7.1 host 10.2.38.250 eq ssh
+   580 permit tcp host 162.244.7.1 host 216.245.155.1 eq ssh
+   590 permit tcp host 162.244.7.1 host 216.245.155.2 eq ssh
+   600 permit tcp host 162.244.7.2 host 10.1.38.101 eq ssh
+   610 permit tcp host 162.244.7.2 host 10.2.38.51 eq ssh
+   620 permit tcp host 162.244.7.2 host 10.2.38.250 eq ssh
+   630 permit tcp host 162.244.7.2 host 216.245.155.1 eq ssh
+   640 permit tcp host 162.244.7.2 host 216.245.155.2 eq ssh
+   650 permit tcp host 185.151.160.8 host 10.1.38.101 eq ssh
+   660 permit tcp host 185.151.160.8 host 10.2.38.51 eq ssh
+   670 permit tcp host 185.151.160.8 host 10.2.38.250 eq ssh
+   680 permit tcp host 185.151.160.8 host 216.245.155.1 eq ssh
+   690 permit tcp host 185.151.160.8 host 216.245.155.2 eq ssh
+   700 remark #accept-traceroute-icmp
+   710 permit icmp any any traceroute
+   720 remark #accept-mlag
+   730 permit tcp any any eq mlag ttl eq 255
+   740 permit udp any any eq mlag ttl eq 255
+   750 permit tcp any eq mlag any ttl eq 255
+   760 remark #accept-vrrp
+   770 permit vrrp any any
+!
+ip routing
+ip routing vrf mgmt
+!
+ip prefix-list DEFAULT_ROUTE_V4
+   seq 10 permit 0.0.0.0/0
+!
+ip prefix-list GRU2_PUBLICS_V4
+   seq 10 permit 216.245.155.0/24
+   seq 20 permit 216.105.167.0/24
+   seq 30 permit 181.215.30.0/24
+   seq 40 permit 104.164.103.0/24
+!
+ipv6 prefix-list DEFAULT_ROUTE_V6
+   seq 10 permit ::/0
+!
+ipv6 prefix-list GRU2_PUBLICS_V6
+   seq 10 permit 2602:80b:603a::/48
+!
+ipv6 unicast-routing
+!
+system control-plane
+   ip access-group filter-all-in-one in
+!
+mlag configuration
+   domain-id MLAG-01
+   local-interface Vlan4094
+   peer-address 10.2.38.251
+   peer-address heartbeat 10.1.38.121
+   peer-link Port-Channel9
+   dual-primary detection delay 5 action errdisable all-interfaces
+!
+ip route 0.0.0.0/0 10.2.38.54 180
+ip route 0.0.0.0/0 10.2.38.246 185
+ip route 216.105.167.0/24 Null0
+ip route vrf mgmt 10.1.0.0/16 10.1.38.1
+!
+ipv6 route ::/0 2602:80b:60dc:3a:51:101:0:2 180
+ipv6 route ::/0 2602:80b:60dc:3a:52:101:0:2 185
+!
+ntp local-interface Management1
+ntp server 192.168.100.100 prefer
+ntp server 10.1.243.49
+ntp server 10.1.247.49
+ntp server 192.168.100.53
+!
+role gnmi
+   10 deny mode exec command .*
+!
+route-map DENY_BGP_ALL deny 10
+!
+route-map GRU2-RT-01_BGP_ADV_V4 permit 10
+   match ip address prefix-list GRU2_PUBLICS_V4
+!
+route-map GRU2-RT-01_BGP_ADV_V6 permit 10
+   match ipv6 address prefix-list GRU2_PUBLICS_V6
+!
+route-map GRU2-RT-01_BGP_RCV_V4 permit 10
+   match ip address prefix-list DEFAULT_ROUTE_V4
+!
+route-map GRU2-RT-01_BGP_RCV_V6 permit 10
+   match ipv6 address prefix-list DEFAULT_ROUTE_V6
+!
+route-map GRU2-RT-02_BGP_ADV_V4 permit 10
+   match ip address prefix-list GRU2_PUBLICS_V4
+!
+route-map GRU2-RT-02_BGP_ADV_V6 permit 10
+   match ipv6 address prefix-list GRU2_PUBLICS_V6
+!
+route-map GRU2-RT-02_BGP_RCV_V4 permit 10
+   match ip address prefix-list DEFAULT_ROUTE_V4
+!
+route-map GRU2-RT-02_BGP_RCV_V6 permit 10
+   match ipv6 address prefix-list DEFAULT_ROUTE_V6
+!
+route-map RT-01_BGP_ADV_V4 permit 10
+   match ip address prefix-list GRU2_PUBLICS_V4
+!
+route-map RT-01_BGP_ADV_V6 permit 10
+   match ipv6 address prefix-list GRU2_PUBLICS_V6
+!
+route-map RT-01_BGP_RCV_V4 permit 10
+   match ip address prefix-list DEFAULT_ROUTE_V4
+!
+route-map RT-01_BGP_RCV_V6 permit 10
+   match ipv6 address prefix-list DEFAULT_ROUTE_V6
+!
+router bgp 4200038101
+   distance bgp 170 170 170
+   neighbor GRU2-RT-01_V4 peer group
+   neighbor GRU2-RT-01_V4 remote-as 53991
+   neighbor GRU2-RT-01_V4 next-hop-self
+   neighbor GRU2-RT-01_V4 update-source 10.2.38.55
+   neighbor GRU2-RT-01_V4 description GRU2-RT-01_V4
+   neighbor GRU2-RT-01_V4 route-map RT-01_BGP_RCV_V4 in
+   neighbor GRU2-RT-01_V4 route-map RT-01_BGP_ADV_V4 out
+   neighbor GRU2-RT-01_V4 maximum-routes 0
+   neighbor GRU2-RT-01_V6 peer group
+   neighbor GRU2-RT-01_V6 remote-as 53991
+   neighbor GRU2-RT-01_V6 next-hop-self
+   neighbor GRU2-RT-01_V6 update-source 2602:80b:60dc:3a:51:101:0:3
+   neighbor GRU2-RT-01_V6 description GRU2-RT-01_V6
+   neighbor GRU2-RT-01_V6 route-map RT-01_BGP_RCV_V6 in
+   neighbor GRU2-RT-01_V6 route-map RT-01_BGP_ADV_V6 out
+   neighbor GRU2-RT-01_V6 maximum-routes 0
+   neighbor GRU2-RT-02_V4 peer group
+   neighbor GRU2-RT-02_V4 remote-as 53991
+   neighbor GRU2-RT-02_V4 next-hop-self
+   neighbor GRU2-RT-02_V4 update-source 10.2.38.247
+   neighbor GRU2-RT-02_V4 description GRU2-RT-02_V4
+   neighbor GRU2-RT-02_V4 route-map GRU2-RT-02_BGP_RCV_V4 in
+   neighbor GRU2-RT-02_V4 route-map GRU2-RT-02_BGP_ADV_V4 out
+   neighbor GRU2-RT-02_V4 maximum-routes 0
+   neighbor GRU2-RT-02_V6 peer group
+   neighbor GRU2-RT-02_V6 remote-as 53991
+   neighbor GRU2-RT-02_V6 next-hop-self
+   neighbor GRU2-RT-02_V6 update-source 2602:80b:60dc:3a:52:101:0:3
+   neighbor GRU2-RT-02_V6 description GRU2-RT-02_V6
+   neighbor GRU2-RT-02_V6 route-map GRU2-RT-02_BGP_RCV_V6 in
+   neighbor GRU2-RT-02_V6 route-map GRU2-RT-02_BGP_ADV_V6 out
+   neighbor GRU2-RT-02_V6 maximum-routes 0
+   neighbor 10.2.38.54 peer group GRU2-RT-01_V4
+   neighbor 10.2.38.54 description gru2-rt-01
+   neighbor 10.2.38.246 peer group GRU2-RT-02_V4
+   neighbor 10.2.38.246 description gru2-rt-02
+   neighbor 2602:80b:60dc:3a:51:101:0:2 peer group GRU2-RT-01_V6
+   neighbor 2602:80b:60dc:3a:51:101:0:2 description gru2-rt-01
+   neighbor 2602:80b:60dc:3a:52:101:0:2 peer group GRU2-RT-02_V6
+   neighbor 2602:80b:60dc:3a:52:101:0:2 description gru2-rt-02
+   aggregate-address 104.164.103.0/24
+   aggregate-address 181.215.30.0/24
+   aggregate-address 216.245.155.0/24
+   aggregate-address 2602:80b:603a::/48
+   !
+   address-family ipv4
+      network 104.164.103.0/24
+      network 181.215.30.0/24
+      network 216.105.167.0/24
+   !
+   address-family ipv6
+      neighbor 2602:80b:60dc:3a:51:101:0:2 activate
+      neighbor 2602:80b:60dc:3a:52:101:0:2 activate
+      neighbor 2602:80b:60dc:3a:54:101:0:2 activate
+!
+management ssh
+   idle-timeout 15
+!

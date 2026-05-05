@@ -1,0 +1,2024 @@
+
+## Last commit: 2026-01-01 00:00:00 UTC by netadmin1
+## Image name: jinstall-host-ex-4600-21.4R3-S4.18-signed.tgz
+
+version 21.4R3-S4.18;
+system {
+    host-name ams-ex-01;
+    root-authentication {
+        encrypted-password "$6$PFsfan1g$m/xtwE283S.giMD0jbCF88M3bQzvXVCZXUWr0lC2TzXtg4vwX0r.95QsmDDizCo6Xga/bNtjrFbrebX6s2rqp1";
+    }
+    commit synchronize;
+    login {
+        retry-options {
+            tries-before-disconnect 3;
+            backoff-threshold 3;
+            backoff-factor 10;
+            lockout-period 4;
+        }
+        idle-timeout 15;
+        class config_backup {
+            permissions [ secret view view-configuration ];
+            deny-commands all;
+        }
+        class config_control {
+            permissions [ configure control view ];
+        }
+        class network-operations-team {
+            permissions all;
+        }
+        class read_only {
+            permissions [ network routing view-configuration ];
+            allow-commands show;
+            deny-commands "(clear)|(file)|(file show)|(help)|(load)|(monitor)|(op)|(request)|(save)|(set)|(start)|(test)";
+            deny-configuration all;
+        }
+        user netadmin1 {
+            uid 1117;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        user netops {
+            uid 2105;
+            class config_control;
+            authentication {
+
+            }
+        }
+        user netadmin2 {
+            uid 1121;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        user netadmin3 {
+            uid 1122;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        user svc-backup {
+            uid 2101;
+            class config_backup;
+            authentication {
+                ssh-ecdsa "ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzODQAAABhBPLACEHOLDER_NOT_REAL_DEMO_KEY_REDACTED_FOR_PUBLIC_LAB_USE==";
+            }
+        }
+        user maxp {
+            uid 1112;
+            class read_only;
+            authentication {
+
+            }
+        }
+        user netadmin4 {
+            uid 1123;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        user oelliott {
+            uid 1120;
+            class read_only;
+            authentication {
+
+            }
+        }
+        user sdaniels {
+            uid 1119;
+            class read_only;
+            authentication {
+
+            }
+        }
+        user netadmin5 {
+            uid 1115;
+            class read_only;
+            authentication {
+
+            }
+        }
+        user netadmin6 {
+            uid 1116;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        user netops3 {
+            uid 1125;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        message "\n\n=================================================================\n\n WARNING! \n\n\n This is a private computer system. Unauthorized access or use \n is prohibited and subject to prosecution and/or disciplinary \n action. All use of this system constitutes consent to \n monitoring at all times and users are not entitled to any \n expectation of privacy. If monitoring reveals possible evidence \n of violation of criminal statutes, this evidence and any other \n related information, including identification information about \n the user, may be provided to law enforcement officials. \n If monitoring reveals violations of security regulations or \n unauthorized use, employees who violate security regulations or \n make unauthorized use of this system are subject to appropriate \n disciplinary action.\n\n=================================================================\n\n";
+    }
+    services {
+        ssh {
+            root-login deny;
+            max-sessions-per-connection 32;
+        }
+        netconf {
+            ssh;
+        }
+    }
+    domain-name net.netlab.local;
+    time-zone GMT;
+    no-redirects;
+    no-redirects-ipv6;
+    no-ping-time-stamp;
+    internet-options {
+        no-source-quench;
+    }
+    authentication-order password;
+    name-server {
+        192.168.100.53;
+        192.168.100.53;
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        host 10.1.148.10 {
+            any notice;
+        }
+        host 192.168.100.100 {
+            any notice;
+            authorization info;
+            match "!(.*usage requires a license.*|.*is Unreachable.*|.*last message repeated.*|.*kernel time sync enabled.*|.*tcp_timer_keep.*|.*RT_IPSEC_BAD_SPI.*|.*JTASK_IO_CONNECT_FAILED.*)";
+        }
+        file default-log-messages {
+            any any;
+            match "(requested 'commit' operation)|(requested 'commit synchronize' operation)|(copying configuration to juniper.save)|(commit complete)|ifAdminStatus|(FRU power)|(FRU removal)|(FRU insertion)|(link UP)|transitioned|Transferred|transfer-file|(license add)|(license delete)|(package -X update)|(package -X delete)|(FRU Online)|(FRU Offline)|(plugged in)|(unplugged)|QF_NODE|QF_SERVER_NODE_GROUP|QF_INTERCONNECT|QF_DIRECTOR|QF_NETWORK_NODE_GROUP|(Master Unchanged, Members Changed)|(Master Changed, Members Changed)|(Master Detected, Members Changed)|(vc add)|(vc delete)|(Master detected)|(Master changed)|(Backup detected)|(Backup changed)|(interface vcp-)";
+            archive size 5m files 10;
+            structured-data;
+        }
+        file messages {
+            any notice;
+            authorization info;
+            match "!(.*usage requires a license.*|.*is Unreachable.*|.*last message repeated.*|.*kernel time sync enabled.*|.*tcp_timer_keep.*|.*RT_IPSEC_BAD_SPI.*|.*JTASK_IO_CONNECT_FAILED.*)";
+            archive size 5m files 10;
+            structured-data;
+        }
+        source-address 10.1.59.101;
+    }
+    ddos-protection {
+        traceoptions {
+            file ddos-protection size 5m files 3 world-readable;
+            level all;
+            flag protocol;
+            flag events;
+        }
+        protocols {
+            resolve {
+                aggregate {
+                    bandwidth 6000;
+                    burst 1000;
+                }
+            }
+            arp {
+                aggregate {
+                    bandwidth 20000;
+                    burst 10000;
+                }
+            }
+        }
+    }
+    ntp {
+        server 192.168.100.53;
+        server 192.168.100.100;
+        server 10.1.247.49;
+        server 10.1.243.49;
+        source-address 10.1.59.101;
+    }
+}
+chassis {
+    redundancy {
+        graceful-switchover;
+    }
+    aggregated-devices {
+        ethernet {
+            device-count 48;
+        }
+    }
+}
+interfaces {
+    xe-0/0/0 {
+        description auh1-aci01-01;
+        ether-options {
+            802.3ad ae10;
+        }
+    }
+    xe-0/0/1 {
+        description auh1-aci01-02;
+        ether-options {
+            802.3ad ae11;
+        }
+    }
+    xe-0/0/2 {
+        description auh1-aci01-03;
+        ether-options {
+            802.3ad ae12;
+        }
+    }
+    xe-0/0/3 {
+        description auh1-aci01-04;
+        ether-options {
+            802.3ad ae13;
+        }
+    }
+    xe-0/0/4 {
+        description auh1-aci01-05;
+        ether-options {
+            802.3ad ae14;
+        }
+    }
+    xe-0/0/5 {
+        description auh1-aci01-06;
+        ether-options {
+            802.3ad ae16;
+        }
+    }
+    xe-0/0/6 {
+        description auh1-aci01-07;
+        ether-options {
+            802.3ad ae17;
+        }
+    }
+    xe-0/0/7 {
+        description auh1-aci01-08;
+        ether-options {
+            802.3ad ae18;
+        }
+    }
+    xe-0/0/8 {
+        description auh1-aci01-09;
+        ether-options {
+            802.3ad ae19;
+        }
+    }
+    xe-0/0/9 {
+        description auh1-aci01-10;
+        ether-options {
+            802.3ad ae20;
+        }
+    }
+    ge-0/0/20 {
+        description auh1-infra-01;
+        ether-options {
+            802.3ad ae15;
+        }
+    }
+    xe-0/0/22 {
+        description auh1-sw-02;
+        ether-options {
+            802.3ad ae0;
+        }
+    }
+    xe-0/0/23 {
+        description auh1-ISP;
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan10;
+                }
+            }
+        }
+    }
+    et-0/0/26 {
+        description auh1-sw-03a;
+        ether-options {
+            802.3ad ae2;
+        }
+    }
+    xe-1/0/0 {
+        description auh1-aci01-01;
+        ether-options {
+            802.3ad ae10;
+        }
+    }
+    xe-1/0/1 {
+        description auh1-aci01-02;
+        ether-options {
+            802.3ad ae11;
+        }
+    }
+    xe-1/0/2 {
+        description auh1-aci01-03;
+        ether-options {
+            802.3ad ae12;
+        }
+    }
+    xe-1/0/3 {
+        description auh1-aci01-04;
+        ether-options {
+            802.3ad ae13;
+        }
+    }
+    xe-1/0/4 {
+        description auh1-aci01-05;
+        ether-options {
+            802.3ad ae14;
+        }
+    }
+    xe-1/0/5 {
+        description auh1-aci01-06;
+        ether-options {
+            802.3ad ae16;
+        }
+    }
+    xe-1/0/6 {
+        description auh1-aci01-07;
+        ether-options {
+            802.3ad ae17;
+        }
+    }
+    xe-1/0/7 {
+        description auh1-aci01-08;
+        ether-options {
+            802.3ad ae18;
+        }
+    }
+    xe-1/0/8 {
+        description auh1-aci01-09;
+        ether-options {
+            802.3ad ae19;
+        }
+    }
+    xe-1/0/9 {
+        description auh1-aci01-10;
+        ether-options {
+            802.3ad ae20;
+        }
+    }
+    ge-1/0/20 {
+        description auh1-infra-01;
+        ether-options {
+            802.3ad ae15;
+        }
+    }
+    xe-1/0/22 {
+        description auh1-sw-02;
+        ether-options {
+            802.3ad ae0;
+        }
+    }
+    xe-1/0/23 {
+        description auh1-ISP;
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan10;
+                }
+            }
+        }
+    }
+    et-1/0/26 {
+        description auh1-sw-03b;
+        ether-options {
+            802.3ad ae2;
+        }
+    }
+    ae0 {
+        description auh1-sw-02;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan14 vlan21 vlan22 ];
+                }
+            }
+        }
+    }
+    ae2 {
+        description auh1-sw-03;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan21 vlan22 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae10 {
+        description auh1-aci01-01;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae11 {
+        description auh1-aci01-02;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae12 {
+        description auh1-aci01-03;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae13 {
+        description auh1-aci01-04;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae14 {
+        description auh1-aci01-05;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae15 {
+        description auh1-infra-01;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan22 vlan206 ];
+                }
+            }
+        }
+    }
+    ae16 {
+        description auh1-aci01-06;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae17 {
+        description auh1-aci01-07;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae18 {
+        description auh1-aci01-08;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae19 {
+        description auh1-aci01-09;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae20 {
+        description auh1-aci01-10;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    irb {
+        unit 10 {
+            family inet {
+                address 5.195.206.1/26;
+                address 5.195.206.65/26;
+            }
+        }
+        unit 66 {
+            family inet;
+        }
+        unit 216 {
+            family inet {
+                address 10.216.0.1/16;
+            }
+        }
+    }
+    lo0 {
+        unit 0 {
+            family inet {
+                filter {
+                    input filter-all-in-one;
+                }
+            }
+            family inet6 {
+                filter {
+                    input filter-all-in-one-v6;
+                }
+            }
+        }
+    }
+    vme {
+        unit 0 {
+            family inet {
+                filter {
+                    input filter-all-in-one;
+                }
+                address 10.1.59.101/24;
+            }
+            family inet6;
+        }
+    }
+}
+snmp {
+    location AUH1;
+    v3 {
+        usm {
+            local-engine {
+                user snmp_monitor_amer {
+                    authentication-sha {
+                        authentication-key "$9$o0aZjP5Q3/C.mIEhSMWDiHkfT6/t01RikRhcSeK8X7dVY24aGUHevaZDjPf1REcyKvWL-bsvMGDjHmP0B1IylKvLbYgMWX-ws4oCtpuRhWLxbwgdV4Z";
+                    }
+                    privacy-aes128 {
+                        privacy-key "$9$98z.A1RrlMWxN69evLxdVs24aikTz3AtOGD69p0IRSrevxNY2ajk.4oz36Cu0-VbwaZk.P3nCgoZjHkTQn/CtIESyK8LNle";
+                    }
+                }
+                user snmp_monitor_emea {
+                    authentication-sha {
+                        authentication-key "$9$J7GUH5T3AtOzF/tu0IRVws4GDiHmF39Qz6At0IR7-dws4Djqf5FiH0B1EyrgoaZk.5T36CtzFylvMN-k.mfFn9Ap01RiktuO1hc24oZGi.P53nCoJUH";
+                    }
+                    privacy-aes128 {
+                        privacy-key "$9$ngAA/CuO1RrKMQFylKv7NfTQ3Ap0BIESr5QylvMN-qmPf36/CtpO1GDqfQz6/p0BEhrlKML7-vMUjH.5TRhcyvWdbsYoJhS";
+                    }
+                }
+                user snmp_monitor_apac {
+                    authentication-sha {
+                        authentication-key "$9$vweM7-Vb2aJDVbTzn6u0NdVs2ajHq5T3kq1RhSMW-VwYZUji.zF/5TEcSlMWX7-dgoji.mTzGU69puEhlKML-VaZUkmfGU/CtpREs2gJZjmfT/9pzF6A";
+                    }
+                    privacy-aes128 {
+                        privacy-key "$9$OdpU1IceK8x7Vp0Vw2gJZp0OBcyleWdwYW8Diq.zF69Apu1lKM87-ApLx7NbwfTQFCtp0BSyKB1X7NVY24aZji.mfTF695T";
+                    }
+                }
+                user snmp_telemetry {
+                    authentication-sha {
+                        authentication-key "$9$SFurlM8X7-wY0BX7dVY2n/9C0BEcyeK836u1EcleaZGDqmTQnpO16/evMWx7P5TFnC0ORSyK1IVws2aJApu1IcSrevLx9A0IREyrevWLX-bwgGjHJZ69";
+                    }
+                    privacy-aes128 {
+                        privacy-key "$9$SgBreW8X7-wYW8Hq.mTQIEhyM8wYgoaUSrZUDif5EcSyWLdVYJUj2gZjq.5TcyreK8xNdsYo-d2aGUHk1REhevXxdw24dV";
+                    }
+                }
+            }
+        }
+        vacm {
+            security-to-group {
+                security-model usm {
+                    security-name snmp_monitor_amer {
+                        group snmp_group_ro;
+                    }
+                    security-name snmp_monitor_emea {
+                        group snmp_group_ro;
+                    }
+                    security-name snmp_monitor_apac {
+                        group snmp_group_ro;
+                    }
+                    security-name snmp_telemetry {
+                        group snmp_group_ro;
+                    }
+                }
+            }
+            access {
+                group snmp_group_ro {
+                    default-context-prefix {
+                        security-model usm {
+                            security-level privacy {
+                                read-view snmp_view;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    engine-id {
+        local 00c52c443d42;
+    }
+    view snmp_view {
+        oid .1 include;
+    }
+}
+forwarding-options {
+    storm-control-profiles default {
+        all {
+            bandwidth-percentage 10;
+        }
+    }
+}
+policy-options {
+    prefix-list NTP-servers-v4 {
+        apply-path "system ntp server <*.*>";
+    }
+    prefix-list NTP-servers-v6 {
+        apply-path "system ntp server <*:*>";
+    }
+    prefix-list LOCALS-v4 {
+        apply-path "interfaces <*> unit <*> family inet address <*>";
+    }
+    prefix-list vme-interface {
+        apply-path "interfaces vme unit 0 family inet address <*>";
+    }
+    prefix-list vlan14-interface {
+        apply-path "interfaces <*> unit 14 family inet address <*>";
+    }
+    prefix-list all-unit0-interfaces {
+        apply-path "interfaces <*> unit 0 family inet address <*>";
+    }
+    prefix-list LOCALS-v6 {
+        apply-path "interfaces <*> unit <*> family inet6 address <*>";
+    }
+    prefix-list RADIUS-servers {
+        apply-path "system radius-server <*>";
+    }
+    prefix-list DNS-servers-v4 {
+        apply-path "system name-server <*.*>";
+    }
+    prefix-list DNS-servers-v6 {
+        apply-path "system name-server <*:*>";
+    }
+    prefix-list public-NTP-servers-v4 {
+        45.11.129.77/32;
+        45.254.38.6/32;
+        162.244.7.76/32;
+        185.151.160.99/32;
+    }
+    prefix-list public-NTP-servers-v6 {
+        2405:a280:33:66::49/128;
+        2602:80b:6012:66::49/128;
+        2a07:7940:12:66::49/128;
+        2a07:7940:14:66::49/128;
+    }
+    prefix-list dr2-public-ip-net-v6 {
+        2602:80b:6012:97::/64;
+        2602:80b:6012:99::/64;
+        2602:80b:6036:97::/64;
+        2602:80b:6039:97::/64;
+        2602:80b:603a:97::/64;
+        2a07:7940:12:97::/64;
+        2a07:7940:12:99::/64;
+        2a07:7940:14:97::/64;
+        2a07:7940:14:98::/64;
+        2a07:7940:14:99::/64;
+        2a07:7940:14:100::/64;
+        2a07:7940:16:99::/64;
+    }
+    prefix-list not-owned-by-netlab-prefixes-v6 {
+        2001:8c1:5840::/48;
+        2001:1a68:37::/48;
+        2001:1b28:410::/48;
+        2401:a040:10::/48;
+        2402:1c00:101::/48;
+        2402:6c00:d003::/48;
+        2806:1080:1500::/48;
+        2806:1080:1700::/48;
+        2a00:1a28:1154::/48;
+        2a00:1a28:2411::/48;
+        2a00:1f68:ff::/48;
+        2a00:da60:b01::/48;
+        2a01:288:400e::/48;
+        2a01:ae20:851:4092::/64;
+        2a02:480:3419::/48;
+        2a02:a40:324::/48;
+        2a02:2160:8001::/48;
+        2a06:e8c0:a::/48;
+        2a07:9300:8000::/48;
+        2a0a:a142::/48;
+        2c0f:1f00::/48;
+    }
+    prefix-list global-netlab-fwag {
+        5.159.235.135/32;
+        5.159.235.136/32;
+        45.11.129.23/32;
+        45.11.129.24/32;
+        45.11.129.27/32;
+        45.11.129.28/32;
+        45.11.129.35/32;
+        45.11.129.36/32;
+        45.11.129.40/32;
+        45.11.129.41/32;
+        45.11.129.44/32;
+        45.11.129.45/32;
+        45.11.130.218/32;
+        45.11.131.135/32;
+        45.11.131.136/32;
+        203.0.113.1/32;
+        203.0.113.1/32;
+        45.195.248.113/32;
+        45.195.248.114/32;
+        45.254.39.113/32;
+        45.254.39.114/32;
+        46.229.159.199/32;
+        46.229.159.200/32;
+        46.246.34.71/32;
+        46.246.34.72/32;
+        46.246.43.7/32;
+        46.246.43.8/32;
+        62.28.148.71/32;
+        62.28.148.72/32;
+        82.163.163.231/32;
+        82.163.163.232/32;
+        84.239.8.7/32;
+        84.239.8.8/32;
+        87.227.138.7/32;
+        87.227.138.8/32;
+        102.217.208.113/32;
+        102.217.208.114/32;
+        103.8.255.39/32;
+        103.8.255.40/32;
+        103.64.16.54/32;
+        103.64.16.55/32;
+        103.64.19.54/32;
+        103.64.19.55/32;
+        103.228.155.199/32;
+        103.228.155.200/32;
+        106.106.2.7/32;
+        106.106.2.8/32;
+        109.235.241.71/32;
+        109.235.241.72/32;
+        118.103.142.231/32;
+        118.103.142.232/32;
+        119.82.30.224/32;
+        119.82.30.225/32;
+        121.78.252.71/32;
+        121.78.252.72/32;
+        162.244.7.10/32;
+        162.244.7.11/32;
+        162.244.7.16/32;
+        162.244.7.17/32;
+        162.244.7.24/32;
+        162.244.7.25/32;
+        162.244.7.26/32;
+        162.244.7.27/32;
+        162.244.7.45/32;
+        162.244.7.46/32;
+        176.57.82.17/32;
+        176.57.82.18/32;
+        177.54.159.135/32;
+        177.54.159.136/32;
+        185.4.247.7/32;
+        185.4.247.8/32;
+        185.34.149.7/32;
+        185.34.149.8/32;
+        185.151.160.135/32;
+        185.151.160.136/32;
+        185.151.162.35/32;
+        185.151.162.36/32;
+        185.154.234.199/32;
+        185.154.234.200/32;
+        185.185.133.135/32;
+        185.185.133.136/32;
+        188.164.206.135/32;
+        188.164.206.136/32;
+        192.199.198.7/32;
+        192.199.198.8/32;
+        194.19.4.7/32;
+        194.19.4.8/32;
+        195.48.52.135/32;
+        195.48.52.137/32;
+        196.223.59.135/32;
+        196.223.59.136/32;
+        197.98.31.31/32;
+        197.98.31.32/32;
+        201.117.144.7/32;
+        201.117.144.8/32;
+        206.188.216.135/32;
+        206.188.216.136/32;
+        206.188.217.7/32;
+        206.188.217.8/32;
+        212.2.222.199/32;
+        212.2.222.200/32;
+        212.158.141.231/32;
+        212.158.141.232/32;
+        213.21.205.199/32;
+        213.21.205.200/32;
+        217.169.126.7/32;
+        217.169.126.8/32;
+    }
+    prefix-list GRPC-SERVERS-v4 {
+        10.1.187.240/32;
+    }
+    prefix-list SNMP-clients {
+        10.1.187.240/32;
+        192.168.100.100/32;
+        10.1.243.199/32;
+        192.168.100.53/32;
+        192.168.100.53/32;
+    }
+    prefix-list dco-external-ssh {
+        4.16.136.120/29;
+        162.244.7.1/32;
+        162.244.7.2/32;
+        185.151.160.8/32;
+        185.151.162.4/32;
+    }
+    prefix-list source-ip-prefixes {
+        10.1.0.0/16;
+    }
+    prefix-list internet-DNS-servers-v4 {
+        1.1.1.1/32;
+        4.4.4.4/32;
+        8.8.4.4/32;
+        8.8.8.8/32;
+    }
+    prefix-list netlab-office-networks {
+        4.14.177.55/32;
+        27.54.57.240/28;
+        37.35.106.221/32;
+        38.97.80.247/32;
+        38.126.232.88/29;
+        98.191.26.72/29;
+        111.223.118.90/32;
+        116.51.23.192/27;
+        116.51.27.10/32;
+        149.7.113.142/32;
+        149.7.113.143/32;
+        154.43.165.0/24;
+        154.43.165.252/32;
+        154.43.165.253/32;
+    }
+    prefix-list dr2-public-ip-net {
+        162.244.7.129/32;
+    }
+    prefix-list global-netlab-prefixes-v6 {
+        2405:a280:22::/48;
+        2405:a280:32::/48;
+        2405:a280:33::/48;
+        2405:a280:34::/48;
+        2405:a280:42::/48;
+        2602:80b:6012::/48;
+        2602:80b:6013::/48;
+        2602:80b:6014::/48;
+        2602:80b:6015::/48;
+        2602:80b:6016::/48;
+        2602:80b:6022::/48;
+        2602:80b:6032::/48;
+        2602:80b:6033::/48;
+        2602:80b:6034::/48;
+        2602:80b:6035::/48;
+        2602:80b:6036::/48;
+        2602:80b:6037::/48;
+        2602:80b:6038::/48;
+        2602:80b:6039::/48;
+        2602:80b:603a::/48;
+        2602:80b:6042::/48;
+        2602:80b:6044::/48;
+        2602:80b:6045::/48;
+        2602:80b:6046::/48;
+        2a07:7940:12::/48;
+        2a07:7940:13::/48;
+        2a07:7940:14::/48;
+        2a07:7940:15::/48;
+        2a07:7940:16::/48;
+        2a07:7940:17::/48;
+        2a07:7940:41::/48;
+        2a07:7940:42::/48;
+        2a07:7940:44::/48;
+        2a07:7940:45::/48;
+        2a07:7940:46::/48;
+        2a07:7940:47::/48;
+        2a07:7940:48::/48;
+    }
+    prefix-list netlab-office-networks-v6 {
+        2405:a280:ff80::/44;
+        2a07:7940:fffd::/48;
+        2a07:7940:fffe::/48;
+        2a07:7940:ffff::/48;
+        2a07:7947:ff40::/44;
+        2a07:7947:ff80::/44;
+        2a07:7947:ffc0::/44;
+    }
+    prefix-list global-netlab-prefixes {
+        45.11.128.0/22;
+        45.11.131.128/26;
+        203.0.113.1/22;
+        45.254.36.0/22;
+        102.217.208.0/24;
+        103.64.16.0/22;
+        162.244.6.0/23;
+        164.152.124.0/24;
+        164.152.125.0/24;
+        181.215.30.0/24;
+        185.151.160.0/22;
+        185.151.161.192/27;
+        199.83.244.0/22;
+        199.83.244.0/24;
+        199.83.245.0/24;
+        199.193.156.0/22;
+        206.188.216.0/23;
+        216.245.154.0/24;
+        216.245.155.0/24;
+    }
+    prefix-list not-owned-by-netlab-prefixes {
+        5.159.235.128/26;
+        5.195.206.0/26;
+        34.140.146.64/26;
+        45.195.248.0/24;
+        46.229.159.192/27;
+        46.246.34.64/26;
+        46.246.43.0/26;
+        62.28.148.64/26;
+        62.138.203.192/26;
+        72.14.130.0/24;
+        82.163.163.224/27;
+        82.214.82.0/26;
+        82.221.116.192/26;
+        84.239.8.0/26;
+        84.244.94.160/27;
+        87.227.138.0/26;
+        89.116.175.0/24;
+        89.117.29.0/24;
+        89.117.167.0/24;
+        89.117.171.0/24;
+        91.195.23.64/26;
+        94.154.123.0/26;
+        103.8.255.32/27;
+        103.14.27.0/25;
+        103.101.129.32/27;
+        103.228.155.192/27;
+        103.248.62.0/27;
+        106.106.2.0/26;
+        109.235.241.64/26;
+        118.103.142.224/27;
+        121.78.252.64/26;
+        123.100.224.0/24;
+        154.43.165.128/27;
+        154.43.165.160/27;
+        177.54.159.128/27;
+        181.215.30.0/24;
+        185.4.247.0/25;
+        185.34.149.0/26;
+        185.154.234.192/26;
+        185.185.133.128/27;
+        185.209.82.128/28;
+        188.164.206.128/26;
+        192.199.198.0/24;
+        194.19.4.0/26;
+        195.48.52.128/27;
+        195.48.74.32/27;
+        195.49.21.0/26;
+        195.49.23.64/28;
+        195.211.24.128/26;
+        196.223.59.128/25;
+        201.117.144.0/26;
+        206.188.216.248/29;
+        206.252.230.32/27;
+        209.58.170.0/27;
+        212.2.222.192/26;
+        212.158.141.224/27;
+        213.21.205.192/26;
+        217.169.126.0/25;
+    }
+}
+firewall {
+    family inet {
+        filter filter-all-in-one {
+            term accept-dns {
+                from {
+                    source-prefix-list {
+                        DNS-servers-v4;
+                    }
+                    destination-prefix-list {
+                        vme-interface;
+                        vlan14-interface;
+                    }
+                    protocol [ udp tcp ];
+                    source-port 53;
+                }
+                then accept;
+            }
+            term accept-icmp {
+                from {
+                    protocol icmp;
+                    icmp-type [ echo-reply echo-request time-exceeded unreachable source-quench router-advertisement parameter-problem timestamp ];
+                }
+                then accept;
+            }
+            term accept-netconf-mgmt {
+                from {
+                    source-prefix-list {
+                        source-ip-prefixes;
+                    }
+                    destination-prefix-list {
+                        vme-interface;
+                        vlan14-interface;
+                    }
+                    protocol tcp;
+                    destination-port 830;
+                }
+                then accept;
+            }
+            term accept-ntp {
+                from {
+                    source-prefix-list {
+                        NTP-servers-v4;
+                        vme-interface;
+                        vlan14-interface;
+                    }
+                    destination-prefix-list {
+                        NTP-servers-v4;
+                        vme-interface;
+                        vlan14-interface;
+                    }
+                    protocol udp;
+                    destination-port ntp;
+                }
+                then accept;
+            }
+            term accept-grpc {
+                from {
+                    source-prefix-list {
+                        GRPC-SERVERS-v4;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v4;
+                    }
+                    protocol tcp;
+                    port 32767;
+                }
+                then accept;
+            }
+            term accept-ntp-source {
+                from {
+                    source-prefix-list {
+                        NTP-servers-v4;
+                        vme-interface;
+                        vlan14-interface;
+                    }
+                    destination-prefix-list {
+                        NTP-servers-v4;
+                        vme-interface;
+                        vlan14-interface;
+                    }
+                    protocol udp;
+                    source-port ntp;
+                }
+                then accept;
+            }
+            term accept-snmp {
+                from {
+                    source-prefix-list {
+                        SNMP-clients;
+                    }
+                    destination-prefix-list {
+                        all-unit0-interfaces;
+                        vlan14-interface;
+                    }
+                    protocol udp;
+                    destination-port snmp;
+                }
+                then accept;
+            }
+            term accept-ssh-mgmt {
+                from {
+                    source-prefix-list {
+                        source-ip-prefixes;
+                    }
+                    destination-prefix-list {
+                        vme-interface;
+                        vlan14-interface;
+                    }
+                    protocol tcp;
+                    destination-port ssh;
+                }
+                then accept;
+            }
+            term accept-ssh {
+                from {
+                    source-prefix-list {
+                        dco-external-ssh;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v4;
+                    }
+                    protocol tcp;
+                    destination-port ssh;
+                }
+                then accept;
+            }
+            term accept-traceroute-icmp {
+                from {
+                    destination-prefix-list {
+                        all-unit0-interfaces;
+                    }
+                    protocol icmp;
+                    icmp-type [ echo-request echo-reply timestamp time-exceeded ];
+                }
+                then accept;
+            }
+            term accept-traceroute-udp {
+                from {
+                    destination-prefix-list {
+                        all-unit0-interfaces;
+                    }
+                    protocol udp;
+                    destination-port 33434-33534;
+                }
+                then accept;
+            }
+            term allow-tcp-est {
+                from {
+                    protocol tcp;
+                    tcp-established;
+                }
+                then accept;
+            }
+            term discard-icmp-fragments {
+                from {
+                    is-fragment;
+                    protocol icmp;
+                }
+                then {
+                    discard;
+                }
+            }
+            term discard-icmp {
+                from {
+                    protocol icmp;
+                }
+                then {
+                    discard;
+                }
+            }
+            term discard-tcp {
+                from {
+                    protocol tcp;
+                }
+                then {
+                    discard;
+                }
+            }
+            term discard-udp {
+                from {
+                    protocol udp;
+                }
+                then {
+                    discard;
+                }
+            }
+            term discard-unknown {
+                then {
+                    discard;
+                }
+            }
+        }
+        filter filter-internet-traffic {
+            term reject-amplified-reflection-attack {
+                from {
+                    protocol udp;
+                    source-port [ 6881 19 389 751 11211 1434 5353 137 111 17 27960 520 161 1900 27015 ];
+                }
+                then {
+                    discard;
+                }
+            }
+            term allow-tcp-est {
+                from {
+                    protocol tcp;
+                    tcp-established;
+                }
+                then accept;
+            }
+            term accept-port-443-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 443;
+                }
+                then accept;
+            }
+            term accept-port-44445-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 44445;
+                }
+                then accept;
+            }
+            term accept-any-to-dr2-public-ip-net {
+                from {
+                    destination-prefix-list {
+                        dr2-public-ip-net;
+                    }
+                    protocol [ tcp udp esp ];
+                }
+                then accept;
+            }
+            term accept-icmp-to-netlab-prefixes {
+                from {
+                    protocol icmp;
+                    icmp-type [ echo-reply echo-request time-exceeded timestamp ];
+                }
+                then accept;
+            }
+            term accept-cross-datacenter-vpn-esp {
+                from {
+                    source-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol esp;
+                }
+                then accept;
+            }
+            term accept-cross-datacenter-vpn-udp {
+                from {
+                    source-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol udp;
+                    destination-port [ 4500 500 ];
+                }
+                then accept;
+            }
+            term accept-port-31032-31034-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-fwag;
+                    }
+                    protocol udp;
+                    destination-port 31032-31034;
+                }
+                then accept;
+            }
+            term accept-port-9090-from-to-netlab-prefixes {
+                from {
+                    source-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 9090;
+                }
+                then accept;
+            }
+            term accept-tracert-udp-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol udp;
+                    destination-port 33434-33534;
+                }
+                then accept;
+            }
+            term accept-port-80-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 80;
+                }
+                then accept;
+            }
+            term accept-port-7780-7900-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 7770-7800;
+                }
+                then accept;
+            }
+            term accept-port-8443-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 8443;
+                }
+                then accept;
+            }
+            term accept-port-8444-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 8444;
+                }
+                then accept;
+            }
+            term accept-port-55555-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 55555;
+                }
+                then accept;
+            }
+            term accept-port-55556-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 55556;
+                }
+                then accept;
+            }
+            term accept-port-1194-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol [ udp tcp ];
+                    destination-port 1194;
+                }
+                then accept;
+            }
+            term accept-source-port-1194-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol udp;
+                    source-port 1194;
+                }
+                then accept;
+            }
+            term accept-ntp-traffic {
+                from {
+                    source-prefix-list {
+                        not-owned-by-netlab-prefixes;
+                        global-netlab-prefixes;
+                    }
+                    destination-prefix-list {
+                        public-NTP-servers-v4;
+                    }
+                    protocol udp;
+                    destination-port ntp;
+                }
+                then accept;
+            }
+            term accept-traffic-to-ntp-servers {
+                from {
+                    destination-prefix-list {
+                        public-NTP-servers-v4;
+                        not-owned-by-netlab-prefixes;
+                        global-netlab-prefixes;
+                    }
+                    protocol udp;
+                    source-port ntp;
+                }
+                then accept;
+            }
+            term accept-dns-traffic {
+                from {
+                    source-prefix-list {
+                        internet-DNS-servers-v4;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol udp;
+                    source-port 53;
+                }
+                then accept;
+            }
+            term accept-ssh-to-device {
+                from {
+                    source-prefix-list {
+                        dco-external-ssh;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v4;
+                    }
+                    protocol tcp;
+                    destination-port ssh;
+                }
+                then accept;
+            }
+            term block-not-allowed-traffic-from-dr2-customers {
+                from {
+                    source-prefix-list {
+                        dr2-public-ip-net;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                }
+                then {
+                    discard;
+                }
+            }
+            term accept-cross-datacenter-traffic {
+                from {
+                    source-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                }
+                then accept;
+            }
+            term accept-netlab-office-networks {
+                from {
+                    source-prefix-list {
+                        netlab-office-networks;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                }
+                then accept;
+            }
+        }
+    }
+    family inet6 {
+        filter filter-all-in-one-v6 {
+            term accept-v6-icmp {
+                from {
+                    next-header icmp6;
+                    icmp-type [ echo-reply echo-request time-exceeded router-advertisement parameter-problem destination-unreachable packet-too-big router-solicit neighbor-solicit neighbor-advertisement redirect ];
+                }
+                then accept;
+            }
+            term accept-tcp-est-v6 {
+                from {
+                    next-header tcp;
+                    tcp-established;
+                }
+                then accept;
+            }
+            term accept-v6-traceroute-udp {
+                from {
+                    destination-prefix-list {
+                        LOCALS-v6;
+                    }
+                    next-header udp;
+                    destination-port 33434-33450;
+                    hop-limit 1;
+                }
+                then accept;
+            }
+            term accept-v6-traceroute-icmp {
+                from {
+                    destination-prefix-list {
+                        LOCALS-v6;
+                    }
+                    next-header icmp6;
+                    icmp-type [ echo-reply echo-request router-advertisement parameter-problem destination-unreachable packet-too-big router-solicit neighbor-solicit neighbor-advertisement redirect ];
+                    hop-limit 1;
+                }
+                then accept;
+            }
+            term accept-v6-dns {
+                from {
+                    source-prefix-list {
+                        DNS-servers-v6;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v6;
+                    }
+                    next-header udp;
+                    source-port 53;
+                }
+            }
+            term accept-v6-ntp {
+                from {
+                    source-prefix-list {
+                        NTP-servers-v6;
+                        LOCALS-v6;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v6;
+                    }
+                    next-header udp;
+                    destination-port ntp;
+                }
+                then accept;
+            }
+            term discard-v6-tcp {
+                from {
+                    next-header tcp;
+                }
+                then discard;
+            }
+            term discard-v6-udp {
+                from {
+                    next-header udp;
+                }
+                then discard;
+            }
+            term discard-v6-icmp {
+                from {
+                    destination-prefix-list {
+                        LOCALS-v6;
+                    }
+                    next-header icmp6;
+                }
+                then discard;
+            }
+            term discard-v6-unknown {
+                then discard;
+            }
+        }
+        filter filter-internet-traffic-v6 {
+            term accept-v6-icmp {
+                from {
+                    next-header icmp6;
+                    icmp-type [ echo-reply echo-request time-exceeded router-advertisement parameter-problem destination-unreachable packet-too-big router-solicit neighbor-solicit neighbor-advertisement redirect ];
+                }
+                then accept;
+            }
+            term reject-amplified-reflection-attack {
+                from {
+                    next-header udp;
+                    source-port [ 6881 19 389 751 11211 1434 5353 137 111 17 27960 520 161 1900 27015 ];
+                }
+                then discard;
+            }
+            term allow-tcp-est-v6 {
+                from {
+                    next-header tcp;
+                    tcp-established;
+                }
+                then accept;
+            }
+            term accept-port-443-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    next-header tcp;
+                    destination-port 443;
+                }
+                then accept;
+            }
+            term accept-port-44445-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    next-header tcp;
+                    destination-port 44445;
+                }
+                then accept;
+            }
+            term accept-any-to-dr2-public-ip-net-v6 {
+                from {
+                    destination-prefix-list {
+                        dr2-public-ip-net-v6;
+                    }
+                    next-header [ tcp udp esp ];
+                }
+                then accept;
+            }
+            term accept-netlab-office-networks-v6 {
+                from {
+                    source-prefix-list {
+                        netlab-office-networks-v6;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                }
+                then accept;
+            }
+            term accept-cross-datacenter-traffic-v6 {
+                from {
+                    source-prefix-list {
+                        global-netlab-prefixes-v6;
+                        not-owned-by-netlab-prefixes-v6;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                        not-owned-by-netlab-prefixes-v6;
+                    }
+                }
+                then accept;
+            }
+            term accept-port-9090-from-to-netlab-prefixes-v6 {
+                from {
+                    source-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    next-header tcp;
+                    destination-port 9090;
+                }
+                then accept;
+            }
+            term accept-tracert-udp-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    next-header udp;
+                    destination-port 33434-33534;
+                }
+                then accept;
+            }
+            term accept-port-80-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    next-header tcp;
+                    destination-port 80;
+                }
+                then accept;
+            }
+            term accept-port-7780-7900-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    next-header tcp;
+                    destination-port 7770-7800;
+                }
+                then accept;
+            }
+            term accept-port-8080-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    next-header tcp;
+                    destination-port 8080;
+                }
+                then accept;
+            }
+            term accept-port-8443-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    next-header tcp;
+                    destination-port 8443;
+                }
+                then accept;
+            }
+            term accept-port-8444-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    next-header tcp;
+                    destination-port 8444;
+                }
+                then accept;
+            }
+            term accept-port-55555-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    next-header tcp;
+                    destination-port 55555;
+                }
+                then accept;
+            }
+            term accept-port-55556-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    next-header tcp;
+                    destination-port 55556;
+                }
+                then accept;
+            }
+            term accept-port-1194-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                        not-owned-by-netlab-prefixes-v6;
+                    }
+                    next-header [ udp tcp ];
+                    destination-port 1194;
+                }
+                then accept;
+            }
+            term accept-source-port-1194-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                        not-owned-by-netlab-prefixes-v6;
+                    }
+                    next-header udp;
+                    source-port 1194;
+                }
+                then accept;
+            }
+            term discard-unknown {
+                then discard;
+            }
+        }
+    }
+    policer additional-1m {
+        if-exceeding {
+            bandwidth-limit 1m;
+            burst-size-limit 625k;
+        }
+        then discard;
+    }
+    policer management-1m {
+        if-exceeding {
+            bandwidth-limit 1m;
+            burst-size-limit 625k;
+        }
+        then discard;
+    }
+    policer management-512k {
+        if-exceeding {
+            bandwidth-limit 512k;
+            burst-size-limit 25k;
+        }
+        then discard;
+    }
+    policer management-5m {
+        if-exceeding {
+            bandwidth-limit 5m;
+            burst-size-limit 625k;
+        }
+        then discard;
+    }
+}
+routing-instances {
+    ISP {
+        instance-type virtual-router;
+        routing-options {
+            static {
+                route 0.0.0.0/0 next-hop 5.195.206.62;
+            }
+        }
+        interface irb.10;
+        interface irb.66;
+        interface irb.216;
+    }
+}
+routing-options {
+    static {
+        route 10.1.0.0/16 next-hop 10.1.59.1;
+    }
+    nonstop-routing;
+}
+protocols {
+    lldp {
+        interface xe-0/0/23 {
+            disable;
+        }
+        interface xe-1/0/23 {
+            disable;
+        }
+    }
+    layer2-control {
+        nonstop-bridging;
+        bpdu-block {
+            disable-timeout 420;
+        }
+    }
+    mstp {
+        configuration-name AUH1;
+        revision-level 12;
+        bridge-priority 32k;
+        bpdu-block-on-edge;
+        interface all;
+        msti 1 {
+            vlan 14;
+        }
+    }
+}
+virtual-chassis {
+    no-split-detection;
+}
+vlans {
+    vlan10 {
+        description storage_wan;
+        vlan-id 10;
+        l3-interface irb.10;
+    }
+    vlan115 {
+        description aci_overlay;
+        vlan-id 115;
+    }
+    vlan14 {
+        description ntw_management;
+        vlan-id 14;
+    }
+    vlan19 {
+        vlan-id 19;
+    }
+    vlan20 {
+        vlan-id 20;
+    }
+    vlan206 {
+        description dr2_mgmt_vdc1;
+        vlan-id 206;
+    }
+    vlan21 {
+        description ipmi;
+        vlan-id 21;
+    }
+    vlan216 {
+        description dr2_dr_agent_to_storage_vdc1;
+        vlan-id 216;
+        l3-interface irb.216;
+    }
+    vlan22 {
+        description storage_pxe;
+        vlan-id 22;
+    }
+    vlan226 {
+        description dr2_content_vdc1;
+        vlan-id 226;
+    }
+    vlan28 {
+        description storage_traffic;
+        vlan-id 28;
+    }
+    vlan33 {
+        description ntw_vsrx_fab;
+        vlan-id 33;
+    }
+    vlan34 {
+        description ntw_vsrx_con;
+        vlan-id 34;
+    }
+    vlan66 {
+        description ntw_server_vlan;
+        vlan-id 66;
+        l3-interface irb.66;
+    }
+}

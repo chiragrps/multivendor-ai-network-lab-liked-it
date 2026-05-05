@@ -1,0 +1,52 @@
+id: bgp_peer_down
+title: BGP peer is down
+category: routing
+severity: high
+description: >
+  Diagnose and remediate a BGP session in Idle/Active/Connect state.
+  Vendor-agnostic — uses vendor_translator to issue the right CLI per device.
+
+inputs:
+  device:    { required: true,  description: "Hostname of the local BGP speaker" }
+  peer_ip:   { required: true,  description: "BGP peer IP" }
+  vendor:    { required: false, description: "Override auto-detected vendor (junos|eos|frr)" }
+
+steps:
+  - id: collect_bgp_summary
+    type: check
+    canonical_task: bgp_summary
+    description: Read current session state to confirm Idle/Active.
+
+  - id: collect_interface_status
+    type: check
+    canonical_task: interface_status
+    description: Verify the egress interface to the peer is up/up.
+
+  - id: ping_peer
+    type: probe
+    description: Verify L3 reachability to peer_ip (ICMP).
+
+  - id: collect_recent_log
+    type: check
+    canonical_task: log_recent
+    description: Look for "BGP", "neighbor", "Idle", "hold timer expired".
+
+  - id: analyze
+    type: ai
+    description: |
+      Synthesize root cause from the four checks above. Possible causes:
+        - L1/L2 down (interface, cable, optic)
+        - L3 unreachable (route, VRF mismatch)
+        - BGP auth/AS-mismatch
+        - Hold timer expired (control-plane congestion)
+
+  - id: clear_neighbor
+    type: remediate
+    canonical_task: clear_bgp_neighbor
+    destructive: true
+    requires_approval: true
+    description: Last-resort soft-reset once root cause is understood.
+
+post_checks:
+  - canonical_task: bgp_summary
+    expect_substring: "Established"

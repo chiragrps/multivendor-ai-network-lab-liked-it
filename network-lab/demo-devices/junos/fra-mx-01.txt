@@ -1,0 +1,2527 @@
+
+## Last commit: 2026-01-01 00:00:00 UTC by netadmin1
+version 21.4R3-S10.13;
+groups {
+    MAINTENANCE {
+        system {
+            login {
+                announcement "DEVICE MAINTENANCE POLICY IS APPLIED ON THIS DEVICE\n\n'show configuration groups MAINTENANCE' for details\n";
+            }
+        }
+        policy-options {
+            policy-statement <*_BGP_ADV_V4> {
+                term accept-netlab-ipv4-public-prefixes {
+                    from {
+                        route-filter-list netlab_BGP_ADV_V4_PREFIXES;
+                    }
+                    then {
+                        as-path-prepend "65000 65000 65000 65000 65000";
+                        accept;
+                    }
+                }
+            }
+            policy-statement <*_BGP_ADV_V6> {
+                term accept-netlab-ipv6-public-prefixes {
+                    from {
+                        route-filter-list netlab_BGP_ADV_V6_PREFIXES;
+                    }
+                    then {
+                        as-path-prepend "65000 65000 65000 65000 65000";
+                        accept;
+                    }
+                }
+            }
+        }
+    }
+}
+system {
+    host-name fra-mx-01;
+    root-authentication {
+        encrypted-password "$6$PFsfan1g$m/xtwE283S.giMD0jbCF88M3bQzvXVCZXUWr0lC2TzXtg4vwX0r.95QsmDDizCo6Xga/bNtjrFbrebX6s2rqp1";
+    }
+    login {
+        retry-options {
+            tries-before-disconnect 3;
+            backoff-threshold 3;
+            backoff-factor 10;
+            lockout-period 4;
+        }
+        idle-timeout 15;
+        class config_backup {
+            permissions [ secret view view-configuration ];
+            deny-commands all;
+        }
+        class config_control {
+            permissions [ configure control view ];
+        }
+        class network-operations-team {
+            permissions all;
+        }
+        class read_only {
+            permissions [ network routing view-configuration ];
+            allow-commands show;
+            deny-commands "(clear)|(file)|(file show)|(help)|(load)|(monitor)|(op)|(request)|(save)|(set)|(start)|(test)";
+            deny-configuration all;
+        }
+        user netadmin1 {
+            uid 1117;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        user netops {
+            uid 2105;
+            class config_control;
+            authentication {
+
+            }
+        }
+        user netadmin2 {
+            uid 1121;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        user netadmin3 {
+            uid 1122;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        user svc-backup {
+            uid 2101;
+            class config_backup;
+            authentication {
+                ssh-ecdsa "ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzODQAAABhBPLACEHOLDER_NOT_REAL_DEMO_KEY_REDACTED_FOR_PUBLIC_LAB_USE==";
+            }
+        }
+        user maxp {
+            uid 1112;
+            class read_only;
+            authentication {
+
+            }
+        }
+        user netadmin4 {
+            uid 1123;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        user oelliott {
+            uid 1120;
+            class read_only;
+            authentication {
+
+            }
+        }
+        user sdaniels {
+            uid 1119;
+            class read_only;
+            authentication {
+
+            }
+        }
+        user netadmin5 {
+            uid 1115;
+            class read_only;
+            authentication {
+
+            }
+        }
+        user netops2 {
+            uid 2000;
+            class network-operations-team;
+            authentication {
+                encrypted-password "$6$YjcCymwt$Z5BPzqlfNLAlO9zT5Rnp89dV0Op.BEv37o6ibKqRtdhqi2DD7kuNY/V/AQ6S4KPUCWqKZrAk7jYFFhhe3bF2j/";
+            }
+        }
+        user netadmin6 {
+            uid 1116;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        user netops3 {
+            uid 1125;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        message "\n\n=================================================================\n\n WARNING! \n\n\n This is a private computer system. Unauthorized access or use \n is prohibited and subject to prosecution and/or disciplinary \n action. All use of this system constitutes consent to \n monitoring at all times and users are not entitled to any \n expectation of privacy. If monitoring reveals possible evidence \n of violation of criminal statutes, this evidence and any other \n related information, including identification information about \n the user, may be provided to law enforcement officials. \n If monitoring reveals violations of security regulations or \n unauthorized use, employees who violate security regulations or \n make unauthorized use of this system are subject to appropriate \n disciplinary action.\n\n=================================================================\n\n";
+    }
+    services {
+        ssh {
+            root-login deny;
+            max-sessions-per-connection 32;
+            sftp-server;
+        }
+        extension-service {
+            request-response {
+                grpc {
+                    clear-text {
+                        port 32767;
+                    }
+                    skip-authentication;
+                }
+            }
+            notification {
+                allow-clients {
+                    address [ 192.168.100.100/32 10.1.247.240/32 ];
+                }
+            }
+        }
+        netconf {
+            ssh;
+        }
+    }
+    domain-name net.netlab.local;
+    time-zone GMT;
+    no-redirects;
+    no-redirects-ipv6;
+    no-ping-time-stamp;
+    internet-options {
+        no-source-quench;
+    }
+    authentication-order password;
+    name-server {
+        10.1.243.12;
+        10.1.243.18;
+    }
+    schema {
+        openconfig {
+            unhide;
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        host 10.1.148.10 {
+            any notice;
+        }
+        host 192.168.100.100 {
+            any notice;
+            authorization info;
+            match "!(.*usage requires a license.*|.*is Unreachable.*|.*last message repeated.*|.*kernel time sync enabled.*|.*tcp_timer_keep.*|.*RT_IPSEC_BAD_SPI.*|.*JTASK_IO_CONNECT_FAILED.*)";
+        }
+        file default-log-messages {
+            any any;
+            match "(requested 'commit' operation)|(requested 'commit synchronize' operation)|(copying configuration to juniper.save)|(commit complete)|ifAdminStatus|(FRU power)|(FRU removal)|(FRU insertion)|(link UP)|transitioned|Transferred|transfer-file|(license add)|(license delete)|(package -X update)|(package -X delete)|(FRU Online)|(FRU Offline)|(plugged in)|(unplugged)|QF_NODE|QF_SERVER_NODE_GROUP|QF_INTERCONNECT|QF_DIRECTOR|QF_NETWORK_NODE_GROUP|(Master Unchanged, Members Changed)|(Master Changed, Members Changed)|(Master Detected, Members Changed)|(vc add)|(vc delete)|(Master detected)|(Master changed)|(Backup detected)|(Backup changed)|(interface vcp-)";
+            archive size 5m files 10;
+            structured-data;
+        }
+        file messages {
+            any notice;
+            authorization info;
+            match "!(.*usage requires a license.*|.*is Unreachable.*|.*last message repeated.*|.*kernel time sync enabled.*|.*tcp_timer_keep.*|.*RT_IPSEC_BAD_SPI.*|.*JTASK_IO_CONNECT_FAILED.*)";
+            archive size 5m files 10;
+            structured-data;
+        }
+        source-address 10.1.30.51;
+    }
+    ddos-protection {
+        traceoptions {
+            file ddos-protection size 5m files 3 world-readable;
+            level all;
+            flag protocol;
+            flag events;
+        }
+        global {
+            flow-report-rate 100;
+        }
+        protocols {
+            icmp {
+                aggregate {
+                    flow-detection-mode on;
+                    flow-level-bandwidth {
+                        subscriber 1000;
+                        logical-interface 20000;
+                    }
+                    flow-level-detection {
+                        subscriber on;
+                        logical-interface on;
+                        physical-interface on;
+                    }
+                }
+            }
+            arp {
+                aggregate {
+                    flow-detection-mode on;
+                    flow-level-bandwidth {
+                        subscriber 1000;
+                        logical-interface 20000;
+                    }
+                    flow-level-detection {
+                        subscriber on;
+                        logical-interface on;
+                        physical-interface on;
+                    }
+                }
+            }
+            ttl {
+                aggregate {
+                    flow-detection-mode on;
+                    flow-level-bandwidth {
+                        subscriber 1000;
+                        logical-interface 20000;
+                    }
+                    flow-level-detection {
+                        subscriber on;
+                        logical-interface on;
+                        physical-interface on;
+                    }
+                }
+            }
+            ndpv6 {
+                invalid-hop-limit {
+                    disable-logging;
+                }
+            }
+        }
+    }
+    ntp {
+        server 10.1.243.49;
+        server 192.168.100.100;
+        server 10.1.247.49;
+        server 192.168.100.53;
+        source-address 10.1.30.51;
+    }
+}
+chassis {
+    aggregated-devices {
+        ethernet {
+            device-count 10;
+        }
+    }
+    fpc 0 {
+        pic 0 {
+            port 0 {
+                speed 100g;
+            }
+            port 1 {
+                speed 100g;
+            }
+            port 2 {
+                speed 100g;
+            }
+        }
+        pic 1 {
+            port 0 {
+                speed 10g;
+            }
+            port 1 {
+                speed 10g;
+            }
+            port 2 {
+                speed 10g;
+            }
+            port 3 {
+                speed 10g;
+            }
+            port 4 {
+                speed 10g;
+            }
+            port 5 {
+                speed 10g;
+            }
+            port 6 {
+                speed 10g;
+            }
+            port 7 {
+                speed 10g;
+            }
+        }
+    }
+}
+interfaces {
+    xe-0/1/0 {
+        description bom1-rt-02;
+        gigether-options {
+            802.3ad ae0;
+        }
+    }
+    xe-0/1/1 {
+        description bom1-sw-01a;
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    xe-0/1/2 {
+        description bom1-sw-01b;
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    xe-0/1/3 {
+        description bom1-ISP-Telstra-IPT-90078312;
+        unit 0 {
+            family inet {
+                filter {
+                    input filter-internet-traffic;
+                }
+                address 210.176.131.131/31;
+            }
+            family inet6 {
+                filter {
+                    input filter-internet-traffic-v6;
+                }
+                address 2403:e800:a00:300::27/127;
+            }
+        }
+    }
+    ae0 {
+        description bom1-rt-02;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family inet {
+                address 10.2.30.98/31;
+            }
+            family inet6 {
+                address 2405:a280:dc:43:51:52:0:2/127;
+            }
+        }
+    }
+    ae1 {
+        description bom1-sw-01;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family inet {
+                address 10.2.30.50/31;
+            }
+            family inet6 {
+                address 2405:a280:dc:43:51:101:0:2/127;
+            }
+        }
+    }
+    fxp0 {
+        unit 0 {
+            family inet {
+                filter {
+                    input filter-all-in-one;
+                }
+                address 10.1.30.51/24;
+            }
+            family inet6 {
+                filter {
+                    input filter-all-in-one-v6;
+                }
+            }
+        }
+    }
+    lo0 {
+        unit 0 {
+            family inet {
+                filter {
+                    input filter-all-in-one;
+                }
+            }
+            family inet6 {
+                filter {
+                    input filter-all-in-one-v6;
+                }
+            }
+        }
+    }
+}
+snmp {
+    location BOM1;
+    v3 {
+        usm {
+            local-engine {
+                user snmp_monitor_amer {
+                    authentication-sha {
+                        authentication-key "$9$o0aZjP5Q3/C.mIEhSMWDiHkfT6/t01RikRhcSeK8X7dVY24aGUHevaZDjPf1REcyKvWL-bsvMGDjHmP0B1IylKvLbYgMWX-ws4oCtpuRhWLxbwgdV4Z";
+                    }
+                    privacy-aes128 {
+                        privacy-key "$9$98z.A1RrlMWxN69evLxdVs24aikTz3AtOGD69p0IRSrevxNY2ajk.4oz36Cu0-VbwaZk.P3nCgoZjHkTQn/CtIESyK8LNle";
+                    }
+                }
+                user snmp_monitor_emea {
+                    authentication-sha {
+                        authentication-key "$9$J7GUH5T3AtOzF/tu0IRVws4GDiHmF39Qz6At0IR7-dws4Djqf5FiH0B1EyrgoaZk.5T36CtzFylvMN-k.mfFn9Ap01RiktuO1hc24oZGi.P53nCoJUH";
+                    }
+                    privacy-aes128 {
+                        privacy-key "$9$ngAA/CuO1RrKMQFylKv7NfTQ3Ap0BIESr5QylvMN-qmPf36/CtpO1GDqfQz6/p0BEhrlKML7-vMUjH.5TRhcyvWdbsYoJhS";
+                    }
+                }
+                user snmp_monitor_apac {
+                    authentication-sha {
+                        authentication-key "$9$vweM7-Vb2aJDVbTzn6u0NdVs2ajHq5T3kq1RhSMW-VwYZUji.zF/5TEcSlMWX7-dgoji.mTzGU69puEhlKML-VaZUkmfGU/CtpREs2gJZjmfT/9pzF6A";
+                    }
+                    privacy-aes128 {
+                        privacy-key "$9$OdpU1IceK8x7Vp0Vw2gJZp0OBcyleWdwYW8Diq.zF69Apu1lKM87-ApLx7NbwfTQFCtp0BSyKB1X7NVY24aZji.mfTF695T";
+                    }
+                }
+                user snmp_telemetry {
+                    authentication-sha {
+                        authentication-key "$9$SFurlM8X7-wY0BX7dVY2n/9C0BEcyeK836u1EcleaZGDqmTQnpO16/evMWx7P5TFnC0ORSyK1IVws2aJApu1IcSrevLx9A0IREyrevWLX-bwgGjHJZ69";
+                    }
+                    privacy-aes128 {
+                        privacy-key "$9$SgBreW8X7-wYW8Hq.mTQIEhyM8wYgoaUSrZUDif5EcSyWLdVYJUj2gZjq.5TcyreK8xNdsYo-d2aGUHk1REhevXxdw24dV";
+                    }
+                }
+            }
+        }
+        vacm {
+            security-to-group {
+                security-model usm {
+                    security-name snmp_monitor_amer {
+                        group snmp_group_ro;
+                    }
+                    security-name snmp_monitor_emea {
+                        group snmp_group_ro;
+                    }
+                    security-name snmp_monitor_apac {
+                        group snmp_group_ro;
+                    }
+                    security-name snmp_telemetry {
+                        group snmp_group_ro;
+                    }
+                }
+            }
+            access {
+                group snmp_group_ro {
+                    default-context-prefix {
+                        security-model usm {
+                            security-level privacy {
+                                read-view snmp_view;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    engine-id {
+        local 00c52c443d42;
+    }
+    view snmp_view {
+        oid .1 include;
+    }
+}
+policy-options {
+    prefix-list BGP-locals-inst-v4 {
+        apply-path "routing-instances <*> protocols bgp group <*> local-address <*.*>";
+    }
+    prefix-list BGP-locals-inst-v6 {
+        apply-path "routing-instances <*> protocols bgp group <*> neighbor <*:*> local-address <*:*>";
+    }
+    prefix-list BGP-locals-v4 {
+        apply-path "protocols bgp group <*> neighbor <*> local-address <*.*>";
+    }
+    prefix-list BGP-locals-v6 {
+        apply-path "protocols bgp group <*> neighbor <*:*> local-address <*:*>";
+    }
+    prefix-list BGP-neighbors-inst-v4 {
+        apply-path "routing-instances <*> protocols bgp group <*> neighbor <*.*>";
+    }
+    prefix-list BGP-neighbors-inst-v6 {
+        apply-path "routing-instances <*> protocols bgp group <*> neighbor <*:*>";
+    }
+    prefix-list BGP-neighbors-v4 {
+        apply-path "protocols bgp group <*> neighbor <*.*>";
+    }
+    prefix-list BGP-neighbors-v6 {
+        apply-path "protocols bgp group <*> neighbor <*:*>";
+    }
+    prefix-list DNS-servers-v4 {
+        apply-path "system name-server <*.*>";
+    }
+    prefix-list DNS-servers-v6 {
+        apply-path "system name-server <*:*>";
+    }
+    prefix-list GRPC-SERVERS-v4 {
+        10.1.217.240/32;
+    }
+    prefix-list LOCALS-v4 {
+        apply-path "interfaces <*> unit <*> family inet address <*>";
+    }
+    prefix-list LOCALS-v6 {
+        apply-path "interfaces <*> unit <*> family inet6 address <*>";
+    }
+    prefix-list MICROSOFT_IPS {
+        13.64.0.0/11;
+        40.96.0.0/12;
+        52.96.0.0/12;
+        52.112.0.0/14;
+    }
+    prefix-list NTP-servers-v4 {
+        apply-path "system ntp server <*.*>";
+    }
+    prefix-list NTP-servers-v6 {
+        apply-path "system ntp server <*:*>";
+    }
+    prefix-list RADIUS-servers {
+        apply-path "system radius-server <*>";
+    }
+    prefix-list SNMP-clients {
+        10.1.217.240/32;
+        192.168.100.100/32;
+        10.1.243.199/32;
+        192.168.100.53/32;
+        192.168.100.53/32;
+    }
+    prefix-list SNMP-community-clients {
+        apply-path "snmp community <*> clients <*>";
+    }
+    prefix-list netlab-office-networks {
+        4.14.177.55/32;
+        27.54.57.240/28;
+        37.35.106.221/32;
+        38.97.80.247/32;
+        38.126.232.88/29;
+        98.191.26.72/29;
+        111.223.118.90/32;
+        116.51.23.192/27;
+        116.51.27.10/32;
+        149.7.113.142/32;
+        149.7.113.143/32;
+        154.43.165.0/24;
+        154.43.165.252/32;
+        154.43.165.253/32;
+    }
+    prefix-list netlab-office-networks-v6 {
+        2405:a280:ff80::/44;
+        2a07:7940:fffd::/48;
+        2a07:7940:fffe::/48;
+        2a07:7940:ffff::/48;
+        2a07:7947:ff40::/44;
+        2a07:7947:ff80::/44;
+        2a07:7947:ffc0::/44;
+    }
+    prefix-list all-dhcp-relay-pxe-servers {
+        apply-path "forwarding-options dhcp-relay server-group <*> <*>";
+    }
+    prefix-list all-unit0-interfaces {
+        apply-path "interfaces <*> unit 0 family inet address <*>";
+    }
+    prefix-list dco-external-ssh {
+        4.16.136.120/29;
+        162.244.7.1/32;
+        162.244.7.2/32;
+        185.151.162.4/32;
+        185.151.162.5/32;
+    }
+    prefix-list dr2-public-ip-net {
+        45.254.36.128/25;
+        162.244.7.129/32;
+    }
+    prefix-list dr2-public-ip-net-v6 {
+        2602:80b:6012:97::/64;
+        2602:80b:6012:99::/64;
+        2602:80b:6036:97::/64;
+        2602:80b:6039:97::/64;
+        2602:80b:603a:97::/64;
+        2a07:7940:12:97::/64;
+        2a07:7940:12:99::/64;
+        2a07:7940:14:97::/64;
+        2a07:7940:14:98::/64;
+        2a07:7940:14:99::/64;
+        2a07:7940:14:100::/64;
+        2a07:7940:16:99::/64;
+    }
+    prefix-list fxp-interface {
+        apply-path "interfaces fxp0 unit 0 family inet address <*>";
+    }
+    prefix-list global-netlab-fwag {
+        5.159.235.135/32;
+        5.159.235.136/32;
+        45.11.129.23/32;
+        45.11.129.24/32;
+        45.11.129.27/32;
+        45.11.129.28/32;
+        45.11.129.35/32;
+        45.11.129.36/32;
+        45.11.129.40/32;
+        45.11.129.41/32;
+        45.11.129.44/32;
+        45.11.129.45/32;
+        45.11.130.218/32;
+        45.11.131.135/32;
+        45.11.131.136/32;
+        203.0.113.1/32;
+        203.0.113.1/32;
+        45.195.248.113/32;
+        45.195.248.114/32;
+        45.254.36.72/32;
+        45.254.36.73/32;
+        45.254.39.113/32;
+        45.254.39.114/32;
+        46.229.159.199/32;
+        46.229.159.200/32;
+        46.246.34.71/32;
+        46.246.34.72/32;
+        46.246.43.7/32;
+        46.246.43.8/32;
+        62.28.148.71/32;
+        62.28.148.72/32;
+        82.163.163.231/32;
+        82.163.163.232/32;
+        84.239.8.7/32;
+        84.239.8.8/32;
+        87.227.138.7/32;
+        87.227.138.8/32;
+        102.217.208.113/32;
+        102.217.208.114/32;
+        103.8.255.39/32;
+        103.8.255.40/32;
+        103.64.16.54/32;
+        103.64.16.55/32;
+        103.64.19.54/32;
+        103.64.19.55/32;
+        103.228.155.199/32;
+        103.228.155.200/32;
+        106.106.2.7/32;
+        106.106.2.8/32;
+        109.235.241.71/32;
+        109.235.241.72/32;
+        118.103.142.231/32;
+        118.103.142.232/32;
+        119.82.30.224/32;
+        119.82.30.225/32;
+        121.78.252.71/32;
+        121.78.252.72/32;
+        162.244.7.10/32;
+        162.244.7.11/32;
+        162.244.7.16/32;
+        162.244.7.17/32;
+        162.244.7.24/32;
+        162.244.7.25/32;
+        162.244.7.26/32;
+        162.244.7.27/32;
+        162.244.7.34/32;
+        162.244.7.35/32;
+        162.244.7.45/32;
+        162.244.7.46/32;
+        176.57.82.17/32;
+        176.57.82.18/32;
+        177.54.159.135/32;
+        177.54.159.136/32;
+        185.4.247.7/32;
+        185.4.247.8/32;
+        185.34.149.7/32;
+        185.34.149.8/32;
+        185.151.160.135/32;
+        185.151.160.136/32;
+        185.151.162.35/32;
+        185.151.162.36/32;
+        185.154.234.199/32;
+        185.154.234.200/32;
+        185.185.133.135/32;
+        185.185.133.136/32;
+        188.164.206.135/32;
+        188.164.206.136/32;
+        194.19.4.7/32;
+        194.19.4.8/32;
+        195.48.52.135/32;
+        195.48.52.137/32;
+        196.223.59.135/32;
+        196.223.59.136/32;
+        197.98.31.31/32;
+        197.98.31.32/32;
+        199.83.244.72/32;
+        199.83.244.73/32;
+        201.117.144.7/32;
+        201.117.144.8/32;
+        206.188.216.135/32;
+        206.188.216.136/32;
+        206.188.217.7/32;
+        206.188.217.8/32;
+        212.2.222.199/32;
+        212.2.222.200/32;
+        212.158.141.231/32;
+        212.158.141.232/32;
+        213.21.205.199/32;
+        213.21.205.200/32;
+        217.169.126.7/32;
+        217.169.126.8/32;
+    }
+    prefix-list global-netlab-prefixes {
+        45.11.128.0/22;
+        45.11.131.128/26;
+        203.0.113.1/22;
+        45.254.36.0/22;
+        45.254.36.0/24;
+        45.254.37.0/24;
+        102.217.208.0/24;
+        103.64.16.0/22;
+        162.244.6.0/23;
+        164.152.124.0/24;
+        164.152.125.0/24;
+        181.215.30.0/24;
+        185.151.160.0/22;
+        185.151.161.192/27;
+        185.174.140.0/22;
+        199.83.244.0/22;
+        199.83.244.0/24;
+        199.83.245.0/24;
+        199.193.156.0/22;
+        206.188.216.0/23;
+        216.245.154.0/24;
+        216.245.155.0/24;
+    }
+    prefix-list global-netlab-prefixes-v6 {
+        2405:a280:22::/48;
+        2405:a280:32::/48;
+        2405:a280:33::/48;
+        2405:a280:34::/48;
+        2405:a280:42::/48;
+        2405:a280:43::/48;
+        2602:80b:6012::/48;
+        2602:80b:6013::/48;
+        2602:80b:6014::/48;
+        2602:80b:6015::/48;
+        2602:80b:6016::/48;
+        2602:80b:6022::/48;
+        2602:80b:6032::/48;
+        2602:80b:6033::/48;
+        2602:80b:6034::/48;
+        2602:80b:6035::/48;
+        2602:80b:6036::/48;
+        2602:80b:6037::/48;
+        2602:80b:6038::/48;
+        2602:80b:6039::/48;
+        2602:80b:603a::/48;
+        2602:80b:6042::/48;
+        2602:80b:6044::/48;
+        2602:80b:6045::/48;
+        2602:80b:6046::/48;
+        2a07:7940:12::/48;
+        2a07:7940:13::/48;
+        2a07:7940:14::/48;
+        2a07:7940:15::/48;
+        2a07:7940:16::/48;
+        2a07:7940:17::/48;
+        2a07:7940:41::/48;
+        2a07:7940:42::/48;
+        2a07:7940:44::/48;
+        2a07:7940:45::/48;
+        2a07:7940:46::/48;
+        2a07:7940:47::/48;
+        2a07:7940:48::/48;
+    }
+    prefix-list internet-DNS-servers-v4 {
+        1.1.1.1/32;
+        4.4.4.4/32;
+        8.8.4.4/32;
+        8.8.8.8/32;
+    }
+    prefix-list not-owned-by-netlab-prefixes {
+        5.159.235.128/26;
+        5.195.206.0/26;
+        34.140.146.64/26;
+        45.9.208.0/24;
+        45.9.209.0/24;
+        45.9.210.0/24;
+        45.9.211.0/24;
+        203.0.113.1/26;
+        45.195.248.0/24;
+        46.229.159.192/27;
+        46.246.34.64/26;
+        46.246.43.0/26;
+        62.28.148.64/26;
+        62.138.203.192/26;
+        72.14.130.0/24;
+        82.163.163.224/27;
+        82.214.82.0/26;
+        82.221.116.192/26;
+        84.239.8.0/26;
+        84.244.94.160/27;
+        85.215.110.240/28;
+        85.215.126.0/24;
+        85.215.127.0/24;
+        85.215.143.0/24;
+        87.227.138.0/26;
+        89.116.175.0/24;
+        89.117.29.0/24;
+        89.117.167.0/24;
+        89.117.171.0/24;
+        94.154.123.0/26;
+        103.8.255.32/27;
+        103.14.27.0/25;
+        103.101.129.32/27;
+        103.228.155.192/27;
+        103.248.62.0/27;
+        106.106.2.0/26;
+        109.235.241.64/26;
+        118.103.142.224/27;
+        121.78.252.64/26;
+        123.100.224.0/24;
+        154.43.165.128/27;
+        154.43.165.160/27;
+        177.54.159.128/27;
+        181.215.30.0/24;
+        185.4.247.0/25;
+        185.34.149.0/26;
+        185.154.234.192/26;
+        185.185.133.128/27;
+        185.209.82.128/28;
+        188.164.206.128/26;
+        192.199.198.0/24;
+        194.19.4.0/26;
+        195.48.52.128/27;
+        195.48.74.32/27;
+        195.49.21.0/26;
+        195.49.23.64/28;
+        195.211.24.128/26;
+        196.223.59.128/25;
+        201.117.144.0/26;
+        206.188.216.248/29;
+        206.252.230.32/27;
+        209.58.170.0/27;
+        212.2.222.192/26;
+        212.158.141.224/27;
+        212.227.69.0/24;
+        212.227.106.0/24;
+        213.21.205.192/26;
+        217.169.126.0/25;
+    }
+    prefix-list not-owned-by-netlab-prefixes-v6 {
+        2001:8c1:5840::/48;
+        2001:1a68:37::/48;
+        2001:1b28:410::/48;
+        2401:a040:10::/48;
+        2402:1c00:101::/48;
+        2402:6c00:d003::/48;
+        2405:ec00:fa03::/48;
+        2806:1080:1500::/48;
+        2806:1080:1700::/48;
+        2a00:1a28:1154::/48;
+        2a00:1a28:2411::/48;
+        2a00:1f68:ff::/48;
+        2a00:da60:b01::/48;
+        2a01:288:400e::/48;
+        2a01:ae20:851:4092::/64;
+        2a02:480:3419::/48;
+        2a02:a40:324::/48;
+        2a02:2160:8001::/48;
+        2a06:e8c0:a::/48;
+        2a07:9300:8000::/48;
+        2a0a:a142::/48;
+        2c0f:1f00::/48;
+    }
+    prefix-list public-NTP-servers-v4 {
+        45.11.129.77/32;
+        45.254.38.6/32;
+        162.244.7.76/32;
+        185.151.160.99/32;
+    }
+    prefix-list public-NTP-servers-v6 {
+        2405:a280:33:66::49/128;
+        2602:80b:6012:66::49/128;
+        2a07:7940:12:66::49/128;
+        2a07:7940:14:66::49/128;
+    }
+    prefix-list source-ip-bfd {
+        10.2.0.0/16;
+    }
+    prefix-list source-ip-prefixes {
+        10.1.0.0/16;
+    }
+    prefix-list ztp-interface {
+        apply-path "interfaces <*> unit 0 family inet address <10.2.*>";
+    }
+    route-filter-list netlab_BGP_ADV_V4_PREFIXES {
+        45.254.36.0/24 exact;
+    }
+    route-filter-list netlab_BGP_ADV_V6_PREFIXES {
+        2405:a280:43::/48 exact;
+    }
+    policy-statement DENY_BGP_ALL {
+        then reject;
+    }
+    policy-statement TELSTRA_BGP_ADV_V4 {
+        term accept-netlab-ipv4-public-prefixes {
+            from {
+                route-filter-list netlab_BGP_ADV_V4_PREFIXES;
+            }
+            then accept;
+        }
+        term reject-all {
+            then reject;
+        }
+    }
+    policy-statement TELSTRA_BGP_ADV_V6 {
+        term accept-netlab-ipv6-public-prefixes {
+            from {
+                route-filter-list netlab_BGP_ADV_V6_PREFIXES;
+            }
+            then accept;
+        }
+        term reject-all {
+            then reject;
+        }
+    }
+    policy-statement TELSTRA_BGP_RCV_V4 {
+        term accept-ipv4-default-route {
+            from {
+                protocol bgp;
+                route-filter 0.0.0.0/0 exact;
+            }
+            then accept;
+        }
+        term reject-lower-than-24 {
+            from {
+                protocol bgp;
+                route-filter 0.0.0.0/25 upto /32;
+            }
+            then reject;
+        }
+        term reject-lumen-scrubbing-asn-203 {
+            from as-path orig-in-203;
+            then reject;
+        }
+        term reject-ipv4-iana-reserved {
+            from {
+                route-filter 0.0.0.0/8 orlonger;
+                route-filter 10.0.0.0/8 orlonger;
+                route-filter 100.64.0.0/10 orlonger;
+                route-filter 127.0.0.0/8 orlonger;
+                route-filter 169.254.0.0/16 orlonger;
+                route-filter 172.16.0.0/12 orlonger;
+                route-filter 192.0.0.0/24 orlonger;
+                route-filter 192.0.2.0/24 orlonger;
+                route-filter 192.168.0.0/16 orlonger;
+                route-filter 224.0.0.0/3 orlonger;
+            }
+            then reject;
+        }
+        term reject-netlab-prefixes {
+            from {
+                route-filter-list netlab_BGP_ADV_V4_PREFIXES;
+            }
+            then reject;
+        }
+        term accept-all-ipv4-routes-upto-24 {
+            from {
+                protocol bgp;
+                route-filter 0.0.0.0/0 upto /24;
+            }
+            then {
+                tag 500;
+                local-preference 500;
+                origin igp;
+                next term;
+            }
+        }
+        term accept-all {
+            then accept;
+        }
+    }
+    policy-statement TELSTRA_BGP_RCV_V6 {
+        term accept-ipv6-default-route {
+            from {
+                protocol bgp;
+                route-filter ::/0 exact;
+            }
+            then accept;
+        }
+        term reject-lower-than-48 {
+            from {
+                family inet6;
+                protocol bgp;
+                route-filter ::/49 upto /128;
+            }
+            then reject;
+        }
+        term reject-lumen-scrubbing-asn-203 {
+            from as-path orig-in-203;
+            then reject;
+        }
+        term reject-ipv6-martians-and-privates {
+            from {
+                route-filter ::1/128 exact;
+                route-filter ff00::/8 orlonger;
+                route-filter fc00::/7 orlonger;
+            }
+            then reject;
+        }
+        term reject-netlab-prefixes {
+            from {
+                route-filter-list netlab_BGP_ADV_V6_PREFIXES;
+            }
+            then reject;
+        }
+        term accept-all-ipv6-routes-upto-48 {
+            from {
+                protocol bgp;
+                route-filter ::/0 upto /48;
+            }
+            then {
+                tag 500;
+                local-preference 500;
+                origin igp;
+                next term;
+            }
+        }
+        term accept-all {
+            then accept;
+        }
+    }
+    policy-statement loadbalance {
+        then {
+            load-balance per-flow;
+        }
+    }
+    policy-statement next-hop-self {
+        from route-type external;
+        then {
+            next-hop self;
+        }
+    }
+    as-path orig-in-203 ".* 203";
+}
+firewall {
+    family inet {
+        filter count-ntp-traffic {
+            term fra2-ntp-traffic {
+                from {
+                    destination-address {
+                        45.11.129.77/32;
+                    }
+                }
+                then {
+                    count ntp-to-fra2;
+                    accept;
+                }
+            }
+            term lhr3-ntp-traffic {
+                from {
+                    destination-address {
+                        185.151.160.99/32;
+                    }
+                }
+                then {
+                    count ntp-to-lhr3;
+                    accept;
+                }
+            }
+            term phx1-ntp-traffic {
+                from {
+                    destination-address {
+                        162.244.7.76/32;
+                    }
+                }
+                then {
+                    count ntp-to-phx1;
+                    accept;
+                }
+            }
+            term mmj1-ntp-traffic {
+                from {
+                    destination-address {
+                        45.254.38.6/32;
+                    }
+                }
+                then {
+                    count ntp-to-mmj1;
+                    accept;
+                }
+            }
+            term accept-all {
+                then accept;
+            }
+        }
+        filter filter-all-in-one {
+            term accept-bfd {
+                from {
+                    source-prefix-list {
+                        source-ip-bfd;
+                        BGP-neighbors-v4;
+                    }
+                    protocol udp;
+                    source-port 49152-65535;
+                    destination-port [ 3784-3785 4784 ];
+                }
+                then accept;
+            }
+            term accept-bgp-dst {
+                from {
+                    source-prefix-list {
+                        BGP-neighbors-v4;
+                        BGP-neighbors-inst-v4;
+                    }
+                    destination-prefix-list {
+                        BGP-locals-v4;
+                        BGP-locals-inst-v4;
+                    }
+                    protocol tcp;
+                    destination-port bgp;
+                }
+                then {
+                    count accept-bgp-dst;
+                    accept;
+                }
+            }
+            term accept-bgp-src {
+                from {
+                    source-prefix-list {
+                        BGP-neighbors-v4;
+                        BGP-neighbors-inst-v4;
+                    }
+                    destination-prefix-list {
+                        BGP-locals-v4;
+                        BGP-locals-inst-v4;
+                    }
+                    protocol tcp;
+                    source-port bgp;
+                }
+                then {
+                    count accept-bgp-src;
+                    accept;
+                }
+            }
+            term accept-dns {
+                from {
+                    source-prefix-list {
+                        DNS-servers-v4;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v4;
+                    }
+                    protocol [ udp tcp ];
+                    source-port 53;
+                }
+                then {
+                    policer management-1m;
+                    count accept-dns;
+                    accept;
+                }
+            }
+            term accept-icmp {
+                from {
+                    protocol icmp;
+                    icmp-type [ echo-reply echo-request time-exceeded unreachable source-quench router-advertisement parameter-problem timestamp ];
+                }
+                then {
+                    policer management-1m;
+                    count accept-icmp;
+                    accept;
+                }
+            }
+            term accept-netconf-mgmt {
+                from {
+                    source-prefix-list {
+                        source-ip-prefixes;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v4;
+                    }
+                    protocol tcp;
+                    destination-port 830;
+                }
+                then {
+                    count accept-netconf;
+                    log;
+                    accept;
+                }
+            }
+            term accept-ntp {
+                from {
+                    source-prefix-list {
+                        NTP-servers-v4;
+                        LOCALS-v4;
+                    }
+                    destination-prefix-list {
+                        NTP-servers-v4;
+                        LOCALS-v4;
+                    }
+                    protocol udp;
+                    port ntp;
+                }
+                then {
+                    policer management-512k;
+                    count accept-ntp;
+                    accept;
+                }
+            }
+            term accept-grpc {
+                from {
+                    source-prefix-list {
+                        GRPC-SERVERS-v4;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v4;
+                    }
+                    protocol tcp;
+                    port 32767;
+                }
+                then {
+                    count accept-grpc;
+                    accept;
+                }
+            }
+            term accept-snmp {
+                from {
+                    source-prefix-list {
+                        SNMP-clients;
+                    }
+                    destination-prefix-list {
+                        all-unit0-interfaces;
+                    }
+                    protocol udp;
+                    destination-port snmp;
+                }
+                then {
+                    count accept-snmp;
+                    accept;
+                }
+            }
+            term accept-ssh-mgmt {
+                from {
+                    source-prefix-list {
+                        source-ip-prefixes;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v4;
+                    }
+                    protocol tcp;
+                    destination-port ssh;
+                }
+                then {
+                    count accept-ssh;
+                    log;
+                    accept;
+                }
+            }
+            term accept-ssh {
+                from {
+                    source-prefix-list {
+                        dco-external-ssh;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v4;
+                    }
+                    protocol tcp;
+                    destination-port ssh;
+                }
+                then {
+                    policer management-5m;
+                    count accept-ssh;
+                    log;
+                    accept;
+                }
+            }
+            term accept-traceroute-icmp {
+                from {
+                    destination-prefix-list {
+                        LOCALS-v4;
+                    }
+                    protocol icmp;
+                    ttl 1;
+                    icmp-type [ echo-request echo-reply timestamp time-exceeded ];
+                }
+                then {
+                    policer management-1m;
+                    count accept-traceroute-icmp;
+                    accept;
+                }
+            }
+            term accept-traceroute-udp {
+                from {
+                    destination-prefix-list {
+                        LOCALS-v4;
+                    }
+                    protocol udp;
+                    ttl 1;
+                    destination-port 33434-33534;
+                }
+                then {
+                    policer management-1m;
+                    count accept-traceroute-udp;
+                    accept;
+                }
+            }
+            term allow-tcp-est {
+                from {
+                    protocol tcp;
+                    tcp-established;
+                }
+                then {
+                    count accept-tcp-established;
+                    accept;
+                }
+            }
+            term discard-icmp-fragments {
+                from {
+                    is-fragment;
+                    protocol icmp;
+                }
+                then {
+                    count discard-icmp-fragments;
+                    discard;
+                }
+            }
+            term discard-icmp {
+                from {
+                    protocol icmp;
+                }
+                then {
+                    count discard-icmp;
+                    discard;
+                }
+            }
+            term discard-ip-options {
+                from {
+                    ip-options any;
+                }
+                then {
+                    count discard-ip-options;
+                    discard;
+                }
+            }
+            term discard-tcp {
+                from {
+                    protocol tcp;
+                }
+                then {
+                    count discard-tcp;
+                    discard;
+                }
+            }
+            term discard-TTL_1-unknown {
+                from {
+                    ttl 1;
+                }
+                then {
+                    count discard-TTL_1-unknown;
+                    discard;
+                }
+            }
+            term discard-udp {
+                from {
+                    protocol udp;
+                }
+                then {
+                    count discard-udp;
+                    discard;
+                }
+            }
+            term discard-unknown {
+                then {
+                    count discard-unknown;
+                    discard;
+                }
+            }
+        }
+        filter filter-internet-traffic {
+            term reject-amplified-reflection-attack {
+                from {
+                    protocol udp;
+                    source-port [ 6881 19 389 751 11211 1434 5353 137 111 17 27960 520 161 1900 27015 ];
+                }
+                then {
+                    count reject-amplified-reflection-attack;
+                    discard;
+                }
+            }
+            term accept-iperf-temp {
+                from {
+                    source-address {
+                        106.200.247.120/32;
+                        103.251.94.60/32;
+                        14.99.239.185/32;
+                        103.228.151.30/32;
+                    }
+                    protocol tcp;
+                    destination-port 5201;
+                }
+                then accept;
+            }
+            term accept-bfd {
+                from {
+                    source-prefix-list {
+                        BGP-neighbors-v4;
+                    }
+                    protocol udp;
+                    source-port 49152-65535;
+                    destination-port [ 3784-3785 4784 ];
+                }
+                then accept;
+            }
+            term allow-tcp-est {
+                from {
+                    protocol tcp;
+                    tcp-established;
+                }
+                then {
+                    count allow-tcp-est;
+                    accept;
+                }
+            }
+            term accept-port-443-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    port 443;
+                }
+                then {
+                    count accept-port-443-to-netlab-prefixes;
+                    accept;
+                }
+            }
+            term accept-port-44445-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 44445;
+                }
+                then {
+                    count accept-port-44445-to-netlab-prefixes;
+                    accept;
+                }
+            }
+            term accept-any-to-dr2-public-ip-net {
+                from {
+                    destination-prefix-list {
+                        dr2-public-ip-net;
+                    }
+                    protocol [ tcp udp esp ];
+                }
+                then {
+                    count accept-any-to-dr2-public-ip-net;
+                    accept;
+                }
+            }
+            term accept-icmp-to-netlab-prefixes {
+                from {
+                    protocol icmp;
+                    icmp-type [ echo-reply echo-request time-exceeded timestamp ];
+                }
+                then {
+                    policer management-1m;
+                    count accept-icmp-to-netlab-prefixes;
+                    accept;
+                }
+            }
+            term accept-cross-datacenter-vpn-esp {
+                from {
+                    source-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol esp;
+                }
+                then {
+                    count accept-cross-datacenter-vpn-esp;
+                    accept;
+                }
+            }
+            term accept-cross-datacenter-vpn-udp {
+                from {
+                    source-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol udp;
+                    destination-port [ 4500 500 ];
+                }
+                then {
+                    count accept-cross-datacenter-vpn-udp;
+                    accept;
+                }
+            }
+            term accept-port-31032-31034-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-fwag;
+                    }
+                    protocol udp;
+                    destination-port 31032-31034;
+                }
+                then {
+                    count accept-port-31032-31034-to-netlab-prefixes;
+                    accept;
+                }
+            }
+            term accept-port-9090-from-to-netlab-prefixes {
+                from {
+                    source-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 9090;
+                }
+                then {
+                    count accept-port-9090-to-netlab-prefixes;
+                    accept;
+                }
+            }
+            term accept-tracert-udp-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol udp;
+                    destination-port 33434-33534;
+                }
+                then {
+                    policer management-1m;
+                    count accept-tracert-udp-to-netlab-prefixes;
+                    accept;
+                }
+            }
+            term accept-port-80-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    port 80;
+                }
+                then {
+                    count accept-port-80-to-netlab-prefixes;
+                    accept;
+                }
+            }
+            term accept-port-7780-7900-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 7770-7800;
+                }
+                then {
+                    count accept-port-7770-7800-to-netlab-prefixes;
+                    accept;
+                }
+            }
+            term accept-port-8443-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 8443;
+                }
+                then {
+                    count accept-port-8443-to-netlab-prefixes;
+                    accept;
+                }
+            }
+            term accept-port-8444-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 8444;
+                }
+                then {
+                    count accept-port-8444-to-netlab-prefixes;
+                    accept;
+                }
+            }
+            term accept-port-55555-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 55555;
+                }
+                then {
+                    count accept-port-55555-to-netlab-prefixes;
+                    accept;
+                }
+            }
+            term accept-port-55556-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port 55556;
+                }
+                then {
+                    count accept-port-55556-to-netlab-prefixes;
+                    accept;
+                }
+            }
+            term accept-port-1194-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol [ udp tcp ];
+                    destination-port 1194;
+                }
+                then {
+                    count accept-port-1194-to-netlab-prefixes;
+                    accept;
+                }
+            }
+            term accept-source-port-1194-to-netlab-prefixes {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol udp;
+                    source-port 1194;
+                }
+                then {
+                    count accept-source-port-1194-to-netlab-prefixes;
+                    accept;
+                }
+            }
+            term accept-ntp-traffic {
+                from {
+                    source-prefix-list {
+                        not-owned-by-netlab-prefixes;
+                        global-netlab-prefixes;
+                    }
+                    destination-prefix-list {
+                        public-NTP-servers-v4;
+                    }
+                    protocol udp;
+                    port ntp;
+                }
+                then {
+                    policer additional-1m;
+                    count accept-ntp-traffic;
+                    accept;
+                }
+            }
+            term accept-traffic-to-ntp-servers {
+                from {
+                    destination-prefix-list {
+                        public-NTP-servers-v4;
+                        not-owned-by-netlab-prefixes;
+                        global-netlab-prefixes;
+                    }
+                    protocol udp;
+                    source-port ntp;
+                }
+                then {
+                    policer additional-1m;
+                    count accept-traffic-to-ntp-servers;
+                    accept;
+                }
+            }
+            term accept-dns-traffic {
+                from {
+                    source-prefix-list {
+                        internet-DNS-servers-v4;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol udp;
+                    source-port 53;
+                }
+                then {
+                    policer additional-1m;
+                    count accept-dns-traffic;
+                    accept;
+                }
+            }
+            term accept-ssh-to-device {
+                from {
+                    source-prefix-list {
+                        dco-external-ssh;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v4;
+                    }
+                    protocol tcp;
+                    destination-port ssh;
+                }
+                then {
+                    policer management-5m;
+                    count accept-ssh-to-device;
+                    log;
+                    accept;
+                }
+            }
+            term accept-bgp-dst {
+                from {
+                    source-prefix-list {
+                        BGP-neighbors-v4;
+                        BGP-neighbors-inst-v4;
+                    }
+                    destination-prefix-list {
+                        BGP-locals-v4;
+                        BGP-locals-inst-v4;
+                    }
+                    protocol tcp;
+                    destination-port bgp;
+                }
+                then {
+                    count accept-bgp-dst;
+                    accept;
+                }
+            }
+            term accept-bgp-src {
+                from {
+                    source-prefix-list {
+                        BGP-neighbors-v4;
+                        BGP-neighbors-inst-v4;
+                    }
+                    destination-prefix-list {
+                        BGP-locals-v4;
+                        BGP-locals-inst-v4;
+                    }
+                    protocol tcp;
+                    source-port bgp;
+                }
+                then {
+                    count accept-bgp-src;
+                    accept;
+                }
+            }
+            term block-not-allowed-traffic-from-dr2-customers {
+                from {
+                    source-prefix-list {
+                        dr2-public-ip-net;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                }
+                then {
+                    count block-not-allowed-traffic-from-dr2-customers;
+                    discard;
+                }
+            }
+            term block-ssh-from-office-or-cross-dc {
+                from {
+                    source-prefix-list {
+                        netlab-office-networks;
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    protocol tcp;
+                    destination-port ssh;
+                }
+                then {
+                    count block-ssh-from-office-or-cross-dc;
+                    log;
+                    discard;
+                }
+            }
+            term accept-cross-datacenter-traffic {
+                from {
+                    source-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                }
+                then {
+                    count accept-cross-datacenter-traffic;
+                    accept;
+                }
+            }
+            term accept-netlab-office-networks {
+                from {
+                    source-prefix-list {
+                        netlab-office-networks;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes;
+                        not-owned-by-netlab-prefixes;
+                    }
+                }
+                then {
+                    count netlab-office-networks;
+                    accept;
+                }
+            }
+            term discard-unknown {
+                then {
+                    count discard-unknown;
+                    discard;
+                }
+            }
+        }
+    }
+    family inet6 {
+        filter filter-all-in-one-v6 {
+            term accept-v6-icmp {
+                from {
+                    payload-protocol icmp6;
+                    icmp-type [ echo-reply echo-request time-exceeded router-advertisement parameter-problem destination-unreachable packet-too-big router-solicit neighbor-solicit neighbor-advertisement redirect ];
+                }
+                then {
+                    policer management-1m;
+                    count accept-v6-icmp;
+                    accept;
+                }
+            }
+            term accept-bfd-v6 {
+                from {
+                    source-prefix-list {
+                        BGP-neighbors-v6;
+                    }
+                    payload-protocol udp;
+                    source-port 49152-65535;
+                    destination-port [ 3784-3785 4784 ];
+                }
+                then accept;
+            }
+            term accept-tcp-est-v6 {
+                from {
+                    payload-protocol tcp;
+                    tcp-established;
+                }
+                then {
+                    count accept-tcp-established-v6;
+                    accept;
+                }
+            }
+            term accept-v6bgp-dst {
+                from {
+                    source-prefix-list {
+                        BGP-neighbors-v6;
+                        BGP-neighbors-inst-v6;
+                    }
+                    destination-prefix-list {
+                        BGP-locals-v6;
+                        BGP-locals-inst-v6;
+                    }
+                    payload-protocol tcp;
+                    destination-port bgp;
+                }
+                then {
+                    count accept-v6bgp-dst;
+                    accept;
+                }
+            }
+            term accept-v6bgp-src {
+                from {
+                    source-prefix-list {
+                        BGP-neighbors-v6;
+                        BGP-neighbors-inst-v6;
+                    }
+                    destination-prefix-list {
+                        BGP-locals-v6;
+                        BGP-locals-inst-v6;
+                    }
+                    payload-protocol tcp;
+                    source-port bgp;
+                }
+                then {
+                    count accept-v6bgp-src;
+                    accept;
+                }
+            }
+            term accept-v6-traceroute-udp {
+                from {
+                    destination-prefix-list {
+                        LOCALS-v6;
+                    }
+                    payload-protocol udp;
+                    destination-port 33434-33450;
+                    hop-limit 1;
+                }
+                then {
+                    policer management-1m;
+                    count accept-v6-traceroute-udp;
+                    accept;
+                }
+            }
+            term accept-v6-traceroute-icmp {
+                from {
+                    destination-prefix-list {
+                        LOCALS-v6;
+                    }
+                    payload-protocol icmp6;
+                    icmp-type [ echo-reply echo-request router-advertisement parameter-problem destination-unreachable packet-too-big router-solicit neighbor-solicit neighbor-advertisement redirect ];
+                    hop-limit 1;
+                }
+                then {
+                    policer management-1m;
+                    count accept-v6-traceroute-icmp;
+                    accept;
+                }
+            }
+            term accept-v6-dns {
+                from {
+                    source-prefix-list {
+                        DNS-servers-v6;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v6;
+                    }
+                    payload-protocol udp;
+                    source-port 53;
+                }
+                then {
+                    policer management-1m;
+                    count accept-v6-dns;
+                }
+            }
+            term accept-v6-ntp {
+                from {
+                    source-prefix-list {
+                        NTP-servers-v6;
+                        LOCALS-v6;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v6;
+                    }
+                    payload-protocol udp;
+                    destination-port ntp;
+                }
+                then {
+                    policer management-512k;
+                    count accept-v6-ntp;
+                    accept;
+                }
+            }
+            term discard-v6-tcp {
+                from {
+                    payload-protocol tcp;
+                }
+                then {
+                    count discard-v6-tcp;
+                    log;
+                    discard;
+                }
+            }
+            term discard-v6-udp {
+                from {
+                    payload-protocol udp;
+                }
+                then {
+                    count discard-v6-udp;
+                    log;
+                    discard;
+                }
+            }
+            term discard-v6-icmp {
+                from {
+                    destination-prefix-list {
+                        LOCALS-v6;
+                    }
+                    payload-protocol icmp6;
+                }
+                then {
+                    count discard-v6-icmp;
+                    log;
+                    discard;
+                }
+            }
+            term discard-v6-unknown {
+                then {
+                    count discard-v6-unknown;
+                    log;
+                    discard;
+                }
+            }
+        }
+        filter filter-internet-traffic-v6 {
+            term accept-v6-icmp {
+                from {
+                    payload-protocol icmp6;
+                    icmp-type [ echo-reply echo-request time-exceeded router-advertisement parameter-problem destination-unreachable packet-too-big router-solicit neighbor-solicit neighbor-advertisement redirect ];
+                }
+                then {
+                    policer management-1m;
+                    count accept-v6-icmp;
+                    accept;
+                }
+            }
+            term reject-amplified-reflection-attack {
+                from {
+                    payload-protocol udp;
+                    source-port [ 6881 19 389 751 11211 1434 5353 137 111 17 27960 520 161 1900 27015 ];
+                }
+                then {
+                    count reject-amplified-reflection-attack;
+                    discard;
+                }
+            }
+            term accept-bfd-v6 {
+                from {
+                    source-prefix-list {
+                        BGP-neighbors-v6;
+                    }
+                    payload-protocol udp;
+                    source-port 49152-65535;
+                    destination-port [ 3784-3785 4784 ];
+                }
+                then accept;
+            }
+            term allow-tcp-est-v6 {
+                from {
+                    payload-protocol tcp;
+                    tcp-established;
+                }
+                then {
+                    count allow-tcp-est;
+                    accept;
+                }
+            }
+            term accept-port-443-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    payload-protocol tcp;
+                    port 443;
+                }
+                then {
+                    count accept-port-443-to-netlab-prefixes-v6;
+                    accept;
+                }
+            }
+            term accept-port-44445-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    payload-protocol tcp;
+                    destination-port 44445;
+                }
+                then {
+                    count accept-port-44445-to-netlab-prefixes-v6;
+                    accept;
+                }
+            }
+            term accept-any-to-dr2-public-ip-net-v6 {
+                from {
+                    destination-prefix-list {
+                        dr2-public-ip-net-v6;
+                    }
+                    payload-protocol [ tcp udp esp ];
+                }
+                then {
+                    count accept-any-to-dr2-public-ip-net-v6;
+                    accept;
+                }
+            }
+            term block-ssh-from-office-or-cross-dc-v6 {
+                from {
+                    source-prefix-list {
+                        netlab-office-networks-v6;
+                        global-netlab-prefixes-v6;
+                        not-owned-by-netlab-prefixes-v6;
+                    }
+                    payload-protocol tcp;
+                    destination-port ssh;
+                }
+                then {
+                    count block-ssh-from-office-or-cross-dc-v6;
+                    log;
+                    discard;
+                }
+            }
+            term accept-netlab-office-networks-v6 {
+                from {
+                    source-prefix-list {
+                        netlab-office-networks-v6;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                }
+                then {
+                    count netlab-office-networks-v6;
+                    accept;
+                }
+            }
+            term accept-cross-datacenter-traffic-v6 {
+                from {
+                    source-prefix-list {
+                        global-netlab-prefixes-v6;
+                        not-owned-by-netlab-prefixes-v6;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                        not-owned-by-netlab-prefixes-v6;
+                    }
+                }
+                then {
+                    count accept-cross-datacenter-traffic;
+                    accept;
+                }
+            }
+            term accept-port-9090-from-to-netlab-prefixes-v6 {
+                from {
+                    source-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    payload-protocol tcp;
+                    destination-port 9090;
+                }
+                then {
+                    count accept-port-9090-to-netlab-prefixes-v6;
+                    accept;
+                }
+            }
+            term accept-tracert-udp-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    payload-protocol udp;
+                    destination-port 33434-33534;
+                }
+                then {
+                    policer management-1m;
+                    count accept-tracert-udp-to-netlab-prefixes-v6;
+                    accept;
+                }
+            }
+            term accept-port-80-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    payload-protocol tcp;
+                    port 80;
+                }
+                then {
+                    count accept-port-80-to-netlab-prefixes-v6;
+                    accept;
+                }
+            }
+            term accept-port-7780-7900-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    payload-protocol tcp;
+                    destination-port 7770-7800;
+                }
+                then {
+                    count accept-port-7770-7800-to-netlab-prefixes-v6;
+                    accept;
+                }
+            }
+            term accept-port-8080-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    payload-protocol tcp;
+                    destination-port 8080;
+                }
+                then {
+                    count accept-port-8080-to-netlab-prefixes-v6;
+                    accept;
+                }
+            }
+            term accept-port-8443-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    payload-protocol tcp;
+                    destination-port 8443;
+                }
+                then {
+                    count accept-port-8443-to-netlab-prefixes-v6;
+                    accept;
+                }
+            }
+            term accept-port-8444-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    payload-protocol tcp;
+                    destination-port 8444;
+                }
+                then {
+                    count accept-port-8444-to-netlab-prefixes-v6;
+                    accept;
+                }
+            }
+            term accept-port-55555-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    payload-protocol tcp;
+                    destination-port 55555;
+                }
+                then {
+                    count accept-port-55555-to-netlab-prefixes-v6;
+                    accept;
+                }
+            }
+            term accept-port-55556-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                    }
+                    payload-protocol tcp;
+                    destination-port 55556;
+                }
+                then {
+                    count accept-port-55556-to-netlab-prefixes-v6;
+                    accept;
+                }
+            }
+            term accept-port-1194-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                        not-owned-by-netlab-prefixes-v6;
+                    }
+                    payload-protocol [ udp tcp ];
+                    destination-port 1194;
+                }
+                then {
+                    count accept-port-1194-to-netlab-prefixes-v6;
+                    accept;
+                }
+            }
+            term accept-source-port-1194-to-netlab-prefixes-v6 {
+                from {
+                    destination-prefix-list {
+                        global-netlab-prefixes-v6;
+                        not-owned-by-netlab-prefixes-v6;
+                    }
+                    payload-protocol udp;
+                    source-port 1194;
+                }
+                then {
+                    count accept-source-port-1194-to-netlab-prefixes-v6;
+                    accept;
+                }
+            }
+            term accept-bgp-dst-v6 {
+                from {
+                    source-prefix-list {
+                        BGP-neighbors-v6;
+                        BGP-neighbors-inst-v6;
+                    }
+                    destination-prefix-list {
+                        BGP-locals-v6;
+                        BGP-locals-inst-v6;
+                    }
+                    payload-protocol tcp;
+                    destination-port bgp;
+                }
+                then {
+                    count accept-bgp-dst;
+                    accept;
+                }
+            }
+            term accept-bgp-src-v6 {
+                from {
+                    source-prefix-list {
+                        BGP-neighbors-v6;
+                        BGP-neighbors-inst-v6;
+                    }
+                    destination-prefix-list {
+                        BGP-locals-v6;
+                        BGP-locals-inst-v6;
+                    }
+                    payload-protocol tcp;
+                    source-port bgp;
+                }
+                then {
+                    count accept-bgp-src;
+                    accept;
+                }
+            }
+            term discard-unknown {
+                then {
+                    count discard-unknown;
+                    discard;
+                }
+            }
+        }
+    }
+    policer additional-1m {
+        if-exceeding {
+            bandwidth-limit 1m;
+            burst-size-limit 625k;
+        }
+        then discard;
+    }
+    policer management-1m {
+        if-exceeding {
+            bandwidth-limit 1m;
+            burst-size-limit 625k;
+        }
+        then discard;
+    }
+    policer management-512k {
+        if-exceeding {
+            bandwidth-limit 512k;
+            burst-size-limit 25k;
+        }
+        then discard;
+    }
+    policer management-5m {
+        if-exceeding {
+            bandwidth-limit 5m;
+            burst-size-limit 625k;
+        }
+        then discard;
+    }
+}
+routing-options {
+    rib inet6.0 {
+        static {
+            route 2405:a280:43::/48 {
+                next-hop 2405:a280:dc:43:51:101::3;
+                qualified-next-hop 2405:a280:dc:43:51:52::3 {
+                    preference 185;
+                }
+                preference 180;
+            }
+        }
+    }
+    router-id 10.1.30.51;
+    autonomous-system 65000;
+    static {
+        route 10.1.0.0/16 next-hop 10.1.30.1;
+        route 45.254.36.0/24 {
+            next-hop 10.2.30.51;
+            qualified-next-hop 10.2.30.99 {
+                preference 185;
+            }
+            preference 180;
+        }
+    }
+    forwarding-table {
+        export loadbalance;
+    }
+}
+protocols {
+    bgp {
+        group BOM1-RT-02_V4 {
+            type internal;
+            keep none;
+            family inet {
+                unicast;
+            }
+            export next-hop-self;
+            peer-as 65000;
+            local-as 65000;
+            neighbor 10.2.30.99 {
+                description "iBGP v4 to bom1-rt-02";
+                local-address 10.2.30.98;
+            }
+        }
+        group BOM1-RT-02_V6 {
+            type internal;
+            keep none;
+            family inet6 {
+                unicast;
+            }
+            export next-hop-self;
+            peer-as 65000;
+            local-as 65000;
+            neighbor 2405:a280:dc:43:51:52::3 {
+                description "iBGP v6 to bom1-rt-02";
+                local-address 2405:a280:dc:43:51:52::2;
+            }
+        }
+        group TELSTRA_ISP_V4 {
+            type external;
+            keep none;
+            import TELSTRA_BGP_RCV_V4;
+            family inet {
+                unicast;
+            }
+            export TELSTRA_BGP_ADV_V4;
+            remove-private;
+            peer-as 4637;
+            local-as 65000;
+            neighbor 210.176.131.130 {
+                description "Telstra HSIP v4 MMB IPT 90078312";
+                local-address 210.176.131.131;
+            }
+        }
+        group TELSTRA_ISP_V6 {
+            type external;
+            keep none;
+            import TELSTRA_BGP_RCV_V6;
+            family inet6 {
+                unicast;
+            }
+            export TELSTRA_BGP_ADV_V6;
+            remove-private;
+            peer-as 4637;
+            local-as 65000;
+            neighbor 2403:e800:a00:300::26 {
+                description "Telstra HSIP v6 MMB IPT 90078312";
+                local-address 2403:e800:a00:300::27;
+            }
+        }
+        traceoptions {
+            file bgp size 5m files 4 world-readable;
+            flag open;
+            flag normal;
+            flag state;
+        }
+        mtu-discovery;
+        log-updown;
+        bgp-error-tolerance {
+            malformed-update-log-interval 10;
+            malformed-route-limit 5;
+        }
+    }
+    sflow {
+        polling-interval 60;
+        sample-rate ingress 10000;
+        source-ip inet6 2405:a280:dc:43:51:101:0:2;
+        collector 2405:a280:43:66::10 {
+            udp-port 9995;
+        }
+        interfaces xe-0/1/3.0;
+    }
+}

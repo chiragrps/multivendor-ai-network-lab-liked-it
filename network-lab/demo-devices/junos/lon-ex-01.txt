@@ -1,0 +1,1311 @@
+
+## Last commit: 2026-01-01 00:00:00 UTC by netadmin1
+## Image name: jinstall-host-ex-4600-21.4R3-S11.3-signed.tgz
+
+version 21.4R3-S11.3;
+system {
+    host-name lon-ex-01;
+    root-authentication {
+        encrypted-password "$6$PFsfan1g$m/xtwE283S.giMD0jbCF88M3bQzvXVCZXUWr0lC2TzXtg4vwX0r.95QsmDDizCo6Xga/bNtjrFbrebX6s2rqp1";
+    }
+    commit synchronize;
+    login {
+        retry-options {
+            tries-before-disconnect 3;
+            backoff-threshold 3;
+            backoff-factor 10;
+            lockout-period 4;
+        }
+        idle-timeout 15;
+        class config_backup {
+            permissions [ secret view view-configuration ];
+            deny-commands all;
+        }
+        class config_control {
+            permissions [ configure control view ];
+        }
+        class network-operations-team {
+            permissions all;
+        }
+        class read_only {
+            permissions [ network routing view-configuration ];
+            allow-commands show;
+            deny-commands "(clear)|(file)|(file show)|(help)|(load)|(monitor)|(op)|(request)|(save)|(set)|(start)|(test)";
+            deny-configuration all;
+        }
+        user netadmin1 {
+            uid 1117;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        user netops {
+            uid 2105;
+            class config_control;
+            authentication {
+
+            }
+        }
+        user netadmin2 {
+            uid 1121;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        user netadmin3 {
+            uid 1122;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        user svc-backup {
+            uid 2101;
+            class config_backup;
+            authentication {
+                ssh-ecdsa "ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzODQAAABhBPLACEHOLDER_NOT_REAL_DEMO_KEY_REDACTED_FOR_PUBLIC_LAB_USE==";
+            }
+        }
+        user maxp {
+            uid 1112;
+            class read_only;
+            authentication {
+
+            }
+        }
+        user netadmin4 {
+            uid 1123;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        user oelliott {
+            uid 1120;
+            class read_only;
+            authentication {
+
+            }
+        }
+        user sdaniels {
+            uid 1119;
+            class read_only;
+            authentication {
+
+            }
+        }
+        user netadmin5 {
+            uid 1115;
+            class read_only;
+            authentication {
+
+            }
+        }
+        user netops2 {
+            uid 2000;
+            class network-operations-team;
+            authentication {
+                encrypted-password "$6$YjcCymwt$Z5BPzqlfNLAlO9zT5Rnp89dV0Op.BEv37o6ibKqRtdhqi2DD7kuNY/V/AQ6S4KPUCWqKZrAk7jYFFhhe3bF2j/";
+            }
+        }
+        user netadmin6 {
+            uid 1116;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        user netops3 {
+            uid 1125;
+            class network-operations-team;
+            authentication {
+
+            }
+        }
+        message "\n\n=================================================================\n\n WARNING! \n\n\n This is a private computer system. Unauthorized access or use \n is prohibited and subject to prosecution and/or disciplinary \n action. All use of this system constitutes consent to \n monitoring at all times and users are not entitled to any \n expectation of privacy. If monitoring reveals possible evidence \n of violation of criminal statutes, this evidence and any other \n related information, including identification information about \n the user, may be provided to law enforcement officials. \n If monitoring reveals violations of security regulations or \n unauthorized use, employees who violate security regulations or \n make unauthorized use of this system are subject to appropriate \n disciplinary action.\n\n=================================================================\n\n";
+    }
+    services {
+        ssh {
+            root-login deny;
+            max-sessions-per-connection 32;
+        }
+        netconf {
+            ssh;
+        }
+    }
+    domain-name net.netlab.local;
+    time-zone GMT;
+    no-redirects;
+    no-redirects-ipv6;
+    no-ping-time-stamp;
+    internet-options {
+        no-source-quench;
+    }
+    authentication-order password;
+    name-server {
+        192.168.100.53;
+        192.168.100.53;
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        host 10.1.148.10 {
+            any notice;
+        }
+        host 192.168.100.100 {
+            any notice;
+            authorization info;
+            match "!(.*usage requires a license.*|.*is Unreachable.*|.*last message repeated.*|.*kernel time sync enabled.*|.*tcp_timer_keep.*|.*RT_IPSEC_BAD_SPI.*|.*JTASK_IO_CONNECT_FAILED.*)";
+        }
+        file default-log-messages {
+            any any;
+            match "(requested 'commit' operation)|(requested 'commit synchronize' operation)|(copying configuration to juniper.save)|(commit complete)|ifAdminStatus|(FRU power)|(FRU removal)|(FRU insertion)|(link UP)|transitioned|Transferred|transfer-file|(license add)|(license delete)|(package -X update)|(package -X delete)|(FRU Online)|(FRU Offline)|(plugged in)|(unplugged)|QF_NODE|QF_SERVER_NODE_GROUP|QF_INTERCONNECT|QF_DIRECTOR|QF_NETWORK_NODE_GROUP|(Master Unchanged, Members Changed)|(Master Changed, Members Changed)|(Master Detected, Members Changed)|(vc add)|(vc delete)|(Master detected)|(Master changed)|(Backup detected)|(Backup changed)|(interface vcp-)";
+            archive size 5m files 10;
+            structured-data;
+        }
+        file messages {
+            any notice;
+            authorization info;
+            match "!(.*usage requires a license.*|.*is Unreachable.*|.*last message repeated.*|.*kernel time sync enabled.*|.*tcp_timer_keep.*|.*RT_IPSEC_BAD_SPI.*|.*JTASK_IO_CONNECT_FAILED.*)";
+            archive size 5m files 10;
+            structured-data;
+        }
+        source-address 10.1.27.103;
+    }
+    ddos-protection {
+        traceoptions {
+            file ddos-protection size 5m files 3 world-readable;
+            level all;
+            flag protocol;
+            flag events;
+        }
+        protocols {
+            resolve {
+                aggregate {
+                    bandwidth 6000;
+                    burst 1000;
+                }
+            }
+            arp {
+                aggregate {
+                    bandwidth 20000;
+                    burst 10000;
+                }
+            }
+        }
+    }
+    ntp {
+        server 192.168.100.53;
+        server 192.168.100.100;
+        server 10.1.247.49;
+        server 10.1.243.49;
+        source-address 10.1.27.103;
+    }
+}
+chassis {
+    redundancy {
+        graceful-switchover;
+    }
+    aggregated-devices {
+        ethernet {
+            device-count 48;
+        }
+    }
+}
+interfaces {
+    xe-0/0/0 {
+        description bll1-aci01-09;
+        ether-options {
+            802.3ad ae10;
+        }
+    }
+    xe-0/0/1 {
+        description bll1-aci01-10;
+        ether-options {
+            802.3ad ae11;
+        }
+    }
+    xe-0/0/2 {
+        description bll1-aci01-11;
+        ether-options {
+            802.3ad ae12;
+        }
+    }
+    xe-0/0/3 {
+        description bll1-aci01-12;
+        ether-options {
+            802.3ad ae13;
+        }
+    }
+    xe-0/0/4 {
+        description bll1-aci01-13;
+        ether-options {
+            802.3ad ae14;
+        }
+    }
+    xe-0/0/5 {
+        description bll1-aci01-14;
+        ether-options {
+            802.3ad ae15;
+        }
+    }
+    xe-0/0/6 {
+        description bll1-aci01-15;
+        ether-options {
+            802.3ad ae16;
+        }
+    }
+    xe-0/0/7 {
+        description bll1-aci01-16;
+        ether-options {
+            802.3ad ae17;
+        }
+    }
+    xe-0/0/8 {
+        description bll1-aci01-17;
+        ether-options {
+            802.3ad ae18;
+        }
+    }
+    xe-0/0/9 {
+        description bll1-aci01-18;
+        ether-options {
+            802.3ad ae19;
+        }
+    }
+    xe-0/0/10 {
+        description bll1-aci01-24;
+        ether-options {
+            802.3ad ae20;
+        }
+    }
+    xe-0/0/11 {
+        description bll1-aci01-25;
+        ether-options {
+            802.3ad ae21;
+        }
+    }
+    xe-0/0/12 {
+        description bll1-aci01-26;
+        ether-options {
+            802.3ad ae22;
+        }
+    }
+    xe-0/0/13 {
+        description bll1-aci01-27;
+        ether-options {
+            802.3ad ae23;
+        }
+    }
+    xe-0/0/14 {
+        description bll1-aci01-28;
+        ether-options {
+            802.3ad ae24;
+        }
+    }
+    xe-0/0/15 {
+        description bll1-aci01-29;
+        ether-options {
+            802.3ad ae25;
+        }
+    }
+    xe-0/0/22 {
+        description bll1-sw-04;
+        ether-options {
+            802.3ad ae0;
+        }
+    }
+    et-0/0/26 {
+        description bll1-sw-01a;
+        ether-options {
+            802.3ad ae1;
+        }
+    }
+    xe-1/0/0 {
+        description bll1-aci01-09;
+        ether-options {
+            802.3ad ae10;
+        }
+    }
+    xe-1/0/1 {
+        description bll1-aci01-10;
+        ether-options {
+            802.3ad ae11;
+        }
+    }
+    xe-1/0/2 {
+        description bll1-aci01-11;
+        ether-options {
+            802.3ad ae12;
+        }
+    }
+    xe-1/0/3 {
+        description bll1-aci01-12;
+        ether-options {
+            802.3ad ae13;
+        }
+    }
+    xe-1/0/4 {
+        description bll1-aci01-13;
+        ether-options {
+            802.3ad ae14;
+        }
+    }
+    xe-1/0/5 {
+        description bll1-aci01-14;
+        ether-options {
+            802.3ad ae15;
+        }
+    }
+    xe-1/0/6 {
+        description bll1-aci01-15;
+        ether-options {
+            802.3ad ae16;
+        }
+    }
+    xe-1/0/7 {
+        description bll1-aci01-16;
+        ether-options {
+            802.3ad ae17;
+        }
+    }
+    xe-1/0/8 {
+        description bll1-aci01-17;
+        ether-options {
+            802.3ad ae18;
+        }
+    }
+    xe-1/0/9 {
+        description bll1-aci01-18;
+        ether-options {
+            802.3ad ae19;
+        }
+    }
+    xe-1/0/10 {
+        description bll1-aci01-24;
+        ether-options {
+            802.3ad ae20;
+        }
+    }
+    xe-1/0/11 {
+        description bll1-aci01-25;
+        ether-options {
+            802.3ad ae21;
+        }
+    }
+    xe-1/0/12 {
+        description bll1-aci01-26;
+        ether-options {
+            802.3ad ae22;
+        }
+    }
+    xe-1/0/13 {
+        description bll1-aci01-27;
+        ether-options {
+            802.3ad ae23;
+        }
+    }
+    xe-1/0/14 {
+        description bll1-aci01-28;
+        ether-options {
+            802.3ad ae24;
+        }
+    }
+    xe-1/0/15 {
+        description bll1-aci01-29;
+        ether-options {
+            802.3ad ae25;
+        }
+    }
+    xe-1/0/22 {
+        description bll1-sw-04;
+        ether-options {
+            802.3ad ae0;
+        }
+    }
+    et-1/0/26 {
+        description bll1-sw-01b;
+        ether-options {
+            802.3ad ae1;
+        }
+    }
+    ae0 {
+        description bll1-sw-04;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan14 vlan21 vlan22 ];
+                }
+            }
+        }
+    }
+    ae1 {
+        description bll1-sw-01;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan21 vlan22 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae10 {
+        description bll1-aci01-09;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae11 {
+        description bll1-aci01-10;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae12 {
+        description bll1-aci01-11;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae13 {
+        description bll1-aci01-12;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae14 {
+        description bll1-aci01-13;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae15 {
+        description bll1-aci01-14;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae16 {
+        description bll1-aci01-15;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae17 {
+        description bll1-aci01-16;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae18 {
+        description bll1-aci01-17;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae19 {
+        description bll1-aci01-18;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae20 {
+        description bll1-aci01-24;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae21 {
+        description bll1-aci01-25;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae22 {
+        description bll1-aci01-26;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae23 {
+        description bll1-aci01-27;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae24 {
+        description bll1-aci01-28;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    ae25 {
+        description bll1-aci01-29;
+        mtu 9216;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan10 vlan14 vlan19 vlan20 vlan28 vlan33 vlan34 vlan66 vlan115 vlan206 vlan216 vlan226 ];
+                }
+            }
+        }
+    }
+    lo0 {
+        unit 0 {
+            family inet {
+                filter {
+                    input filter-all-in-one;
+                }
+            }
+            family inet6 {
+                filter {
+                    input filter-all-in-one-v6;
+                }
+            }
+        }
+    }
+    vme {
+        unit 0 {
+            family inet {
+                filter {
+                    input filter-all-in-one;
+                }
+                address 10.1.27.103/24;
+            }
+            family inet6;
+        }
+    }
+}
+snmp {
+    location BLL1;
+    v3 {
+        usm {
+            local-engine {
+                user snmp_monitor_amer {
+                    authentication-sha {
+                        authentication-key "$9$o0aZjP5Q3/C.mIEhSMWDiHkfT6/t01RikRhcSeK8X7dVY24aGUHevaZDjPf1REcyKvWL-bsvMGDjHmP0B1IylKvLbYgMWX-ws4oCtpuRhWLxbwgdV4Z";
+                    }
+                    privacy-aes128 {
+                        privacy-key "$9$98z.A1RrlMWxN69evLxdVs24aikTz3AtOGD69p0IRSrevxNY2ajk.4oz36Cu0-VbwaZk.P3nCgoZjHkTQn/CtIESyK8LNle";
+                    }
+                }
+                user snmp_monitor_emea {
+                    authentication-sha {
+                        authentication-key "$9$J7GUH5T3AtOzF/tu0IRVws4GDiHmF39Qz6At0IR7-dws4Djqf5FiH0B1EyrgoaZk.5T36CtzFylvMN-k.mfFn9Ap01RiktuO1hc24oZGi.P53nCoJUH";
+                    }
+                    privacy-aes128 {
+                        privacy-key "$9$ngAA/CuO1RrKMQFylKv7NfTQ3Ap0BIESr5QylvMN-qmPf36/CtpO1GDqfQz6/p0BEhrlKML7-vMUjH.5TRhcyvWdbsYoJhS";
+                    }
+                }
+                user snmp_monitor_apac {
+                    authentication-sha {
+                        authentication-key "$9$vweM7-Vb2aJDVbTzn6u0NdVs2ajHq5T3kq1RhSMW-VwYZUji.zF/5TEcSlMWX7-dgoji.mTzGU69puEhlKML-VaZUkmfGU/CtpREs2gJZjmfT/9pzF6A";
+                    }
+                    privacy-aes128 {
+                        privacy-key "$9$OdpU1IceK8x7Vp0Vw2gJZp0OBcyleWdwYW8Diq.zF69Apu1lKM87-ApLx7NbwfTQFCtp0BSyKB1X7NVY24aZji.mfTF695T";
+                    }
+                }
+                user snmp_telemetry {
+                    authentication-sha {
+                        authentication-key "$9$SFurlM8X7-wY0BX7dVY2n/9C0BEcyeK836u1EcleaZGDqmTQnpO16/evMWx7P5TFnC0ORSyK1IVws2aJApu1IcSrevLx9A0IREyrevWLX-bwgGjHJZ69";
+                    }
+                    privacy-aes128 {
+                        privacy-key "$9$SgBreW8X7-wYW8Hq.mTQIEhyM8wYgoaUSrZUDif5EcSyWLdVYJUj2gZjq.5TcyreK8xNdsYo-d2aGUHk1REhevXxdw24dV";
+                    }
+                }
+            }
+        }
+        vacm {
+            security-to-group {
+                security-model usm {
+                    security-name snmp_monitor_amer {
+                        group snmp_group_ro;
+                    }
+                    security-name snmp_monitor_emea {
+                        group snmp_group_ro;
+                    }
+                    security-name snmp_monitor_apac {
+                        group snmp_group_ro;
+                    }
+                    security-name snmp_telemetry {
+                        group snmp_group_ro;
+                    }
+                }
+            }
+            access {
+                group snmp_group_ro {
+                    default-context-prefix {
+                        security-model usm {
+                            security-level privacy {
+                                read-view snmp_view;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    engine-id {
+        local 00c52c443d42;
+    }
+    view snmp_view {
+        oid .1 include;
+    }
+}
+forwarding-options {
+    storm-control-profiles default {
+        all {
+            bandwidth-percentage 10;
+        }
+    }
+}
+policy-options {
+    prefix-list DNS-servers-v4 {
+        apply-path "system name-server <*.*>";
+    }
+    prefix-list DNS-servers-v6 {
+        apply-path "system name-server <*:*>";
+    }
+    prefix-list GRPC-SERVERS-v4 {
+        10.1.220.240/32;
+    }
+    prefix-list LOCALS-v4 {
+        apply-path "interfaces <*> unit <*> family inet address <*>";
+    }
+    prefix-list LOCALS-v6 {
+        apply-path "interfaces <*> unit <*> family inet6 address <*>";
+    }
+    prefix-list NTP-servers-v4 {
+        apply-path "system ntp server <*.*>";
+    }
+    prefix-list NTP-servers-v6 {
+        apply-path "system ntp server <*:*>";
+    }
+    prefix-list RADIUS-servers {
+        apply-path "system radius-server <*>";
+    }
+    prefix-list SNMP-clients {
+        10.1.220.240/32;
+        192.168.100.100/32;
+        10.1.243.199/32;
+        192.168.100.53/32;
+        192.168.100.53/32;
+    }
+    prefix-list all-unit0-interfaces {
+        apply-path "interfaces <*> unit 0 family inet address <*>";
+    }
+    prefix-list dco-external-ssh {
+        4.16.136.120/29;
+        162.244.7.1/32;
+        162.244.7.2/32;
+        185.151.160.8/32;
+        185.151.162.4/32;
+    }
+    prefix-list source-ip-prefixes {
+        10.1.0.0/16;
+    }
+    prefix-list vlan14-interface {
+        apply-path "interfaces <*> unit 14 family inet address <*>";
+    }
+    prefix-list vme-interface {
+        apply-path "interfaces vme unit 0 family inet address <*>";
+    }
+}
+firewall {
+    family inet {
+        filter filter-all-in-one {
+            term accept-dns {
+                from {
+                    source-prefix-list {
+                        DNS-servers-v4;
+                    }
+                    destination-prefix-list {
+                        vme-interface;
+                        vlan14-interface;
+                    }
+                    protocol [ udp tcp ];
+                    source-port 53;
+                }
+                then accept;
+            }
+            term accept-icmp {
+                from {
+                    protocol icmp;
+                    icmp-type [ echo-reply echo-request time-exceeded unreachable source-quench router-advertisement parameter-problem timestamp ];
+                }
+                then accept;
+            }
+            term accept-netconf-mgmt {
+                from {
+                    source-prefix-list {
+                        source-ip-prefixes;
+                    }
+                    destination-prefix-list {
+                        vme-interface;
+                        vlan14-interface;
+                    }
+                    protocol tcp;
+                    destination-port 830;
+                }
+                then accept;
+            }
+            term accept-ntp {
+                from {
+                    source-prefix-list {
+                        NTP-servers-v4;
+                        vme-interface;
+                        vlan14-interface;
+                    }
+                    destination-prefix-list {
+                        NTP-servers-v4;
+                        vme-interface;
+                        vlan14-interface;
+                    }
+                    protocol udp;
+                    destination-port ntp;
+                }
+                then accept;
+            }
+            term accept-ntp-source {
+                from {
+                    source-prefix-list {
+                        NTP-servers-v4;
+                        vme-interface;
+                        vlan14-interface;
+                    }
+                    destination-prefix-list {
+                        NTP-servers-v4;
+                        vme-interface;
+                        vlan14-interface;
+                    }
+                    protocol udp;
+                    source-port ntp;
+                }
+                then accept;
+            }
+            term accept-snmp {
+                from {
+                    source-prefix-list {
+                        SNMP-clients;
+                    }
+                    destination-prefix-list {
+                        all-unit0-interfaces;
+                        vlan14-interface;
+                    }
+                    protocol udp;
+                    destination-port snmp;
+                }
+                then accept;
+            }
+            term accept-ssh-mgmt {
+                from {
+                    source-prefix-list {
+                        source-ip-prefixes;
+                    }
+                    destination-prefix-list {
+                        vme-interface;
+                        vlan14-interface;
+                    }
+                    protocol tcp;
+                    destination-port ssh;
+                }
+                then accept;
+            }
+            term accept-ssh {
+                from {
+                    source-prefix-list {
+                        dco-external-ssh;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v4;
+                    }
+                    protocol tcp;
+                    destination-port ssh;
+                }
+                then accept;
+            }
+            term accept-traceroute-icmp {
+                from {
+                    destination-prefix-list {
+                        all-unit0-interfaces;
+                    }
+                    protocol icmp;
+                    icmp-type [ echo-request echo-reply timestamp time-exceeded ];
+                }
+                then accept;
+            }
+            term accept-traceroute-udp {
+                from {
+                    destination-prefix-list {
+                        all-unit0-interfaces;
+                    }
+                    protocol udp;
+                    destination-port 33434-33534;
+                }
+                then accept;
+            }
+            term allow-tcp-est {
+                from {
+                    protocol tcp;
+                    tcp-established;
+                }
+                then accept;
+            }
+            term discard-icmp-fragments {
+                from {
+                    is-fragment;
+                    protocol icmp;
+                }
+                then {
+                    discard;
+                }
+            }
+            term discard-icmp {
+                from {
+                    protocol icmp;
+                }
+                then {
+                    discard;
+                }
+            }
+            term discard-tcp {
+                from {
+                    protocol tcp;
+                }
+                then {
+                    discard;
+                }
+            }
+            term discard-udp {
+                from {
+                    protocol udp;
+                }
+                then {
+                    discard;
+                }
+            }
+            term discard-unknown {
+                then {
+                    discard;
+                }
+            }
+        }
+    }
+    family inet6 {
+        filter filter-all-in-one-v6 {
+            term accept-v6-icmp {
+                from {
+                    next-header icmp6;
+                    icmp-type [ echo-reply echo-request time-exceeded router-advertisement parameter-problem destination-unreachable packet-too-big router-solicit neighbor-solicit neighbor-advertisement redirect ];
+                }
+                then accept;
+            }
+            term accept-tcp-est-v6 {
+                from {
+                    next-header tcp;
+                    tcp-established;
+                }
+                then accept;
+            }
+            term accept-v6-traceroute-udp {
+                from {
+                    destination-prefix-list {
+                        LOCALS-v6;
+                    }
+                    next-header udp;
+                    destination-port 33434-33450;
+                    hop-limit 1;
+                }
+                then accept;
+            }
+            term accept-v6-traceroute-icmp {
+                from {
+                    destination-prefix-list {
+                        LOCALS-v6;
+                    }
+                    next-header icmp6;
+                    icmp-type [ echo-reply echo-request router-advertisement parameter-problem destination-unreachable packet-too-big router-solicit neighbor-solicit neighbor-advertisement redirect ];
+                    hop-limit 1;
+                }
+                then accept;
+            }
+            term accept-v6-dns {
+                from {
+                    source-prefix-list {
+                        DNS-servers-v6;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v6;
+                    }
+                    next-header udp;
+                    source-port 53;
+                }
+            }
+            term accept-v6-ntp {
+                from {
+                    source-prefix-list {
+                        NTP-servers-v6;
+                        LOCALS-v6;
+                    }
+                    destination-prefix-list {
+                        LOCALS-v6;
+                    }
+                    next-header udp;
+                    destination-port ntp;
+                }
+                then accept;
+            }
+            term discard-v6-tcp {
+                from {
+                    next-header tcp;
+                }
+                then discard;
+            }
+            term discard-v6-udp {
+                from {
+                    next-header udp;
+                }
+                then discard;
+            }
+            term discard-v6-icmp {
+                from {
+                    destination-prefix-list {
+                        LOCALS-v6;
+                    }
+                    next-header icmp6;
+                }
+                then discard;
+            }
+            term discard-v6-unknown {
+                then discard;
+            }
+        }
+    }
+    policer additional-1m {
+        if-exceeding {
+            bandwidth-limit 1m;
+            burst-size-limit 625k;
+        }
+        then discard;
+    }
+    policer management-1m {
+        if-exceeding {
+            bandwidth-limit 1m;
+            burst-size-limit 625k;
+        }
+        then discard;
+    }
+    policer management-512k {
+        if-exceeding {
+            bandwidth-limit 512k;
+            burst-size-limit 25k;
+        }
+        then discard;
+    }
+    policer management-5m {
+        if-exceeding {
+            bandwidth-limit 5m;
+            burst-size-limit 625k;
+        }
+        then discard;
+    }
+}
+routing-options {
+    static {
+        route 10.1.0.0/16 next-hop 10.1.27.1;
+    }
+    nonstop-routing;
+}
+protocols {
+    lldp {
+        port-id-subtype interface-name;
+        interface all;
+    }
+    layer2-control {
+        nonstop-bridging;
+        bpdu-block {
+            disable-timeout 420;
+        }
+    }
+    mstp {
+        configuration-name BLL1;
+        revision-level 12;
+        interface all;
+        msti 1 {
+            vlan 14;
+        }
+    }
+}
+virtual-chassis {
+    preprovisioned;
+    no-split-detection;
+    member 0 {
+        role routing-engine;
+        serial-number TC3721360250;
+    }
+    member 1 {
+        role routing-engine;
+        serial-number TC3721360759;
+    }
+}
+vlans {
+    vlan10 {
+        description storage_wan;
+        vlan-id 10;
+    }
+    vlan115 {
+        description aci_overlay;
+        vlan-id 115;
+    }
+    vlan14 {
+        description ntw_management;
+        vlan-id 14;
+    }
+    vlan19 {
+        vlan-id 19;
+    }
+    vlan20 {
+        vlan-id 20;
+    }
+    vlan206 {
+        description dr2_mgmt_vdc1;
+        vlan-id 206;
+    }
+    vlan21 {
+        description ipmi;
+        vlan-id 21;
+    }
+    vlan216 {
+        description dr2_dr_agent_to_storage_vdc1;
+        vlan-id 216;
+    }
+    vlan22 {
+        description storage_pxe;
+        vlan-id 22;
+    }
+    vlan226 {
+        description dr2_content_vdc1;
+        vlan-id 226;
+    }
+    vlan28 {
+        description storage_traffic;
+        vlan-id 28;
+    }
+    vlan33 {
+        description ntw_vsrx_fab;
+        vlan-id 33;
+    }
+    vlan34 {
+        description ntw_vsrx_con;
+        vlan-id 34;
+    }
+    vlan66 {
+        description ntw_server_vlan;
+        vlan-id 66;
+    }
+}

@@ -1,0 +1,36 @@
+id: ospf_neighbor_stuck
+title: OSPF neighbor stuck in Init/ExStart/Loading
+category: routing
+severity: medium
+description: >
+  Diagnose OSPF adjacency that fails to reach Full state.
+  Common causes: area mismatch, MTU mismatch, hello/dead timer mismatch,
+  authentication mismatch, network type mismatch.
+
+inputs:
+  device: { required: true }
+  peer_router_id: { required: false }
+  vendor: { required: false }
+
+steps:
+  - id: collect_neighbors
+    type: check
+    canonical_task: ospf_neighbors
+
+  - id: collect_interface_status
+    type: check
+    canonical_task: interface_status
+    description: Verify MTU values on the OSPF-enabled interfaces.
+
+  - id: collect_log
+    type: check
+    canonical_task: log_recent
+    description: Look for "OSPF", "MTU", "area", "auth", "Mismatched".
+
+  - id: analyze
+    type: ai
+    description: Identify which mismatch (area / MTU / timers / auth) is at fault.
+
+post_checks:
+  - canonical_task: ospf_neighbors
+    expect_substring: "Full"

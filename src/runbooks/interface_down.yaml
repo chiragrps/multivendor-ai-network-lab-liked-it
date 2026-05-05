@@ -1,0 +1,37 @@
+id: interface_down
+title: Interface is administratively or operationally down
+category: interface
+severity: high
+description: >
+  Investigate a down interface, distinguish admin-down from physical down,
+  and apply the safe vendor-specific remediation.
+
+inputs:
+  device:    { required: true }
+  interface: { required: true, description: "e.g. eth0, ge-0/0/0, Ethernet1" }
+  vendor:    { required: false }
+
+steps:
+  - id: collect_interface_status
+    type: check
+    canonical_task: interface_status
+
+  - id: collect_log
+    type: check
+    canonical_task: log_recent
+    description: Look for "link-down", "carrier", "SFP", "errdisable".
+
+  - id: classify
+    type: ai
+    description: Decide admin-down vs physical-down vs errdisable.
+
+  - id: no_shutdown
+    type: remediate
+    canonical_task: shutdown_interface
+    destructive: true
+    requires_approval: true
+    description: If admin-down, bring interface back up (no shutdown / set delete disable).
+
+post_checks:
+  - canonical_task: interface_status
+    expect_substring: "up"
