@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Multivendor AI Network Lab — Architecture Diagram</title>
+<style>
+:root{
+  --bg:#05050e;--card:#0a0a18;--border:#1a1a38;
+  --accent:#00d4ff;--green:#22c55e;--red:#ff4444;
+  --yellow:#ffd700;--purple:#a855f7;--orange:#ff8c42;
+  --teal:#00e5cc;--pink:#ff6eb4;--blue:#3b82f6;
+  --text:#e2e8f0;--muted:#4a5568;--muted2:#64748b;
+  --font:'SF Mono','Fira Code',Consolas,monospace
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;padding:32px 24px}
+h1{text-align:center;font-size:22px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+.subtitle{text-align:center;font-size:13px;color:var(--muted);margin-bottom:36px;letter-spacing:.06em}
+
+.diagram{display:flex;flex-direction:column;gap:0;max-width:1500px;margin:0 auto}
+.layer{position:relative;margin-bottom:0}
+.layer-label{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-left:4px;display:flex;align-items:center;gap:8px}
+.layer-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.connector{display:flex;justify-content:center;align-items:center;height:36px;position:relative}
+.connector::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,transparent,var(--border),transparent)}
+.connector-label{font-size:11px;color:var(--muted2);background:var(--bg);padding:2px 10px;position:relative;z-index:1;border:1px solid var(--border);border-radius:10px;letter-spacing:.06em}
+
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.box{border-radius:8px;border:1px solid var(--border);padding:12px 14px;transition:border-color .2s,box-shadow .2s;position:relative;overflow:hidden}
+.box:hover{border-color:rgba(0,212,255,.4);box-shadow:0 0 20px rgba(0,212,255,.08)}
+.box::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.025) 0%,transparent 60%);pointer-events:none}
+
+.box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.box-body{font-size:11px;color:var(--muted2);line-height:1.6}
+.tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:.05em;margin:1px 2px 1px 0;text-transform:uppercase}
+.new-badge{display:inline-block;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;background:rgba(0,229,204,.18);color:var(--teal);border:1px solid rgba(0,229,204,.35);letter-spacing:.05em;vertical-align:middle;margin-left:4px}
+.p3-badge{display:inline-block;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;background:rgba(255,215,0,.18);color:var(--yellow);border:1px solid rgba(255,215,0,.35);letter-spacing:.05em;vertical-align:middle;margin-left:4px}
+
+.c-accent{background:rgba(0,212,255,.08);border-color:rgba(0,212,255,.3)}.c-accent .box-title{color:var(--accent)}
+.c-green{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.3)}.c-green .box-title{color:var(--green)}
+.c-red{background:rgba(255,68,68,.06);border-color:rgba(255,68,68,.25)}.c-red .box-title{color:var(--red)}
+.c-yellow{background:rgba(255,215,0,.06);border-color:rgba(255,215,0,.25)}.c-yellow .box-title{color:var(--yellow)}
+.c-purple{background:rgba(168,85,247,.06);border-color:rgba(168,85,247,.3)}.c-purple .box-title{color:var(--purple)}
+.c-orange{background:rgba(255,140,66,.06);border-color:rgba(255,140,66,.25)}.c-orange .box-title{color:var(--orange)}
+.c-teal{background:rgba(0,229,204,.06);border-color:rgba(0,229,204,.3)}.c-teal .box-title{color:var(--teal)}
+.c-pink{background:rgba(255,110,180,.06);border-color:rgba(255,110,180,.25)}.c-pink .box-title{color:var(--pink)}
+.c-blue{background:rgba(59,130,246,.06);border-color:rgba(59,130,246,.3)}.c-blue .box-title{color:var(--blue)}
+.c-dark{background:rgba(255,255,255,.02);border-color:var(--border)}.c-dark .box-title{color:var(--muted2)}
+
+.t-accent{background:rgba(0,212,255,.12);color:var(--accent);border:1px solid rgba(0,212,255,.2)}
+.t-green{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.t-red{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.2)}
+.t-yellow{background:rgba(255,215,0,.12);color:var(--yellow);border:1px solid rgba(255,215,0,.2)}
+.t-purple{background:rgba(168,85,247,.12);color:var(--purple);border:1px solid rgba(168,85,247,.2)}
+.t-orange{background:rgba(255,140,66,.12);color:var(--orange);border:1px solid rgba(255,140,66,.2)}
+.t-teal{background:rgba(0,229,204,.12);color:var(--teal);border:1px solid rgba(0,229,204,.2)}
+.t-pink{background:rgba(255,110,180,.12);color:var(--pink);border:1px solid rgba(255,110,180,.2)}
+.t-blue{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
+.t-muted{background:rgba(255,255,255,.05);color:var(--muted2);border:1px solid var(--border)}
+
+.w1{flex:1;min-width:140px}.w2{flex:2;min-width:200px}.w3{flex:3;min-width:260px}.w4{flex:4;min-width:340px}
+.full{width:100%;flex:none}
+
+/* Device grid — 26 devices */
+.device-grid{display:grid;grid-template-columns:repeat(13,1fr);gap:6px;margin-top:6px}
+.dev-box{border-radius:5px;padding:6px 4px;text-align:center;border:1px solid var(--border);background:rgba(255,255,255,.02);font-size:9px;cursor:default;transition:transform .15s,box-shadow .2s}
+.dev-box:hover{transform:translateY(-2px) scale(1.05)}
+.dev-name{font-weight:700;font-family:var(--font);letter-spacing:.02em}
+.dev-site{color:var(--muted);font-size:8px;margin-top:2px}
+.dev-jns{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.35)}.dev-jns .dev-name{color:var(--green)}
+.dev-eos{background:rgba(59,130,246,.07);border-color:rgba(59,130,246,.35)}.dev-eos .dev-name{color:var(--blue)}
+.dev-frr{background:rgba(168,85,247,.07);border-color:rgba(168,85,247,.35)}.dev-frr .dev-name{color:var(--purple)}
+
+/* Tab grid — 12 demo tabs */
+.tab-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:6px}
+.tab-box{border-radius:6px;padding:9px 8px;border:1px solid var(--border);background:rgba(255,255,255,.02);transition:transform .2s,border-color .2s,box-shadow .2s}
+.tab-box:hover{transform:translateY(-2px);box-shadow:0 0 14px rgba(0,212,255,.2)}
+.tab-name{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.tab-icon{font-size:13px}
+.tab-feat{font-size:9px;color:var(--muted2);line-height:1.45}
+.tab-p3{border-color:rgba(255,215,0,.4);background:rgba(255,215,0,.04)}.tab-p3 .tab-name{color:var(--yellow)}
+.tab-mv{border-color:rgba(0,229,204,.35);background:rgba(0,229,204,.04)}.tab-mv .tab-name{color:var(--teal)}
+
+/* Tool grid */
+.tool-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
+.tool-box{border-radius:7px;padding:11px 10px;border:1px solid rgba(0,229,204,.25);background:rgba(0,229,204,.04);transition:transform .2s,box-shadow .2s,border-color .2s}
+.tool-box:hover{transform:translateY(-2px);border-color:rgba(0,229,204,.6);box-shadow:0 0 16px rgba(0,229,204,.18)}
+.tool-name{font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.tool-desc{font-size:10px;color:var(--muted2);line-height:1.5}
+.tool-meta{font-size:9px;color:var(--muted);margin-top:5px}
+
+/* Reference patterns grid */
+.ref-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
+.ref-box{border-radius:7px;padding:11px 10px;border:1px solid rgba(255,215,0,.2);background:rgba(255,215,0,.04)}
+.ref-box:hover{border-color:rgba(255,215,0,.5);background:rgba(255,215,0,.07)}
+.ref-name{font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:5px}
+.ref-desc{font-size:10px;color:var(--muted2);line-height:1.5}
+
+.legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:24px;padding:14px;border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,.015)}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted2)}
+.leg-dot{width:10px;height:10px;border-radius:3px}
+
+.layer,.legend{opacity:0;transform:translateY(28px);transition:opacity .6s ease,transform .6s ease}
+.layer.visible,.legend.visible{opacity:1;transform:translateY(0)}
+
+.layer.visible .box,
+.layer.visible .dev-box,
+.layer.visible .tab-box,
+.layer.visible .tool-box,
+.layer.visible .ref-box{animation:fadeSlide .42s ease both}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+.layer.visible .dev-box:nth-child(1){animation-delay:.02s}.layer.visible .dev-box:nth-child(2){animation-delay:.04s}
+.layer.visible .dev-box:nth-child(3){animation-delay:.06s}.layer.visible .dev-box:nth-child(4){animation-delay:.08s}
+.layer.visible .dev-box:nth-child(5){animation-delay:.1s}.layer.visible .dev-box:nth-child(6){animation-delay:.12s}
+.layer.visible .dev-box:nth-child(7){animation-delay:.14s}.layer.visible .dev-box:nth-child(8){animation-delay:.16s}
+.layer.visible .dev-box:nth-child(9){animation-delay:.18s}.layer.visible .dev-box:nth-child(10){animation-delay:.2s}
+.layer.visible .dev-box:nth-child(n+11){animation-delay:.22s}
+
+.connector{position:relative;height:44px;display:flex;justify-content:center;align-items:center;overflow:hidden}
+.connector::before{content:'';position:absolute;left:50%;top:0;width:2px;height:200%;
+  background:linear-gradient(to bottom,transparent 0%,var(--accent) 50%,transparent 100%);
+  animation:flowDown 1.6s linear infinite;transform:translateX(-50%)}
+@keyframes flowDown{from{top:-100%}to{top:100%}}
+
+h1{animation:floatTitle 3.5s ease-in-out infinite}
+@keyframes floatTitle{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+h1::after{content:'';display:block;margin:6px auto 0;width:120px;height:2px;
+  background:linear-gradient(to right,transparent,var(--accent),transparent);
+  animation:sweepGlow 2.5s ease-in-out infinite}
+@keyframes sweepGlow{0%,100%{width:60px;opacity:.4}50%{width:240px;opacity:1}}
+
+.live-pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);
+  animation:livePulse 1.5s ease-in-out infinite;vertical-align:middle;margin-right:4px}
+@keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.6)}70%{box-shadow:0 0 0 6px rgba(34,197,94,0)}}
+
+.dev-box,.tool-box,.tab-box,.ref-box{cursor:default;transition:transform .2s,box-shadow .2s,background .2s,border-color .2s}
+
+.box::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.04) 50%,transparent 70%);
+  opacity:0;transition:opacity .3s;pointer-events:none}
+.box:hover::after{opacity:1;animation:shimmer .6s ease forwards}
+@keyframes shimmer{from{background-position:-200px 0}to{background-position:200px 0}}
+
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.03) 3px,rgba(0,0,0,.03) 4px);
+  opacity:.6}
+
+/* BGP session indicator pulse */
+.bgp-pulse{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--orange);
+  animation:bgpPulse 2.2s ease-in-out infinite;vertical-align:middle;margin-right:4px}
+@keyframes bgpPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,140,66,.55)}65%{box-shadow:0 0 0 5px rgba(255,140,66,0)}}
+</style>
+</head>
+<body>
+
+<h1>⬡ Multivendor AI Network Lab · Phase 3</h1>
+<p class="subtitle">26 devices · Juniper / Arista / FRR · Pydantic-AI Orchestrator · NIKA-style Eval Harness · GAIT Audit · MCP Server (49 tools) · Vendor-Agnostic · May 2026</p>
+
+<div class="diagram">
+
+  <!-- ═══ LAYER 1: REFERENCE PATTERNS ═══ -->
+  <div class="layer">
+    <div class="layer-label">📚 Layer 0 — Reference Projects (Patterns Extracted &amp; Adapted)</div>
+    <div class="ref-grid">
+      <div class="ref-box">
+        <div class="ref-name">🦞 NetClaw <span class="new-badge">automateyournetwork</span></div>
+        <div class="ref-desc">GAIT immutable Git audit · TOON serialization · Intent verification · Hop-by-hop path trace · CCIE-level skill registry · 72 MCP servers</div>
+      </div>
+      <div class="ref-box">
+        <div class="ref-name">🧪 NIKA <span class="new-badge">sands-lab</span></div>
+        <div class="ref-desc">640 incident scenarios · LLM-as-judge scoring · Composable fault injection · Kathará containers · ReAct agents · 5 scenario categories</div>
+      </div>
+      <div class="ref-box">
+        <div class="ref-name">🤖 pydantic-ai <span class="new-badge">Hugo Tinoco</span></div>
+        <div class="ref-desc">Multi-agent orchestrator · Structured BaseModel outputs · OpenRouter/DeepSeek · BatfishRunContext · Agent-as-tool delegation</div>
+      </div>
+      <div class="ref-box">
+        <div class="ref-name">🔌 codingnetworks.blog <span class="new-badge">MPLS+MCP</span></div>
+        <div class="ref-desc">fastmcp Python server · 40 tool functions · Claude operates real MPLS network · Destructive command gating · Autonomous root-cause</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><span class="connector-label">↓ Patterns Adapted to Multivendor + Vendor-Agnostic ↓</span></div>
+
+  <!-- ═══ LAYER 1: NETWORK DEVICES ═══ -->
+  <div class="layer">
+    <div class="layer-label">🌐 Layer 1 — Multivendor Lab (26 Devices · 5 Sites · BGP Mesh)</div>
+    <div class="row" style="margin-bottom:10px">
+      <div class="box c-green w1">
+        <div class="box-title">🟢 Juniper · 10</div>
+        <div class="box-body">Sanitized real configs · SRX firewalls · MX core routers · EX switches · Junos 19.4–21.4</div>
+        <div style="margin-top:6px"><span class="tag t-green">junos</span><span class="tag t-green">PyEZ</span><span class="tag t-muted">NETCONF</span></div>
+      </div>
+      <div class="box c-blue w1">
+        <div class="box-title">🔵 Arista · 6</div>
+        <div class="box-body">Sanitized real configs · DCS-7280CR3K routers · DCS-7050CX3 leaves · EOS 4.25–4.30</div>
+        <div style="margin-top:6px"><span class="tag t-blue">eos</span><span class="tag t-blue">eAPI</span><span class="tag t-muted">CloudVision</span></div>
+      </div>
+      <div class="box c-purple w1">
+        <div class="box-title">🟣 FRR · 10 <span class="p3-badge">LIVE</span></div>
+        <div class="box-body">Docker containers · ports 2201–2210 · Core/Edge/Dist roles · BGP+OSPF mesh · ASN 65001–65010</div>
+        <div style="margin-top:6px"><span class="tag t-purple">frr</span><span class="tag t-purple">vtysh</span><span class="tag t-muted">SSH+exec</span></div>
+      </div>
+      <div class="box c-orange w2">
+        <div class="box-title"><span class="bgp-pulse"></span>BGP Topology Graph</div>
+        <div class="box-body">10 inventory.json sessions (iBGP/eBGP) + 22 site-LAN edges = full any-to-any path coverage · BFS hop-by-hop trace · Vendor-colored SVG</div>
+        <div style="margin-top:6px"><span class="tag t-orange">iBGP</span><span class="tag t-orange">eBGP</span><span class="tag t-orange">site-LAN</span></div>
+      </div>
+      <div class="box c-yellow w1">
+        <div class="box-title">🌍 5 Sites</div>
+        <div class="box-body">DE-FRA · UK-LON · NL-AMS · EU-CDG · US-NYC</div>
+        <div style="margin-top:6px"><span class="tag t-yellow">EMEA</span><span class="tag t-yellow">AMER</span></div>
+      </div>
+    </div>
+    <div class="device-grid">
+      <div class="dev-box dev-jns"><div class="dev-name">fra-fw-01</div><div class="dev-site">FRA · SRX</div></div>
+      <div class="dev-box dev-jns"><div class="dev-name">fra-mx-01</div><div class="dev-site">FRA · MX</div></div>
+      <div class="dev-box dev-jns"><div class="dev-name">fra-ex-01</div><div class="dev-site">FRA · EX</div></div>
+      <div class="dev-box dev-jns"><div class="dev-name">fra-ex-02</div><div class="dev-site">FRA · EX</div></div>
+      <div class="dev-box dev-jns"><div class="dev-name">lon-fw-01</div><div class="dev-site">LON · SRX</div></div>
+      <div class="dev-box dev-jns"><div class="dev-name">lon-ex-01</div><div class="dev-site">LON · EX</div></div>
+      <div class="dev-box dev-jns"><div class="dev-name">ams-fw-01</div><div class="dev-site">AMS · SRX</div></div>
+      <div class="dev-box dev-jns"><div class="dev-name">ams-ex-01</div><div class="dev-site">AMS · EX</div></div>
+      <div class="dev-box dev-jns"><div class="dev-name">cdg-mx-01</div><div class="dev-site">CDG · MX</div></div>
+      <div class="dev-box dev-jns"><div class="dev-name">nyc-fw-01</div><div class="dev-site">NYC · SRX</div></div>
+      <div class="dev-box dev-eos"><div class="dev-name">fra-eos-rt-01</div><div class="dev-site">FRA · 7280</div></div>
+      <div class="dev-box dev-eos"><div class="dev-name">fra-eos-sw-01</div><div class="dev-site">FRA · 7050</div></div>
+      <div class="dev-box dev-eos"><div class="dev-name">ams-eos-rt-01</div><div class="dev-site">AMS · 7280</div></div>
+      <div class="dev-box dev-eos"><div class="dev-name">ams-eos-sw-01</div><div class="dev-site">AMS · 7050</div></div>
+      <div class="dev-box dev-eos"><div class="dev-name">cdg-eos-rt-01</div><div class="dev-site">CDG · 7280</div></div>
+      <div class="dev-box dev-eos"><div class="dev-name">nyc-eos-rt-01</div><div class="dev-site">NYC · 7280</div></div>
+      <div class="dev-box dev-frr"><div class="dev-name">fra-core-01</div><div class="dev-site">FRA · :2201</div></div>
+      <div class="dev-box dev-frr"><div class="dev-name">fra-core-02</div><div class="dev-site">FRA · :2202</div></div>
+      <div class="dev-box dev-frr"><div class="dev-name">fra-edge-01</div><div class="dev-site">FRA · :2205</div></div>
+      <div class="dev-box dev-frr"><div class="dev-name">fra-dist-01</div><div class="dev-site">FRA · :2210</div></div>
+      <div class="dev-box dev-frr"><div class="dev-name">lon-core-01</div><div class="dev-site">LON · :2203</div></div>
+      <div class="dev-box dev-frr"><div class="dev-name">lon-edge-01</div><div class="dev-site">LON · :2208</div></div>
+      <div class="dev-box dev-frr"><div class="dev-name">lon-dist-01</div><div class="dev-site">LON · :2206</div></div>
+      <div class="dev-box dev-frr"><div class="dev-name">ams-core-01</div><div class="dev-site">AMS · :2204</div></div>
+      <div class="dev-box dev-frr"><div class="dev-name">ams-edge-01</div><div class="dev-site">AMS · :2209</div></div>
+      <div class="dev-box dev-frr"><div class="dev-name">nyc-core-01</div><div class="dev-site">NYC · :2207</div></div>
+    </div>
+  </div>
+
+  <div class="connector"><span class="connector-label">↓ SSH · NETCONF · gNMI · Syslog · SNMP ↓</span></div>
+
+  <!-- ═══ LAYER 2: TRANSPORT / COLLECTION ═══ -->
+  <div class="layer">
+    <div class="layer-label">🚛 Layer 2 — Transport / Collection (Vendor-Agnostic)</div>
+    <div class="row">
+      <div class="box c-accent w1">
+        <div class="box-title">🔐 SSH / Netmiko</div>
+        <div class="box-body">PKCS#11 (YubiKey) for live · Username + key for FRR containers · Parallel via Nornir · Timeout 15s</div>
+        <div style="margin-top:6px"><span class="tag t-accent">netmiko</span><span class="tag t-accent">paramiko</span></div>
+      </div>
+      <div class="box c-green w1">
+        <div class="box-title">📜 NETCONF / PyEZ</div>
+        <div class="box-body">Juniper RPC · Structured XML · /api/mv/junos/netconf · Real-device only</div>
+        <div style="margin-top:6px"><span class="tag t-green">junos-eznc</span><span class="tag t-green">lxml</span></div>
+      </div>
+      <div class="box c-purple w1">
+        <div class="box-title">📡 gNMI / OpenConfig</div>
+        <div class="box-body">OC paths → vtysh on FRR · Subscribe SAMPLE/ON_CHANGE · /api/mv/gnmi/query · YANG-modeled</div>
+        <div style="margin-top:6px"><span class="tag t-purple">pygnmi</span><span class="tag t-purple">openconfig</span></div>
+      </div>
+      <div class="box c-orange w1">
+        <div class="box-title">📝 Syslog Receiver</div>
+        <div class="box-body">UDP :5140 · Ring buffer 500 · BGP/interface/auth events · Auto-refresh tab</div>
+        <div style="margin-top:6px"><span class="tag t-orange">UDP</span><span class="tag t-orange">RFC 5424</span></div>
+      </div>
+      <div class="box c-red w1">
+        <div class="box-title">⚠️ SNMP Trap Receiver</div>
+        <div class="box-body">UDP :1162 · Ring buffer 200 · linkDown / linkUp / BGP traps · Auto-correlate</div>
+        <div style="margin-top:6px"><span class="tag t-red">UDP</span><span class="tag t-red">v2c</span></div>
+      </div>
+      <div class="box c-blue w1">
+        <div class="box-title">🐳 Docker exec</div>
+        <div class="box-body">FRR live container exec · vtysh -c · No SSH overhead · Used for chaos sim</div>
+        <div style="margin-top:6px"><span class="tag t-blue">docker</span><span class="tag t-blue">FRR 8.5</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><span class="connector-label">↓ Flask API + MCP Server ↓</span></div>
+
+  <!-- ═══ LAYER 3: API + MCP ═══ -->
+  <div class="layer">
+    <div class="layer-label">🔌 Layer 3 — Flask API :5757 + MCP Server (49 Tools)</div>
+    <div class="row">
+      <div class="box c-accent w2">
+        <div class="box-title">🌐 Flask App (app.py)</div>
+        <div class="box-body">Main API surface · /api/devices · /api/run · /api/ai-command · /api/nornir/run · 34 legacy network ops endpoints · Static demo at /demo/</div>
+        <div style="margin-top:6px"><span class="tag t-accent">Flask 3.1</span><span class="tag t-accent">flask-cors</span><span class="tag t-muted">port 5757</span></div>
+      </div>
+      <div class="box c-teal w2">
+        <div class="box-title">⚡ Multivendor Blueprint <span class="p3-badge">PHASE 3</span></div>
+        <div class="box-body">/api/mv/* — 20 endpoints: devices · topology · batfish/fleet · suzieq/analyze · gnmi/query · syslog · traps · netconf · orchestrator · intent/verify · path/trace · eval/{scenarios,run} · gait/{recent,stats} · runbooks · runbook/execute · cve · translator · toon</div>
+        <div style="margin-top:6px"><span class="tag t-teal">multivendor_extensions.py</span><span class="tag t-teal">12 P3 endpoints</span></div>
+      </div>
+      <div class="box c-pink w2">
+        <div class="box-title">🔌 MCP Server (fastmcp) <span class="p3-badge">49 TOOLS</span></div>
+        <div class="box-body">mcp_dcn_server.py · Exposes every API endpoint as MCP tool so Claude Code can call directly · 34 legacy + 15 Phase 3 multivendor tools · stdio transport</div>
+        <div style="margin-top:6px"><span class="tag t-pink">fastmcp</span><span class="tag t-pink">JSON-RPC 2.0</span><span class="tag t-pink">mv_orchestrator</span><span class="tag t-pink">mv_path_trace</span><span class="tag t-pink">mv_eval_run</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><span class="connector-label">↓ AI Orchestration · Vendor-Agnostic Tools ↓</span></div>
+
+  <!-- ═══ LAYER 4: AI ORCHESTRATION & TOOLS ═══ -->
+  <div class="layer">
+    <div class="layer-label">🧠 Layer 4 — AI Orchestration &amp; Phase 3 Tools (8 Modules)</div>
+    <div class="tool-grid">
+      <div class="tool-box">
+        <div class="tool-name">🤖 Pydantic-AI Orchestrator</div>
+        <div class="tool-desc">Auto-classifies prompt → routes to RoutingAgent / ACLAgent / IncidentAgent. Each child returns a Pydantic <code>BaseModel</code> with confidence, evidence, remediation steps. Falls back to deterministic stub when no LLM key.</div>
+        <div class="tool-meta">pydantic_ai_orchestrator.py · 4 BaseModels · Anthropic SDK</div>
+      </div>
+      <div class="tool-box">
+        <div class="tool-name">🧪 Eval Harness <span class="p3-badge">NIKA</span></div>
+        <div class="tool-desc">10 incident scenarios (BGP, OSPF, MTU, ACL, CVE, intent, perf). Synthesizes NL symptom · invokes agent · scores via keyword overlap + Claude Haiku LLM-as-judge (0–10 each).</div>
+        <div class="tool-meta">eval_harness.py · scenarios.json · LLM judge</div>
+      </div>
+      <div class="tool-box">
+        <div class="tool-name">🗺️ Vendor Translator</div>
+        <div class="tool-desc">12 canonical tasks × 5 vendors. One symbol "<code>bgp_summary</code>" emits "<code>show bgp summary</code>" (Junos), "<code>show ip bgp summary</code>" (EOS), "<code>vtysh -c '...'</code>" (FRR), or IOS/NX-OS. Destructive tasks gated.</div>
+        <div class="tool-meta">vendor_translator.py · 60 mappings · is_destructive()</div>
+      </div>
+      <div class="tool-box">
+        <div class="tool-name">🛡️ Auto-Remediation Runbooks</div>
+        <div class="tool-desc">YAML playbooks per fault type (BGP peer down, interface down, OSPF stuck, ACL block). Step types: check / probe / ai / remediate. Destructive steps require approval. Dry-run by default.</div>
+        <div class="tool-meta">runbooks/*.yaml · 4 playbooks</div>
+      </div>
+      <div class="tool-box">
+        <div class="tool-name">🎯 Intent Verification</div>
+        <div class="tool-desc">Cross-references inventory.json BGP claims vs SuzieQ-parsed observations. Flags <code>claimed_peer_missing</code>, <code>undeclared_peer</code>. Returns drift list + 0–100% intent score.</div>
+        <div class="tool-meta">/api/mv/intent/verify · Drift types · Score</div>
+      </div>
+      <div class="tool-box">
+        <div class="tool-name">🛣️ Path Trace</div>
+        <div class="tool-desc">BFS over BGP graph + site-LAN edges. Any-to-any 26-device coverage. Edge types: iBGP / eBGP / site-LAN. Renders vendor-colored SVG with hop labels and edge color codes.</div>
+        <div class="tool-meta">/api/mv/path/trace · phase3.js SVG</div>
+      </div>
+      <div class="tool-box">
+        <div class="tool-name">📜 GAIT Audit Trail</div>
+        <div class="tool-desc">Immutable JSONL append-only log. Every AI action recorded: actor, action, target, prompt, response, tools-called, tokens (in/out), status. Filterable by actor.</div>
+        <div class="tool-meta">gait_audit.py · audit/gait_YYYY-MM-DD.jsonl</div>
+      </div>
+      <div class="tool-box">
+        <div class="tool-name">📦 TOON + 🔍 CVE Scanner</div>
+        <div class="tool-desc">TOON (Tabular Object Oriented Notation): pipe-separated rows · ~60% smaller than JSON for tabular API payloads. CVE Scanner: static (vendor, OS-version) lookup over fleet · critical/high counts.</div>
+        <div class="tool-meta">toon_serializer.py · cve_db.json</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><span class="connector-label">↓ LLM Backbone (Anthropic Claude) ↓</span></div>
+
+  <!-- ═══ LAYER 5: LLM ═══ -->
+  <div class="layer">
+    <div class="layer-label">🧬 Layer 5 — LLM Backbone (Anthropic SDK)</div>
+    <div class="row">
+      <div class="box c-pink w2">
+        <div class="box-title">🤖 Claude Haiku 4.5 — Diagnoser</div>
+        <div class="box-body">Default for orchestrator child agents · ~2-4s latency · Confidence 0.85-0.95 on rich prompts · CCIE/JNCIE-level remediation steps · Token tracking via <code>resp.usage</code></div>
+        <div style="margin-top:6px"><span class="tag t-pink">claude-haiku-4-5</span><span class="tag t-pink">structured outputs</span><span class="tag t-pink">~600 max_tokens</span></div>
+      </div>
+      <div class="box c-pink w2">
+        <div class="box-title">⚖️ Claude Haiku 4.5 — LLM Judge</div>
+        <div class="box-body">Eval harness scorer · Reads agent diagnosis + scenario · Returns strict JSON {score 0-10, reasoning} · 60% root cause / 30% remediation / 10% no-hallucination</div>
+        <div style="margin-top:6px"><span class="tag t-pink">claude-haiku-4-5</span><span class="tag t-pink">JSON mode</span><span class="tag t-pink">~400 max_tokens</span></div>
+      </div>
+      <div class="box c-yellow w2">
+        <div class="box-title">🔄 Offline Fallback</div>
+        <div class="box-body">No <code>ANTHROPIC_API_KEY</code> set · Deterministic keyword-rich stub response · Confidence 0.4 · Demo functions even without key · Still produces eval scores ~6/10</div>
+        <div style="margin-top:6px"><span class="tag t-yellow">no-key mode</span><span class="tag t-yellow">deterministic</span><span class="tag t-muted">offline-safe</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><span class="connector-label">↓ Demo UI · 12 Tabs ↓</span></div>
+
+  <!-- ═══ LAYER 6: UI ═══ -->
+  <div class="layer">
+    <div class="layer-label">🎨 Layer 6 — Demo UI Tabs (12 tabs · http://localhost:5757/demo/)</div>
+    <div class="tab-grid">
+      <div class="tab-box tab-mv"><div class="tab-name"><span class="tab-icon">🗄️</span> MV Inventory</div><div class="tab-feat">26 devices · Vendor color tags · Site / role / live filters</div></div>
+      <div class="tab-box tab-mv"><div class="tab-name"><span class="tab-icon">🔍</span> Fleet Audit</div><div class="tab-feat">Batfish-style rule audit across 16 static configs · Critical/High counts</div></div>
+      <div class="tab-box tab-mv"><div class="tab-name"><span class="tab-icon">📊</span> SuzieQ</div><div class="tab-feat">Offline observability · BGP/OSPF/interface parse · No daemon required</div></div>
+      <div class="tab-box tab-mv"><div class="tab-name"><span class="tab-icon">📡</span> gNMI</div><div class="tab-feat">OpenConfig path → vtysh on FRR · Subscribe / Get / Set</div></div>
+      <div class="tab-box tab-mv"><div class="tab-name"><span class="tab-icon">📝</span> Syslog</div><div class="tab-feat">UDP :5140 ring buffer · Auto-refresh · Live BGP/interface events</div></div>
+      <div class="tab-box tab-mv"><div class="tab-name"><span class="tab-icon">⚠️</span> SNMP Traps</div><div class="tab-feat">UDP :1162 ring buffer · linkDown · linkUp · BGP state</div></div>
+      <div class="tab-box tab-p3"><div class="tab-name"><span class="tab-icon">🤖</span> Orchestrator <span class="p3-badge">P3</span></div><div class="tab-feat">Pydantic-AI multi-agent · Rendered diagnosis + structured JSON · Confidence card</div></div>
+      <div class="tab-box tab-p3"><div class="tab-name"><span class="tab-icon">🎯</span> Intent Verify <span class="p3-badge">P3</span></div><div class="tab-feat">One click → drift detector · 100% / 0 drift cards · Drift list with type</div></div>
+      <div class="tab-box tab-p3"><div class="tab-name"><span class="tab-icon">🧪</span> Eval Harness <span class="p3-badge">P3</span></div><div class="tab-feat">Pick scenario · Run / Run All · Keyword + LLM-judge scores · Latency ms</div></div>
+      <div class="tab-box tab-p3"><div class="tab-name"><span class="tab-icon">🛣️</span> Path Trace <span class="p3-badge">P3</span></div><div class="tab-feat">Pick src + dst · Vendor-colored SVG · iBGP/eBGP/site-LAN edge labels</div></div>
+      <div class="tab-box tab-p3"><div class="tab-name"><span class="tab-icon">📜</span> GAIT Audit <span class="p3-badge">P3</span></div><div class="tab-feat">Live event stream · Tokens In/Out · Filter by actor · Today's events</div></div>
+      <div class="tab-box"><div class="tab-name"><span class="tab-icon">💬</span> AI Command</div><div class="tab-feat">NL → CLI → SSH → explain · Qwen3 / Claude Haiku · Real device exec</div></div>
+    </div>
+  </div>
+
+  <div class="connector"><span class="connector-label">↓ Storage / Persistence ↓</span></div>
+
+  <!-- ═══ LAYER 7: STORAGE ═══ -->
+  <div class="layer">
+    <div class="layer-label">💾 Layer 7 — Storage &amp; Persistence (gitignored runtime data)</div>
+    <div class="row">
+      <div class="box c-teal w1"><div class="box-title">audit/gait_*.jsonl</div><div class="box-body">Daily-rotated immutable AI audit log · Append-only · One JSONL per UTC day · Filterable</div></div>
+      <div class="box c-yellow w1"><div class="box-title">inventory.json</div><div class="box-body">26 devices · BGP sessions · Site coordinates · Single source of truth for /api/mv/*</div></div>
+      <div class="box c-orange w1"><div class="box-title">scenarios.json</div><div class="box-body">10 incident scenarios · fault type · expected keywords · severity · category</div></div>
+      <div class="box c-red w1"><div class="box-title">cve_db.json</div><div class="box-body">Static (vendor, OS-version) → CVE list · CVSS · severity · public NVD entries</div></div>
+      <div class="box c-purple w1"><div class="box-title">runbooks/*.yaml</div><div class="box-body">4 auto-remediation playbooks · YAML steps · destructive flags · approval gates</div></div>
+      <div class="box c-dark w1"><div class="box-title">sanitize_tokens.json <span class="new-badge">gitignored</span></div><div class="box-body">Local-only · Source-company tokens for sanitize_configs.py · Never committed to public repo</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:rgba(34,197,94,.45)"></div> Juniper (junos)</div>
+  <div class="leg-item"><div class="leg-dot" style="background:rgba(59,130,246,.45)"></div> Arista (eos)</div>
+  <div class="leg-item"><div class="leg-dot" style="background:rgba(168,85,247,.45)"></div> FRR (live containers)</div>
+  <div class="leg-item"><div class="leg-dot" style="background:rgba(0,212,255,.4)"></div> Core API / infrastructure</div>
+  <div class="leg-item"><div class="leg-dot" style="background:rgba(0,229,204,.45)"></div> Phase 3 Tools (8 modules)</div>
+  <div class="leg-item"><div class="leg-dot" style="background:rgba(255,215,0,.45)"></div> P3 UI tabs / reference patterns</div>
+  <div class="leg-item"><div class="leg-dot" style="background:rgba(255,110,180,.45)"></div> LLM (Anthropic Claude Haiku 4.5)</div>
+  <div class="leg-item"><div class="leg-dot" style="background:rgba(255,140,66,.45)"></div> BGP / collection / external</div>
+  <div class="leg-item" style="margin-left:12px;color:var(--muted)">Built by Georgi Gaydarov · Claude Sonnet 4.6 · May 2026 · 26 devices · 20 endpoints · 49 MCP tools · 12 demo tabs · github.com/gesh75/multivendor-ai-network-lab</div>
+</div>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, {threshold: 0.08});
+document.querySelectorAll('.layer, .legend').forEach(el => observer.observe(el));
+// Initial paint: reveal all layers in viewport immediately
+setTimeout(() => {
+  document.querySelectorAll('.layer, .legend').forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if(rect.top < window.innerHeight) el.classList.add('visible');
+  });
+}, 60);
+// Safety net: if any layer is still hidden after 1.5s (e.g. opened via direct link
+// to a print/PDF viewer that never fires scroll events), reveal them all.
+setTimeout(() => {
+  document.querySelectorAll('.layer:not(.visible), .legend:not(.visible)')
+    .forEach(el => el.classList.add('visible'));
+}, 1500);
+
+// Device pulse — simulates BGP session liveness
+const devices = document.querySelectorAll('.dev-box');
+function pulseDevices(){
+  devices.forEach((d, i) => {
+    setTimeout(() => {
+      const isFrr = d.classList.contains('dev-frr');
+      const color = isFrr ? 'rgba(168,85,247,.55)' : d.classList.contains('dev-eos') ? 'rgba(59,130,246,.55)' : 'rgba(34,197,94,.55)';
+      const bg    = isFrr ? 'rgba(168,85,247,.16)' : d.classList.contains('dev-eos') ? 'rgba(59,130,246,.14)' : 'rgba(34,197,94,.14)';
+      const orig  = isFrr ? 'rgba(168,85,247,.07)' : d.classList.contains('dev-eos') ? 'rgba(59,130,246,.07)' : 'rgba(34,197,94,.07)';
+      d.style.boxShadow = '0 0 14px ' + color;
+      d.style.background = bg;
+      setTimeout(() => {
+        d.style.boxShadow = '';
+        d.style.background = orig;
+      }, 380);
+    }, (i % 13) * 120);
+  });
+}
+setTimeout(pulseDevices, 1200);
+setInterval(pulseDevices, 6500);
+
+// Tool box scanner pulse
+const toolBoxes = document.querySelectorAll('.tool-box');
+function pulseTools(){
+  toolBoxes.forEach((b, i) => {
+    setTimeout(() => {
+      b.style.borderColor = 'rgba(0,229,204,.7)';
+      b.style.background = 'rgba(0,229,204,.12)';
+      setTimeout(() => {
+        b.style.borderColor = 'rgba(0,229,204,.25)';
+        b.style.background = 'rgba(0,229,204,.04)';
+      }, 420);
+    }, i * 200);
+  });
+}
+setTimeout(pulseTools, 1800);
+setInterval(pulseTools, 5800);
+
+// Connector label cycling — like the original Gesh diagram
+const connectors = document.querySelectorAll('.connector-label');
+const flowLabels = [
+  ['↓ Patterns Adapted to Multivendor + Vendor-Agnostic ↓','↓ NetClaw + NIKA + pydantic-ai + MPLS-MCP ↓','↓ All extracted features made vendor-neutral ↓'],
+  ['↓ SSH · NETCONF · gNMI · Syslog · SNMP ↓','↓ 5 transport protocols · vendor-neutral ↓','↓ Single canonical task → 5 vendor CLIs ↓'],
+  ['↓ Flask API + MCP Server ↓','↓ /api/mv/* — 20 endpoints ↓','↓ MCP tools — Claude Code direct call ↓'],
+  ['↓ AI Orchestration · Vendor-Agnostic Tools ↓','↓ Pydantic structured outputs ↓','↓ 8 Phase 3 modules · NetClaw + NIKA + pydantic ↓'],
+  ['↓ LLM Backbone (Anthropic Claude) ↓','↓ Claude Haiku 4.5 · ~2-4s · 0.85-0.95 confidence ↓','↓ Offline fallback when no API key ↓'],
+  ['↓ Demo UI · 12 Tabs ↓','↓ 6 base MV + 5 P3 + AI Command ↓','↓ DOM-safe rendering · 0 console errors ↓'],
+  ['↓ Storage / Persistence ↓','↓ JSONL append-only audit ↓','↓ All runtime data gitignored ↓'],
+];
+connectors.forEach((el, i) => {
+  if(!flowLabels[i]) return;
+  let idx = 0;
+  setInterval(() => {
+    idx = (idx + 1) % flowLabels[i].length;
+    el.style.transition = 'opacity .35s';
+    el.style.opacity = '0';
+    setTimeout(() => { el.textContent = flowLabels[i][idx]; el.style.opacity = '1'; }, 380);
+  }, 4400 + i * 600);
+});
+</script>
+
+</body>
+</html>

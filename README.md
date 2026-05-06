@@ -40,6 +40,16 @@ All sanitized configs use RFC 5737 / RFC 1918 ranges and placeholder credentials
 Real public ASNs (3356 / 13335 / 15169 / 16509) are retained because they're
 public Internet routing data — useful for realism in BGP demos.
 
+## Architecture
+
+Animated 8-layer architecture diagram (open locally — `demo/architecture.html`):
+
+> Reference projects → 26 devices → Transport → Flask + MCP server →
+> AI orchestration & 8 Phase 3 tools → LLM backbone → 12 demo UI tabs → Storage
+
+Open `http://localhost:5757/demo/architecture.html` after starting the Flask app
+to see it animated.
+
 ## Quick start
 
 ```bash
