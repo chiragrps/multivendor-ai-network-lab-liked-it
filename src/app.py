@@ -229,6 +229,10 @@ LLM_MODEL         = os.environ.get("LLM_MODEL",         "gemma4:latest")   # Oll
 LLM_MODEL_RUNNER  = os.environ.get("LLM_MODEL_RUNNER",  "ai/qwen3:latest") # Docker Model Runner fallback
 LLM_ENABLED       = os.environ.get("LLM_ENABLED",       "true").lower() == "true"
 LLM_TIMEOUT       = int(os.environ.get("LLM_TIMEOUT",   "60"))
+# Provider order: "local" = Ollama → ModelRunner → Claude (default, current behavior).
+#                 "claude" = Claude first, local fallback.
+#                 "claude-only" = Claude only (skip local). Recommended when ANTHROPIC_API_KEY is set.
+LLM_PROVIDER      = os.environ.get("LLM_PROVIDER",      "local").lower()
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ANTHROPIC_MODEL   = "claude-haiku-4-5-20251001"
 
@@ -7910,15 +7914,50 @@ def _clean_llm_response(text):
     return result if result else text.strip()
 
 
+def _llm_query_claude(system_prompt, user_prompt, max_tokens=500):
+    """Direct call to Anthropic Claude. Returns cleaned text or None."""
+    if not ANTHROPIC_API_KEY:
+        return None
+    try:
+        r = _requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": ANTHROPIC_API_KEY,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": ANTHROPIC_MODEL,
+                "max_tokens": max_tokens,
+                "system": system_prompt,
+                "messages": [{"role": "user", "content": user_prompt}],
+            },
+            timeout=30,
+        )
+        if r.status_code == 200:
+            text = r.json()["content"][0].get("text", "").strip()
+            if text:
+                return _clean_llm_response(text)
+    except Exception:
+        pass
+    return None
+
+
 def _llm_query(system_prompt, user_prompt, max_tokens=500):
-    """Query a local LLM. Priority order:
-      1. Ollama  :11434  — gemma4:latest  (OpenAI-compatible, no special fields)
-      2. Docker Model Runner :12434       (llama.cpp engine + TCP)
-      3. Docker Model Runner Unix socket  (inference.sock fallback)
+    """Query an LLM. Provider order is controlled by LLM_PROVIDER env var:
+      - "claude"      : Claude first, local fallback
+      - "claude-only" : Claude only (skip local)
+      - "local"       : Ollama → Docker ModelRunner → Claude (default)
     Returns cleaned text or None on complete failure.
     """
     if not LLM_ENABLED:
         return None
+
+    # Claude-first or Claude-only modes: try Anthropic before any local model.
+    if LLM_PROVIDER in ("claude", "claude-only"):
+        text = _llm_query_claude(system_prompt, user_prompt, max_tokens=max_tokens)
+        if text is not None or LLM_PROVIDER == "claude-only":
+            return text  # success or hard-skip local
 
     # ── Attempt 0: Ollama native /api/chat (gemma4 / qwen2.5-coder / llama3.2) ─
     # Use native Ollama API with think=false to disable chain-of-thought on thinking
@@ -8030,39 +8069,66 @@ def _llm_query(system_prompt, user_prompt, max_tokens=500):
             except Exception:
                 pass
 
-    # ── Attempt 3: Anthropic claude-haiku fallback ────────────────────────────
-    if ANTHROPIC_API_KEY:
-        try:
-            r = _requests.post(
-                "https://api.anthropic.com/v1/messages",
-                headers={
-                    "x-api-key": ANTHROPIC_API_KEY,
-                    "anthropic-version": "2023-06-01",
-                    "content-type": "application/json",
-                },
-                json={
-                    "model": ANTHROPIC_MODEL,
-                    "max_tokens": max_tokens,
-                    "system": system_prompt,
-                    "messages": [{"role": "user", "content": user_prompt}],
-                },
-                timeout=30,
-            )
-            if r.status_code == 200:
-                text = r.json()["content"][0].get("text", "").strip()
-                if text:
-                    return _clean_llm_response(text)
-        except Exception:
-            pass
+    # ── Attempt 3: Anthropic Claude fallback ──────────────────────────────────
+    text = _llm_query_claude(system_prompt, user_prompt, max_tokens=max_tokens)
+    if text is not None:
+        return text
 
     return None
 
 
+def _list_available_providers() -> list[dict]:
+    """Probe each LLM provider quickly and return availability."""
+    out: list[dict] = []
+    out.append({
+        "id": "claude",
+        "label": f"Claude ({ANTHROPIC_MODEL})",
+        "available": bool(ANTHROPIC_API_KEY),
+    })
+    ollama_ok = False
+    try:
+        r = _requests.get(f"{OLLAMA_URL.rstrip('/')}/api/tags", timeout=2)
+        ollama_ok = (r.status_code == 200)
+    except Exception:
+        pass
+    out.append({"id": "local", "label": f"Local ({LLM_MODEL})", "available": ollama_ok})
+    out.append({"id": "claude-only", "label": "Claude only (no fallback)", "available": bool(ANTHROPIC_API_KEY)})
+    return out
+
+
+@app.route("/api/llm/provider", methods=["POST"])
+def llm_set_provider():
+    """Set the active LLM_PROVIDER at runtime. Body: {"provider": "claude" | "local" | "claude-only"}"""
+    global LLM_PROVIDER
+    body = request.get_json(silent=True) or {}
+    new = (body.get("provider") or "").lower().strip()
+    if new not in ("local", "claude", "claude-only"):
+        return jsonify({"error": "provider must be one of: local, claude, claude-only"}), 400
+    if new in ("claude", "claude-only") and not ANTHROPIC_API_KEY:
+        return jsonify({"error": "ANTHROPIC_API_KEY not configured — cannot select claude provider"}), 400
+    LLM_PROVIDER = new
+    return jsonify({"provider": LLM_PROVIDER, "ok": True})
+
+
 @app.route("/api/llm/status", methods=["GET"])
 def llm_status():
-    """Check LLM availability — Ollama first, Docker Model Runner as fallback."""
+    """Check LLM availability — order depends on LLM_PROVIDER env var."""
     if not LLM_ENABLED:
         return jsonify({"enabled": False, "available": False, "reason": "LLM_ENABLED=false"})
+
+    key_suffix = f"…{ANTHROPIC_API_KEY[-6:]}" if ANTHROPIC_API_KEY else None
+
+    # Claude-first / Claude-only modes report Claude as primary transport.
+    if LLM_PROVIDER in ("claude", "claude-only") and ANTHROPIC_API_KEY:
+        return jsonify({
+            "enabled": True, "available": True,
+            "model": ANTHROPIC_MODEL,
+            "transport": "anthropic:claude",
+            "provider": LLM_PROVIDER,
+            "models": [ANTHROPIC_MODEL],
+            "anthropic_key_suffix": key_suffix,
+            "providers_available": _list_available_providers(),
+        })
 
     # ── Attempt 0: Ollama (/api/tags lists loaded models) ──────────────────
     try:
@@ -8072,7 +8138,10 @@ def llm_status():
             return jsonify({
                 "enabled": True, "available": True,
                 "model": LLM_MODEL, "transport": f"ollama:{OLLAMA_URL}",
+                "provider": LLM_PROVIDER,
                 "models": models,
+                "anthropic_key_suffix": key_suffix,
+                "providers_available": _list_available_providers(),
             })
     except Exception:
         pass
@@ -11530,7 +11599,12 @@ def api_remediate():
             ["bash", _SIM_SCRIPT, action],
             capture_output=True, text=True, timeout=45,
         )
-        lines = [l for l in (proc.stdout + proc.stderr).splitlines() if l.strip()]
+        # Filter known-benign vtysh warnings (no global vtysh.conf in containers — harmless)
+        _NOISE = ("vtysh.conf", "No such file or directory")
+        lines = [
+            l for l in (proc.stdout + proc.stderr).splitlines()
+            if l.strip() and not all(n in l for n in _NOISE)
+        ]
         return jsonify({
             "action": action,
             "success": proc.returncode == 0,
@@ -12637,6 +12711,65 @@ def _coord_route(message: str) -> tuple[str, str]:
 
 # ── Agent handlers ─────────────────────────────────────────────────────────────
 
+def _extract_hostname_from_text(text: str) -> str:
+    """Match any inventory hostname (DEVICES + multivendor _ALL_DEVICES) in free text."""
+    if not text:
+        return ""
+    t = text.lower()
+    candidates: list[str] = [d["hostname"] for d in DEVICES if d.get("hostname")]
+    try:
+        from multivendor_extensions import _ALL_DEVICES as _MV_DEVICES  # type: ignore
+        candidates.extend(d["hostname"] for d in _MV_DEVICES if d.get("hostname"))
+    except (ImportError, AttributeError):
+        pass
+    for h in sorted(set(candidates), key=len, reverse=True):
+        if h.lower() in t:
+            return h
+    return ""
+
+
+def _load_mv_static_config(hostname: str) -> tuple[str, dict] | tuple[None, None]:
+    """Return (config_text, mv_device_dict) for a multivendor static-config device."""
+    try:
+        from multivendor_extensions import _ALL_DEVICES as _MV_DEVICES, _DEMO_DIR  # type: ignore
+    except (ImportError, AttributeError):
+        return None, None
+    dev = next((d for d in _MV_DEVICES if d.get("hostname") == hostname), None)
+    if not dev or not dev.get("config"):
+        return None, None
+    full = os.path.join(_DEMO_DIR, dev["config"])
+    try:
+        with open(full, errors="replace") as f:
+            return f.read(), dev
+    except OSError:
+        return None, None
+
+
+def _load_mv_live_config(hostname: str) -> tuple[str, dict] | tuple[None, None]:
+    """For live FRR devices in the multivendor inventory, SSH and return running-config."""
+    try:
+        from multivendor_extensions import _ALL_DEVICES as _MV_DEVICES  # type: ignore
+    except (ImportError, AttributeError):
+        return None, None
+    dev = next((d for d in _MV_DEVICES if d.get("hostname") == hostname and d.get("live")), None)
+    if not dev:
+        return None, None
+    ip   = dev.get("ip", "127.0.0.1")
+    port = int(dev.get("port", 22))
+    dtype = dev.get("os", "frr")
+    cmd = "show running-config" if dtype == "frr" else (
+        "show configuration | display set" if dtype == "junos" else "show running-config"
+    )
+    try:
+        r = run_command_on_device(ip, dtype, cmd, port=port)
+        text = (r or {}).get("output", "") if isinstance(r, dict) else ""
+        if text.strip():
+            return text, dev
+    except (OSError, RuntimeError, ValueError):
+        pass
+    return None, None
+
+
 def _agent_diagnosis(message: str, hostname: str, context: dict) -> dict:
     """Collect per-device health data then ask LLM for root-cause analysis."""
     evidence: dict = {}
@@ -12670,15 +12803,29 @@ def _agent_diagnosis(message: str, hostname: str, context: dict) -> dict:
 
 def _agent_compliance(message: str, hostname: str, context: dict) -> dict:
     """Pull running config and check against Batfish rules + LLM audit."""
-    dev = next((d for d in DEVICES if d["hostname"] == hostname), None) if hostname else None
-    if not dev:
+    if not hostname:
         return {"error": f"Provide a hostname for compliance scan (device '{hostname}' not in inventory)"}
-    ip, dtype, port = dev["ip"], dev.get("type", "junos"), dev.get("port", 22)
-    cmd = "show configuration | display set" if dtype == "junos" else "show running-config"
-    r = run_command_on_device(ip, dtype, cmd, port=port)
-    config: str = r.get("output", "") if isinstance(r, dict) else ""
+    dev = next((d for d in DEVICES if d["hostname"] == hostname), None)
+    config: str = ""
+    source: str = ""
+    if dev:
+        ip, dtype, port = dev["ip"], dev.get("type", "junos"), dev.get("port", 22)
+        cmd = "show configuration | display set" if dtype == "junos" else "show running-config"
+        r = run_command_on_device(ip, dtype, cmd, port=port)
+        config = r.get("output", "") if isinstance(r, dict) else ""
+        source = f"live SSH ({dtype})"
     if not config:
-        return {"error": "Could not retrieve device config"}
+        cfg_text, mv_dev = _load_mv_static_config(hostname)
+        if cfg_text:
+            config = cfg_text
+            source = f"static config ({mv_dev.get('config')})"
+    if not config:
+        cfg_text, mv_dev = _load_mv_live_config(hostname)
+        if cfg_text:
+            config = cfg_text
+            source = f"live SSH ({mv_dev.get('os')} :{mv_dev.get('port')})"
+    if not config:
+        return {"error": f"Could not retrieve device config for '{hostname}'"}
 
     findings: list[dict] = []
     for pattern, severity, msg in _BATFISH_RULES:
@@ -12694,11 +12841,12 @@ def _agent_compliance(message: str, hostname: str, context: dict) -> dict:
     )
     llm_raw = _llm_query(sys_p, f"Device: {hostname}\nConfig:\n{config[:3000]}", max_tokens=400)
     return {
-        "hostname":     hostname,
+        "hostname":      hostname,
+        "config_source": source,
         "rule_findings": findings,
-        "ai_findings":  _clean_llm_response(llm_raw) if llm_raw else None,
-        "errors":       sum(1 for f in findings if f["severity"] == "error"),
-        "warnings":     sum(1 for f in findings if f["severity"] == "warn"),
+        "ai_findings":   _clean_llm_response(llm_raw) if llm_raw else None,
+        "errors":        sum(1 for f in findings if f["severity"] == "error"),
+        "warnings":      sum(1 for f in findings if f["severity"] == "warn"),
     }
 
 
@@ -12806,6 +12954,9 @@ def api_chat():
 
     if not message:
         return jsonify({"error": "message required"}), 400
+
+    if not hostname:
+        hostname = _extract_hostname_from_text(message)
 
     agent, intent = _coord_route(message)
 

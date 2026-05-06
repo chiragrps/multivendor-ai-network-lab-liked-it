@@ -119,6 +119,12 @@ def _pop_last_usage() -> dict[str, int]:
     return u
 
 
+def _build_user_message(prompt: str, context: str | None) -> str:
+    if not context:
+        return prompt
+    return f"{prompt}\n\n--- DEVICE CONTEXT ---\n{context}"
+
+
 def _call_claude(system: str, user: str, model: str = "claude-haiku-4-5", max_tokens: int = 600) -> str:
     if not _has_anthropic():
         return ""
@@ -161,29 +167,38 @@ def _extract_json(text: str) -> dict[str, Any] | None:
 # ─── Child agents ────────────────────────────────────────────────────────────
 
 
-def routing_agent(prompt: str) -> RoutingDiagnosis:
+def routing_agent(prompt: str, context: str | None = None) -> RoutingDiagnosis:
     sys = (
-        "You are a routing specialist (BGP/OSPF/IS-IS). Respond with strict JSON matching:\n"
+        "You are a routing specialist (BGP/OSPF/IS-IS). The user's prompt is below, "
+        "followed by DEVICE CONTEXT (config snippets and/or live show output) when available. "
+        "Use the DEVICE CONTEXT as ground truth — cite specific lines in `evidence`. "
+        "Respond with strict JSON matching:\n"
         '{"protocol": "bgp|ospf|isis|unknown", "affected_device": "", "affected_peer": "",'
         '"state": "", "root_cause": "", "evidence": [], "remediation": [], "confidence": 0.0}\n'
         "No prose. JSON only."
     )
-    raw = _call_claude(sys, prompt)
+    raw = _call_claude(sys, _build_user_message(prompt, context))
     data = _extract_json(raw) or {}
     if not data:
+        evidence = [prompt[:200]]
+        if context:
+            evidence.extend(line.strip() for line in context.splitlines()[:12] if line.strip())
         data = {
             "protocol": "bgp",
             "affected_device": _guess_device(prompt),
-            "state": "Idle",
-            "root_cause": "Best-effort offline diagnosis (no LLM available).",
-            "evidence": [prompt[:200]],
+            "state": "Idle" if not context else "see evidence",
+            "root_cause": (
+                "Offline heuristic diagnosis from collected device context."
+                if context else "Best-effort offline diagnosis (no LLM available)."
+            ),
+            "evidence": evidence,
             "remediation": [
                 "Verify L1/L2 — interface up/up",
                 "Verify L3 — ping peer IP",
                 "Compare local/remote AS, MTU, area, auth",
                 "If config matches, soft-reset the neighbor (clear bgp neighbor)",
             ],
-            "confidence": 0.4,
+            "confidence": 0.55 if context else 0.4,
         }
     try:
         return RoutingDiagnosis(**data)
@@ -192,15 +207,17 @@ def routing_agent(prompt: str) -> RoutingDiagnosis:
         return RoutingDiagnosis(root_cause="parsing failed", evidence=[raw[:300]])
 
 
-def acl_agent(prompt: str) -> ACLDiagnosis:
+def acl_agent(prompt: str, context: str | None = None) -> ACLDiagnosis:
     sys = (
-        "You are a firewall/ACL specialist. Respond with strict JSON matching:\n"
+        "You are a firewall/ACL specialist. The user's prompt is below, followed by DEVICE "
+        "CONTEXT (config snippets) when available. Cite the matching policy/line from context. "
+        "Respond with strict JSON matching:\n"
         '{"device": "", "policy_name": "", "flow": {"src":"","dst":"","port":0,"proto":""},'
         '"decision": "deny|permit|drop|unknown", "matching_line": "", "root_cause": "",'
         '"proposed_change": "", "confidence": 0.0}\n'
         "No prose. JSON only."
     )
-    raw = _call_claude(sys, prompt)
+    raw = _call_claude(sys, _build_user_message(prompt, context))
     data = _extract_json(raw) or {}
     if not data:
         data = {
@@ -208,9 +225,12 @@ def acl_agent(prompt: str) -> ACLDiagnosis:
             "policy_name": None,
             "flow": {},
             "decision": "deny",
-            "root_cause": "Best-effort offline diagnosis (no LLM available).",
+            "root_cause": (
+                "Offline heuristic diagnosis from collected device context."
+                if context else "Best-effort offline diagnosis (no LLM available)."
+            ),
             "proposed_change": "Add specific permit rule (avoid any/any) for the legitimate flow.",
-            "confidence": 0.4,
+            "confidence": 0.55 if context else 0.4,
         }
     try:
         return ACLDiagnosis(**data)
@@ -219,14 +239,15 @@ def acl_agent(prompt: str) -> ACLDiagnosis:
         return ACLDiagnosis(root_cause="parsing failed")
 
 
-def incident_agent(prompt: str, severity_hint: str = "medium") -> IncidentTicket:
+def incident_agent(prompt: str, context: str | None = None, severity_hint: str = "medium") -> IncidentTicket:
     sys = (
-        "You are an NOC analyst creating an incident ticket. Respond with strict JSON matching:\n"
+        "You are an NOC analyst creating an incident ticket. Use DEVICE CONTEXT (when "
+        "provided) to scope affected devices and root cause. Respond with strict JSON matching:\n"
         '{"ticket_id":"","severity":"low|medium|high|critical","title":"","summary":"",'
         '"affected_devices":[], "root_cause":"", "remediation_steps":[], "requires_change_window": false}\n'
         "No prose. JSON only."
     )
-    raw = _call_claude(sys, prompt)
+    raw = _call_claude(sys, _build_user_message(prompt, context))
     data = _extract_json(raw) or {}
     if not data.get("ticket_id"):
         data.setdefault("ticket_id", f"INC-{int(time.time())}")
@@ -252,37 +273,37 @@ def _guess_device(prompt: str) -> str:
 # ─── Orchestrator entrypoint ─────────────────────────────────────────────────
 
 
-def run_orchestrator(prompt: str) -> str:
+def run_orchestrator(prompt: str, context: str | None = None) -> str:
     """
     Top-level entrypoint used by eval_harness and the UI.
     Returns a human-readable string (so it slots into the existing ai_command UI).
     """
     decision = _classify(prompt)
     if decision == "routing":
-        result: BaseModel = routing_agent(prompt)
+        result: BaseModel = routing_agent(prompt, context=context)
     elif decision == "acl":
-        result = acl_agent(prompt)
+        result = acl_agent(prompt, context=context)
     elif decision == "incident":
-        result = incident_agent(prompt)
+        result = incident_agent(prompt, context=context)
     else:
-        result = routing_agent(prompt)
+        result = routing_agent(prompt, context=context)
 
     payload = result.model_dump()
     return _format_for_human(decision, payload)
 
 
-def run_orchestrator_structured(prompt: str) -> dict[str, Any]:
+def run_orchestrator_structured(prompt: str, context: str | None = None) -> dict[str, Any]:
     """Same as run_orchestrator but returns the dict envelope for API/UI."""
     decision = _classify(prompt)
     _pop_last_usage()  # reset before invocation
     if decision == "routing":
-        result: BaseModel = routing_agent(prompt)
+        result: BaseModel = routing_agent(prompt, context=context)
     elif decision == "acl":
-        result = acl_agent(prompt)
+        result = acl_agent(prompt, context=context)
     elif decision == "incident":
-        result = incident_agent(prompt)
+        result = incident_agent(prompt, context=context)
     else:
-        result = routing_agent(prompt)
+        result = routing_agent(prompt, context=context)
     usage = _pop_last_usage()
 
     return {
@@ -291,6 +312,7 @@ def run_orchestrator_structured(prompt: str) -> dict[str, Any]:
         "rendered": _format_for_human(decision, result.model_dump()),
         "online": _has_anthropic(),
         "usage": usage,
+        "context_chars": len(context) if context else 0,
     }
 
 

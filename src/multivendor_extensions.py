@@ -21,7 +21,7 @@ Register in app.py with:
     app.register_blueprint(mv_bp)
 """
 
-import os, json, re, time, threading, socket, struct, logging
+import os, sys, json, re, time, threading, socket, struct, logging
 from datetime import datetime, timezone
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -379,19 +379,26 @@ def mv_suzieq_analyze():
         })
 
     elif verb == "summarize":
-        total_bgp   = sum(len(p["bgp_peers"]) for p in parsed)
-        with_gnmi   = sum(1 for p in parsed if p["gnmi_enabled"])
-        with_snmp   = sum(1 for p in parsed if p["snmp_enabled"])
-        vendor_dist = {}
+        total_bgp    = sum(len(p["bgp_peers"]) for p in parsed)
+        total_ospf   = sum(len(p["ospf_areas"]) for p in parsed)
+        total_iface  = sum(len(p["interfaces"]) for p in parsed)
+        unique_areas = sorted({a for p in parsed for a in p["ospf_areas"]})
+        with_gnmi    = sum(1 for p in parsed if p["gnmi_enabled"])
+        with_snmp    = sum(1 for p in parsed if p["snmp_enabled"])
+        vendor_dist: dict[str, int] = {}
         for p in parsed:
             vendor_dist[p["vendor"]] = vendor_dist.get(p["vendor"], 0) + 1
         return jsonify({
             "table": table, "verb": verb, "elapsed": elapsed,
             "devices_analyzed": len(parsed),
-            "total_bgp_peers": total_bgp,
-            "gnmi_enabled": with_gnmi, "snmp_enabled": with_snmp,
+            "total_bgp_peers":   total_bgp,
+            "total_ospf_areas":  total_ospf,
+            "unique_ospf_areas": unique_areas,
+            "total_interfaces":  total_iface,
+            "gnmi_enabled":      with_gnmi,
+            "snmp_enabled":      with_snmp,
             "vendor_distribution": vendor_dist,
-            "common_issues": list(set(i for p in parsed for i in p["issues"]))[:10],
+            "common_issues":     list({i for p in parsed for i in p["issues"]})[:10],
         })
 
     elif verb == "unique":
@@ -1055,6 +1062,107 @@ def mv_eval_run():
 
 # ── Pydantic-AI orchestrator ───────────────────────────────────────────────────
 
+def _find_devices_in_prompt(prompt: str) -> list[dict]:
+    """Match any inventory hostname appearing in the prompt (longest first)."""
+    p = prompt.lower()
+    hits: list[dict] = []
+    seen: set[str] = set()
+    for d in sorted(_ALL_DEVICES, key=lambda x: -len(x.get("hostname", ""))):
+        h = d.get("hostname", "").lower()
+        if h and h in p and h not in seen:
+            hits.append(d)
+            seen.add(h)
+    return hits[:3]  # cap at 3 to keep context compact
+
+
+_BGP_HEADERS = ("router bgp", "protocols bgp", "policy-options", "routing-options")
+_OSPF_HEADERS = ("router ospf", "protocols ospf", "interface ", "area ")
+_FW_HEADERS = ("security policies", "firewall", "ip access-list", "policy-statement")
+
+
+def _extract_section(cfg: str, agent: str, max_lines: int = 80) -> str:
+    """Pull the BGP / OSPF / firewall section from a config blob, capped to max_lines."""
+    if agent == "acl":
+        keys = _FW_HEADERS
+    elif agent == "incident":
+        keys = _BGP_HEADERS + _OSPF_HEADERS + _FW_HEADERS
+    else:
+        keys = _BGP_HEADERS + _OSPF_HEADERS
+    lines = cfg.splitlines()
+    keep: list[str] = []
+    in_block = False
+    block_indent = -1
+    for ln in lines:
+        low = ln.lower().lstrip()
+        if any(low.startswith(k) for k in keys):
+            in_block = True
+            block_indent = len(ln) - len(ln.lstrip())
+            keep.append(ln)
+            continue
+        if in_block:
+            cur_indent = len(ln) - len(ln.lstrip())
+            if ln.strip() == "" or cur_indent > block_indent:
+                keep.append(ln)
+            else:
+                in_block = False
+        if len(keep) >= max_lines:
+            break
+    return "\n".join(keep[:max_lines])
+
+
+def _collect_live_frr(dev: dict, agent: str) -> str:
+    """Fetch live state from an FRR container via vtysh."""
+    try:
+        sys.path.insert(0, _HERE)
+        import app as flask_app  # type: ignore
+    except ImportError as e:
+        return f"# live fetch unavailable: {e}"
+    cmds = (
+        ("show ip bgp summary", "show running-config bgp")
+        if agent != "acl" else
+        ("show running-config", "show ip route")
+    )
+    out: list[str] = []
+    for cmd in cmds:
+        try:
+            r = flask_app.run_command_on_device(
+                dev.get("ip", "127.0.0.1"), "frr", cmd, port=int(dev.get("port", 22))
+            )
+            text = (r or {}).get("output", "")
+            if text:
+                out.append(f"$ {cmd}\n{text[:1500]}")
+        except (OSError, RuntimeError, ValueError) as e:
+            out.append(f"# {cmd} failed: {e}")
+    return "\n\n".join(out)
+
+
+def _build_orchestrator_context(prompt: str, agent: str) -> str:
+    devs = _find_devices_in_prompt(prompt)
+    if not devs:
+        return ""
+    chunks: list[str] = []
+    for d in devs:
+        host = d.get("hostname", "?")
+        head = f"### Device: {host}  vendor={d.get('vendor','?')} os={d.get('os','?')} site={d.get('site','?')} live={bool(d.get('live'))}"
+        chunks.append(head)
+        cfg_path = d.get("config")
+        if cfg_path:
+            full = os.path.join(_DEMO_DIR, cfg_path)
+            try:
+                with open(full, errors="replace") as f:
+                    cfg = f.read()
+                section = _extract_section(cfg, agent)
+                if section.strip():
+                    chunks.append(f"# config snippet ({cfg_path})\n{section}")
+                else:
+                    chunks.append(f"# config snippet ({cfg_path}) — first 60 lines\n" + "\n".join(cfg.splitlines()[:60]))
+            except OSError as e:
+                chunks.append(f"# config read failed: {e}")
+        if d.get("live"):
+            chunks.append(f"# live state\n{_collect_live_frr(d, agent)}")
+    return "\n\n".join(chunks)[:8000]  # hard cap to protect token budget
+
+
 @mv_bp.route("/api/mv/orchestrator", methods=["POST"])
 def mv_orchestrator():
     body = request.get_json(silent=True) or {}
@@ -1062,13 +1170,17 @@ def mv_orchestrator():
     if not prompt:
         return jsonify({"error": "prompt required"}), 400
     orch = _import_helper("pydantic_ai_orchestrator")
-    result = orch.run_orchestrator_structured(prompt)
+    decision = orch._classify(prompt)
+    context = _build_orchestrator_context(prompt, decision)
+    result = orch.run_orchestrator_structured(prompt, context=context or None)
+    result["devices_resolved"] = [d.get("hostname") for d in _find_devices_in_prompt(prompt)]
     g = _import_helper("gait_audit")
-    g.record(actor="orchestrator", action="diagnose", target=None,
+    g.record(actor="orchestrator", action="diagnose", target=",".join(result["devices_resolved"]) or None,
              prompt=prompt, response=result.get("rendered", "")[:500],
              tools_called=[result.get("agent", "?")],
              tokens=result.get("usage") or {},
-             status="ok")
+             status="ok",
+             extra={"context_chars": result.get("context_chars", 0)})
     return jsonify(result)
 
 

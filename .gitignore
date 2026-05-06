@@ -57,3 +57,6 @@ htmlcov/
 
 # Docker
 docker-compose.override.yml
+
+# Sanitization — source-company tokens (never commit)
+network-lab/demo-devices/sanitize_tokens.json
