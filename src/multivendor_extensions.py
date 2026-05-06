@@ -33,7 +33,21 @@ mv_bp = Blueprint("mv", __name__)
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 _HERE       = os.path.dirname(os.path.abspath(__file__))
-_LAB_DIR    = os.path.normpath(os.path.join(_HERE, "../../network-lab"))
+
+
+def _resolve_lab_dir() -> str:
+    """Locate the network-lab/ directory, supporting both repo layouts:
+    - new (multivendor-ai-network-lab):  src/<this>  →  ../network-lab/
+    - legacy (DCN_Network_Tool flat):    <this>      →  ../../network-lab/
+    """
+    for rel in ("../network-lab", "../../network-lab"):
+        candidate = os.path.normpath(os.path.join(_HERE, rel))
+        if os.path.isdir(os.path.join(candidate, "demo-devices")):
+            return candidate
+    return os.path.normpath(os.path.join(_HERE, "../../network-lab"))
+
+
+_LAB_DIR    = _resolve_lab_dir()
 _DEMO_DIR   = os.path.join(_LAB_DIR, "demo-devices")
 _INV_FILE   = os.path.join(_DEMO_DIR, "inventory.json")
 
