@@ -404,7 +404,7 @@ security {
         from-zone ntw-advpn to-zone ntw-vlan14 {
             policy ntw-opnsense-to-ntw-vlan14-allow-ssh {
                 match {
-                    source-address [ 192.168.144.0/24 10.1.252.0/24 ];
+                    source-address [ 192.168.144.0/24 192.168.252.0/24 ];
                     destination-address 10.1.30.0/24;
                     application junos-ssh;
                 }
@@ -487,7 +487,7 @@ security {
             }
             policy ntw-advpn-to-ntw-vlan14-allow-opengear {
                 match {
-                    source-address [ 192.168.144.0/24 10.1.252.0/24 ];
+                    source-address [ 192.168.144.0/24 192.168.252.0/24 ];
                     destination-address local-console-servers;
                     application [ junos-ssh junos-https ];
                 }
@@ -499,7 +499,7 @@ security {
         from-zone ntw-advpn to-zone ntw-loc {
             policy admin-network-to-ntw-loc {
                 match {
-                    source-address [ 10.1.252.0/24 192.168.144.0/24 ];
+                    source-address [ 192.168.252.0/24 192.168.144.0/24 ];
                     destination-address 10.1.217.0/24;
                     application [ junos-ssh junos-ftp junos-https junos-http junos-icmp-ping junos-dns-udp junos-dns-tcp tcp-port-3389 tcp-port-4343 tcp-port-8200 tcp-port-8080 tcp-port-8081 tcp-port-8082 tcp-port-8088 tcp-port-8090 tcp-port-8443 tcp-port-8888 tcp-port-9090 tcp-port-9092 tcp-port-9095 udp-ports-33434-33534 ];
                 }
@@ -650,7 +650,7 @@ security {
                 address 10.1.30.0/24 10.1.30.0/24;
                 address bom1-ntw-monitoring-net 10.1.30.0/24;
                 address bom1-pdu-net 10.1.150.0/24;
-                address 10.1.252.0/24 10.1.252.0/24;
+                address 192.168.252.0/24 192.168.252.0/24;
                 address 192.168.144.0/24 192.168.144.0/24;
                 address 10.1.0.0/16 10.1.0.0/16;
                 address lhr3-ntw-win-01 192.168.100.53/32;
@@ -715,7 +715,7 @@ security {
                 address bom1-ntw-monitoring-net 10.1.30.0/24;
                 address bom1-pdu-net 10.1.150.0/24;
                 address 10.1.254.0/24 10.1.254.0/24;
-                address 10.1.252.0/24 10.1.252.0/24;
+                address 192.168.252.0/24 192.168.252.0/24;
                 address 192.168.144.0/24 192.168.144.0/24;
                 address 10.1.0.0/16 10.1.0.0/16;
                 address lhr3-ntw-win-01 192.168.100.53/32;

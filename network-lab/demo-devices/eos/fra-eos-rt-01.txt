@@ -445,7 +445,7 @@ ip prefix-list FRA4-FW-01_PRIVATES_ADV_V4
 !
 ip prefix-list FRA4-FW-01_PRIVATES_RCV_V4
    seq 10 permit 192.168.144.0/24 ge 24
-   seq 20 permit 10.1.252.0/24 ge 24
+   seq 20 permit 192.168.252.0/24 ge 24
    seq 30 permit 10.1.247.0/24 ge 24
    seq 40 permit 192.168.100.100/24 ge 24
    seq 50 permit 192.168.100.53/24 ge 24
@@ -488,7 +488,7 @@ ip prefix-list IANA_RESERVED
 !
 ip prefix-list NTW-INFRA-01_BGP_ADV_V4
    seq 10 permit 192.168.144.0/24 le 32
-   seq 20 permit 10.1.252.0/24 le 32
+   seq 20 permit 192.168.252.0/24 le 32
    seq 30 permit 10.2.249.0/24
    seq 40 permit 10.3.249.0/24
    seq 50 permit 192.168.100.53/24

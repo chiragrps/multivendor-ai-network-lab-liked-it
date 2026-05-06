@@ -404,7 +404,7 @@ security {
         from-zone ntw-advpn to-zone ntw-vlan14 {
             policy ntw-opnsense-to-ntw-vlan14-allow-ssh {
                 match {
-                    source-address [ 192.168.144.0/24 10.1.252.0/24 ];
+                    source-address [ 192.168.144.0/24 192.168.252.0/24 ];
                     destination-address 10.1.27.0/24;
                     application junos-ssh;
                 }
@@ -486,7 +486,7 @@ security {
             }
             policy ntw-advpn-to-ntw-vlan14-allow-opengear {
                 match {
-                    source-address [ 192.168.144.0/24 10.1.252.0/24 ];
+                    source-address [ 192.168.144.0/24 192.168.252.0/24 ];
                     destination-address 10.1.27.41/32;
                     application [ junos-ssh junos-https ];
                 }
@@ -637,7 +637,7 @@ security {
                 address 10.1.27.0/24 10.1.27.0/24;
                 address bll1-ntw-monitoring-net 10.1.27.0/24;
                 address bll1-pdu-net 10.1.150.0/24;
-                address 10.1.252.0/24 10.1.252.0/24;
+                address 192.168.252.0/24 192.168.252.0/24;
                 address 192.168.144.0/24 192.168.144.0/24;
                 address 10.1.0.0/16 10.1.0.0/16;
                 address lhr3-ntw-win-01 192.168.100.53/32;
@@ -702,7 +702,7 @@ security {
                 address bll1-ntw-monitoring-net 10.1.27.0/24;
                 address bll1-pdu-net 10.1.150.0/24;
                 address 10.1.254.0/24 10.1.254.0/24;
-                address 10.1.252.0/24 10.1.252.0/24;
+                address 192.168.252.0/24 192.168.252.0/24;
                 address 192.168.144.0/24 192.168.144.0/24;
                 address 10.1.0.0/16 10.1.0.0/16;
                 address lhr3-ntw-win-01 192.168.100.53/32;
