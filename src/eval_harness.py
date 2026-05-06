@@ -17,12 +17,15 @@ Workflow:
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 import time
 from typing import Any
 
 import gait_audit
+
+logger = logging.getLogger(__name__)
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _SCENARIOS_FILE = os.path.join(_HERE, "scenarios.json")
@@ -115,7 +118,9 @@ def llm_judge(agent_output: str, scenario: dict[str, Any]) -> dict[str, Any] | N
         parsed["max"] = 10
         parsed["usage"] = {"input": token_in, "output": token_out}
         return parsed
-    except Exception as e:  # noqa: BLE001
+    except (anthropic.APIError, anthropic.APIConnectionError, anthropic.RateLimitError,
+            json.JSONDecodeError, KeyError, TypeError) as e:
+        logger.warning("llm_judge failed: %s", e)
         return {"score": 0, "reasoning": f"judge error: {e}", "method": "llm_judge", "max": 10, "error": True}
 
 
@@ -242,7 +247,8 @@ def _invoke_agent_with_usage(agent: str, symptom: str) -> tuple[str, dict[str, i
             from pydantic_ai_orchestrator import run_orchestrator_structured  # type: ignore
             envelope = run_orchestrator_structured(symptom)
             return envelope.get("rendered", ""), envelope.get("usage") or {"input": 0, "output": 0}
-        except Exception as e:  # noqa: BLE001
+        except (ImportError, AttributeError, KeyError) as e:
+            logger.warning("orchestrator unavailable: %s", e)
             return f"[orchestrator unavailable: {e}]\n" + _stub_agent(symptom), {"input": 0, "output": 0}
     if agent == "ai_command":
         out = _ai_command_sync(symptom)
@@ -251,22 +257,6 @@ def _invoke_agent_with_usage(agent: str, symptom: str) -> tuple[str, dict[str, i
             return out, usage
         return _stub_agent(symptom), {"input": 0, "output": 0}
     return _stub_agent(symptom), {"input": 0, "output": 0}
-
-
-def _invoke_agent(agent: str, symptom: str) -> str:
-    """Resolve and invoke the agent. Falls back to a deterministic stub if no AI configured."""
-    if agent == "orchestrator":
-        try:
-            from pydantic_ai_orchestrator import run_orchestrator  # type: ignore
-            return run_orchestrator(symptom)
-        except Exception as e:  # noqa: BLE001
-            return f"[orchestrator unavailable: {e}]\n" + _stub_agent(symptom)
-    if agent == "ai_command":
-        out = _ai_command_sync(symptom)
-        if out:
-            return out
-        return _stub_agent(symptom)
-    return _stub_agent(symptom)
 
 
 _LAST_AI_USAGE: dict[str, int] = {"input": 0, "output": 0}
@@ -307,7 +297,8 @@ def _ai_command_sync(prompt: str) -> str | None:
             _LAST_AI_USAGE["input"] = int(getattr(usage, "input_tokens", 0) or 0)
             _LAST_AI_USAGE["output"] = int(getattr(usage, "output_tokens", 0) or 0)
         return resp.content[0].text if resp.content else ""
-    except Exception:
+    except (anthropic.APIError, anthropic.APIConnectionError, anthropic.RateLimitError) as e:
+        logger.warning("eval_harness LLM call failed: %s", e)
         return None
 
 

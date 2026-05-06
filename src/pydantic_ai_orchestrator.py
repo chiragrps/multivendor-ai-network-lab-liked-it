@@ -22,9 +22,12 @@ from __future__ import annotations
 
 import json
 import os
+import logging
 import re
 import time
 from typing import Any, Literal
+
+logger = logging.getLogger(__name__)
 
 try:
     from pydantic import BaseModel, Field  # type: ignore
@@ -135,7 +138,11 @@ def _call_claude(system: str, user: str, model: str = "claude-haiku-4-5", max_to
             _LAST_USAGE["input"] += int(getattr(usage, "input_tokens", 0) or 0)
             _LAST_USAGE["output"] += int(getattr(usage, "output_tokens", 0) or 0)
         return resp.content[0].text if resp.content else ""
-    except Exception:
+    except (anthropic.APIError, anthropic.APIConnectionError, anthropic.RateLimitError) as e:
+        logger.warning("Anthropic API call failed: %s", e)
+        return ""
+    except KeyError:
+        logger.error("ANTHROPIC_API_KEY missing from environment at call time")
         return ""
 
 
@@ -180,7 +187,8 @@ def routing_agent(prompt: str) -> RoutingDiagnosis:
         }
     try:
         return RoutingDiagnosis(**data)
-    except Exception:
+    except (TypeError, ValueError) as e:
+        logger.warning("RoutingDiagnosis validation failed: %s", e)
         return RoutingDiagnosis(root_cause="parsing failed", evidence=[raw[:300]])
 
 
@@ -206,7 +214,8 @@ def acl_agent(prompt: str) -> ACLDiagnosis:
         }
     try:
         return ACLDiagnosis(**data)
-    except Exception:
+    except (TypeError, ValueError) as e:
+        logger.warning("ACLDiagnosis validation failed: %s", e)
         return ACLDiagnosis(root_cause="parsing failed")
 
 
@@ -230,7 +239,8 @@ def incident_agent(prompt: str, severity_hint: str = "medium") -> IncidentTicket
         data.setdefault("requires_change_window", False)
     try:
         return IncidentTicket(**data)
-    except Exception:
+    except (TypeError, ValueError) as e:
+        logger.warning("IncidentTicket validation failed: %s", e)
         return IncidentTicket(ticket_id=f"INC-{int(time.time())}", title=prompt[:80])
 
 

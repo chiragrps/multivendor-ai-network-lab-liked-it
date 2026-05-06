@@ -7670,7 +7670,7 @@ _API_ENDPOINTS = [
         "desc": "List all Junos devices auto-generated from DCN inventory (auth details stripped).",
         "params": [],
         "example_curl": "curl http://localhost:5757/api/jmcp/devices",
-        "response": '{"device_count":384,"devices":{"uk-lon-dist-01":{"ip":"10.1.15.101","port":22,"username":"netadmin1","auth_type":"ssh_agent"},...}}',
+        "response": '{"device_count":384,"devices":{"uk-lon-dist-01":{"ip":"10.1.15.101","port":22,"username":"Georgi.Gaydarov","auth_type":"ssh_agent"},...}}',
     },
     {
         "method": "POST", "path": "/api/jmcp/execute",
@@ -12314,7 +12314,11 @@ _CLI_PROXY_PORTS: dict[str, int] = {
     "uk-lon-dist-01": 8809,
     "de-fra-dist-01": 8810,
 }
-_CLI_PROXY_AUTH = ("admin", os.environ.get("CLI_PROXY_PASSWORD", "lab123"))
+_CLI_PROXY_PASSWORD = os.environ.get("CLI_PROXY_PASSWORD", "")
+if not _CLI_PROXY_PASSWORD:
+    print("[WARN] CLI_PROXY_PASSWORD env var not set — CLI proxy auth will fail. "
+          "Set it in .env or disable the CLI Transport benchmark tab.")
+_CLI_PROXY_AUTH = ("admin", _CLI_PROXY_PASSWORD)
 _BENCH_COMMANDS = [
     "show version",
     "show bgp summary",
@@ -12417,8 +12421,14 @@ def api_transport_bench():
                                 username="root", key_filename=_lab_key,
                                 timeout=10, look_for_keys=False, allow_agent=False)
                 else:
+                    _frr_pw = os.environ.get("FRR_DEFAULT_PASSWORD", "")
+                    if not _frr_pw:
+                        raise RuntimeError(
+                            "No SSH key found and FRR_DEFAULT_PASSWORD not set; "
+                            "cannot authenticate to FRR container."
+                        )
                     cli.connect("localhost", port=device.get("port", 22),
-                                username="root", password="lab123",
+                                username="root", password=_frr_pw,
                                 timeout=10, look_for_keys=False, allow_agent=False)
                 import shlex as _shlex
                 _, stdout, stderr = cli.exec_command(

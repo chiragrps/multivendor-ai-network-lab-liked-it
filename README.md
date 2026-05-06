@@ -136,6 +136,59 @@ multivendor-ai-network-lab/
     └── 2026-05-05-multivendor-ai-features-design.md
 ```
 
+## Engineering notes &amp; production roadmap
+
+This is a portfolio/demo lab — not a production system. Phase 3 modules
+follow modern Python hygiene: full type hints (PEP 604 syntax), Flask
+Blueprints (the `mv_bp` blueprint cleanly separates the 20 multivendor
+endpoints from legacy routes), specific exception handling with
+`logging.warning`/`exception` and never swallowing exceptions silently,
+and externalized credentials via env vars. The legacy `src/app.py` predates
+the Phase 3 work and is the migration target.
+
+### Already in place (Phase 3)
+
+- **Type hints everywhere** in the 8 new modules (`pydantic_ai_orchestrator.py`,
+  `eval_harness.py`, `gait_audit.py`, `toon_serializer.py`,
+  `vendor_translator.py`, `multivendor_extensions.py`, runbooks, scenarios).
+- **Flask Blueprints** — `mv_bp` separates `/api/mv/*` routes into their own
+  module. The MCP server is a parallel `fastmcp` surface.
+- **Specific exception handling** — Anthropic SDK errors caught individually
+  (`APIError`, `RateLimitError`, `APIConnectionError`); Pydantic validation
+  caught as `(TypeError, ValueError)`; JSON parsing as `JSONDecodeError`.
+- **Standard `logging` module** instead of `print()` in all Phase 3 modules.
+- **No hardcoded credentials** — `ANTHROPIC_API_KEY`, SSH keys, and the
+  `CLI_PROXY_PASSWORD` come from env. Missing values log a warning rather
+  than silently falling back to a known-weak password.
+- **Sanitization tokens externalized** to a gitignored
+  `network-lab/demo-devices/sanitize_tokens.json` so the public repo carries
+  none of the source-company identifiers.
+
+### Production migration roadmap
+
+These are the right next steps if anyone wants to run this beyond a single
+demo box. None of them are needed for the current lab to function.
+
+1. **State out of memory.** `_napalm_jobs`, `_PYATS_SNAPSHOTS`, ring buffers
+   for syslog/traps, and the GAIT log all live in a single Python process.
+   Move to **Redis** (job/snapshot state), **RQ** or **Celery** (long-running
+   audits), and a **rotated SQLite or PostgreSQL** backend for GAIT so a
+   gunicorn worker farm can share state.
+2. **Replace regex CLI parsers with TextFSM / Cisco Genie templates.** Netmiko
+   has native TextFSM support and the community templates already cover
+   `show bgp summary`, `show interfaces`, `show ip route`, etc. for
+   Junos/EOS/IOS/NX-OS. This eliminates fragile regex per-vendor and survives
+   firmware upgrades.
+3. **Split legacy `src/app.py` into Blueprints** matching the Phase 3 pattern:
+   `routes/device_ops.py`, `routes/llm_agents.py`, `routes/librenms.py`,
+   `routes/reports.py`. Then add type hints across all of it.
+4. **CI gate**: `mypy --strict` over `src/*.py`, `ruff` for style, and
+   `pytest` for the parser unit tests. Fail the build on any new bare
+   `except Exception:` clause.
+5. **Secrets manager**: rotate from `.env` to AWS Secrets Manager / Vault for
+   any deployment beyond a developer laptop. The code already reads from env,
+   so this is a deployment change, not a code change.
+
 ## Licensing
 
 MIT — see [LICENSE](LICENSE).

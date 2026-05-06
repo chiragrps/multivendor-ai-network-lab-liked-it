@@ -13,7 +13,7 @@ RUN chmod 700 /root/.ssh && chmod 600 /root/.ssh/authorized_keys
 RUN echo "PermitRootLogin yes" >> /etc/ssh/sshd_config \
     && echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config \
     && echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config \
-    && echo "root:lab123" | chpasswd
+    && echo "root:change-me-in-prod" | chpasswd
 
 # CLI-over-HTTPS proxy (stdlib only — no pip required)
 COPY cli_proxy.py /usr/local/bin/cli_proxy.py

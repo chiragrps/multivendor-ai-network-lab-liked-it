@@ -42,8 +42,8 @@ def _load_inventory() -> dict:
     try:
         with open(_INV_FILE) as f:
             return json.load(f)
-    except Exception as e:
-        log.warning(f"inventory.json not found: {e}")
+    except (OSError, json.JSONDecodeError) as e:
+        log.warning("inventory.json not loadable: %s", e)
         return {"devices": [], "bgp_sessions": []}
 
 _INVENTORY = _load_inventory()
@@ -484,17 +484,28 @@ def _gnmi_worker(dev: dict, vtysh_cmd: str) -> dict:
             "output":    output or err,
             "success":   bool(output),
         }
-    except Exception as exc:
-        return {
-            "hostname":  dev["hostname"],
-            "site":      dev["site"],
-            "vendor":    dev["vendor"],
-            "ip":        dev["ip"],
-            "port":      dev.get("port"),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "output":    str(exc),
-            "success":   False,
-        }
+    # ImportError: paramiko absent. SSHException/socket.error: connection issues.
+    # OSError: missing key file. Anything else surfaces in the structured error envelope.
+    except (ImportError, OSError) as exc:
+        log.warning("gnmi_worker connection error on %s: %s", dev.get("hostname"), exc)
+        return _gnmi_error_envelope(dev, exc)
+    except Exception as exc:  # noqa: BLE001 — paramiko exceptions are subclasses of various stdlib errors
+        log.exception("gnmi_worker unexpected failure on %s", dev.get("hostname"))
+        return _gnmi_error_envelope(dev, exc)
+
+
+def _gnmi_error_envelope(dev: dict, exc: BaseException) -> dict:
+    """Structured error envelope shared by both gnmi_worker exception arms."""
+    return {
+        "hostname":  dev["hostname"],
+        "site":      dev["site"],
+        "vendor":    dev["vendor"],
+        "ip":        dev["ip"],
+        "port":      dev.get("port"),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "output":    str(exc),
+        "success":   False,
+    }
 
 
 @mv_bp.route("/api/mv/gnmi/query", methods=["POST"])
@@ -570,7 +581,8 @@ def _parse_syslog(data: bytes, src_ip: str) -> dict:
             fac_idx  = pri_val >> 3
             facility = _FAC_NAMES[fac_idx] if fac_idx < len(_FAC_NAMES) else str(fac_idx)
             content  = pri_match.group(2)
-    except Exception:
+    except (UnicodeDecodeError, ValueError, IndexError) as e:
+        log.debug("syslog parse fallback: %s", e)
         content = data.decode(errors="replace")[:200]; severity = "info"; facility = "user"
 
     return {
@@ -705,8 +717,8 @@ def _parse_snmp_trap(data: bytes, src_ip: str) -> dict:
         if trap_type == "unknown" and len(data) > 4:
             # Guess from version byte: 0x30=sequence, then length, then version
             trap_type = "v2cTrap" if data[0] == 0x30 else "genericTrap"
-    except Exception:
-        pass
+    except (ValueError, IndexError) as e:
+        log.debug("snmp trap parse fallback (%s): %s", src_ip, e)
     return {
         "ts":        datetime.now(timezone.utc).isoformat(),
         "src":       src_ip,

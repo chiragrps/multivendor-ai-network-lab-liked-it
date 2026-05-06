@@ -13,7 +13,7 @@ Endpoints:
 All responses: {"hostname":str, "commands":[str], "results":[{"cmd":str,"output":str,"elapsed_ms":int}],
                 "total_elapsed_ms":int}
 
-Auth: HTTP Basic (user=admin, password read from CLI_PROXY_PASSWORD env, default "lab123")
+Auth: HTTP Basic (user=admin, password read from CLI_PROXY_PASSWORD env, default "change-me-in-prod")
 Listens: 0.0.0.0:8080
 """
 
@@ -29,7 +29,7 @@ from threading import Thread
 
 HOSTNAME  = socket.gethostname()
 PORT      = int(os.environ.get("CLI_PROXY_PORT", "8080"))
-PASSWORD  = os.environ.get("CLI_PROXY_PASSWORD", "lab123")
+PASSWORD  = os.environ.get("CLI_PROXY_PASSWORD", "change-me-in-prod")
 _CRED_B64 = base64.b64encode(f"admin:{PASSWORD}".encode()).decode()
 
 

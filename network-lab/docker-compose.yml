@@ -208,7 +208,7 @@ services:
     environment:
       DOCKER_INFLUXDB_INIT_MODE: setup
       DOCKER_INFLUXDB_INIT_USERNAME: admin
-      DOCKER_INFLUXDB_INIT_PASSWORD: dcnlab123
+      DOCKER_INFLUXDB_INIT_PASSWORD: change-me-in-prod
       DOCKER_INFLUXDB_INIT_ORG: dcn-lab
       DOCKER_INFLUXDB_INIT_BUCKET: network-telemetry
       DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: dcn-lab-token-secret
@@ -227,7 +227,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: dcnlab123
+      GF_SECURITY_ADMIN_PASSWORD: change-me-in-prod
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
