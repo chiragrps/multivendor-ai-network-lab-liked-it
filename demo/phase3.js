@@ -221,16 +221,27 @@
       const sites = Array.from(new Set(j.nodes.map(n => n.site)));
       setText('path-vendors', vendors.join(', '));
       setText('path-sites', sites.join(', '));
-      const W = 1200, H = 240, gap = (W - 100) / Math.max(j.nodes.length - 1, 1);
+      const W = 1200, H = 260, gap = (W - 100) / Math.max(j.nodes.length - 1, 1);
       const x = (i) => 50 + i * gap;
       const cy = H / 2;
       const wrap = clear('path-svg-wrap');
-      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, style: 'width:100%;height:240px' });
-      // edges
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, style: 'width:100%;height:260px' });
+      // edges with type labels (eBGP / iBGP / site-LAN)
+      const EDGE_COLOR = { 'eBGP': '#f59e0b', 'iBGP': '#22d3ee', 'site-LAN': '#94a3b8', 'BGP': '#94a3b8', 'unknown': '#586069' };
       for (let i = 0; i < j.edges.length; i++) {
+        const et = j.edges[i].type || 'unknown';
+        const color = EDGE_COLOR[et] || '#586069';
+        const x1 = x(i) + 45, x2 = x(i + 1) - 45;
         svg.appendChild(el('line', {
-          x1: x(i) + 45, y1: cy, x2: x(i + 1) - 45, y2: cy,
-          stroke: '#586069', 'stroke-width': '2', 'stroke-dasharray': '6,3'
+          x1, y1: cy, x2, y2: cy,
+          stroke: color, 'stroke-width': '2.5',
+          'stroke-dasharray': et === 'site-LAN' ? '4,3' : null,
+        }));
+        const mx = (x1 + x2) / 2;
+        svg.appendChild(el('text', {
+          x: mx, y: cy - 8, 'text-anchor': 'middle',
+          fill: color, 'font-size': '10', 'font-family': 'Consolas, monospace',
+          'font-weight': '600', text: et,
         }));
       }
       // nodes

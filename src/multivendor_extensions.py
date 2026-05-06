@@ -926,17 +926,48 @@ def mv_path_trace():
     dst = request.args.get("dst", "")
     if not src or not dst:
         return jsonify({"error": "src and dst hostnames required"}), 400
+    if src == dst:
+        return jsonify({"error": "src and dst must differ", "src": src, "dst": dst}), 400
 
-    # Build adjacency
+    # Build a richer adjacency graph that covers all 26 devices, not just the
+    # FRR BGP mesh. inventory.json bgp_sessions only enumerate FRR-FRR peerings;
+    # static-config devices (Juniper SRX/MX/EX, Arista) need site-level edges
+    # so any-to-any path trace works and produces multi-vendor visualizations.
     adj: dict[str, list[str]] = {}
-    for s in _BGP_SESSIONS:
-        a, b = s["a"], s["b"]
+    edge_types: dict[tuple[str, str], str] = {}
+
+    def _add_edge(a: str, b: str, etype: str) -> None:
+        if a == b:
+            return
+        key = tuple(sorted([a, b]))
+        if key in edge_types:
+            return
+        edge_types[key] = etype
         adj.setdefault(a, []).append(b)
         adj.setdefault(b, []).append(a)
 
+    # 1. eBGP/iBGP sessions from inventory.json
+    for s in _BGP_SESSIONS:
+        _add_edge(s["a"], s["b"], s.get("type", "BGP"))
+
+    # 2. Site-level adjacency: pick the FRR core in each site as the anchor
+    #    and connect every other device in that site to it. Falls back to the
+    #    first device in the site if no FRR core exists.
+    by_site: dict[str, list[dict]] = {}
+    for d in _ALL_DEVICES:
+        by_site.setdefault(d.get("site", "?"), []).append(d)
+
+    for site, devs in by_site.items():
+        cores = [d for d in devs if d.get("vendor") == "frr" and d.get("role") == "core"]
+        anchor = cores[0]["hostname"] if cores else devs[0]["hostname"]
+        for d in devs:
+            _add_edge(anchor, d["hostname"], "site-LAN")
+
     # BFS
-    if src not in adj or dst not in adj:
-        return jsonify({"error": "src or dst has no BGP adjacency", "src": src, "dst": dst}), 404
+    if src not in adj:
+        return jsonify({"error": f"src {src!r} has no edges in topology", "src": src, "dst": dst}), 404
+    if dst not in adj:
+        return jsonify({"error": f"dst {dst!r} has no edges in topology", "src": src, "dst": dst}), 404
 
     queue: list[tuple[str, list[str]]] = [(src, [src])]
     seen: set[str] = {src}
@@ -968,9 +999,25 @@ def mv_path_trace():
             "color": {"juniper": "#22c55e", "arista": "#3b82f6", "frr": "#a855f7"}.get(d.get("vendor"), "#888"),
             "health": "ok",  # placeholder — could be wired to live BGP state
         })
-    edges = [{"from": path[i], "to": path[i + 1]} for i in range(len(path) - 1)]
+    edges = []
+    for i in range(len(path) - 1):
+        a, b = path[i], path[i + 1]
+        key = tuple(sorted([a, b]))
+        edges.append({"from": a, "to": b, "type": edge_types.get(key, "unknown")})
 
-    return jsonify({"src": src, "dst": dst, "hops": len(path) - 1, "path": path, "nodes": nodes, "edges": edges})
+    vendors = sorted({n["vendor"] for n in nodes if n.get("vendor") and n["vendor"] != "unknown"})
+    sites = sorted({n["site"] for n in nodes if n.get("site") and n["site"] != "?"})
+
+    return jsonify({
+        "src": src,
+        "dst": dst,
+        "hops": len(path) - 1,
+        "path": path,
+        "nodes": nodes,
+        "edges": edges,
+        "vendors": vendors,
+        "sites": sites,
+    })
 
 
 # ── Eval harness endpoints ─────────────────────────────────────────────────────
