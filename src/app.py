@@ -3,6 +3,31 @@
 DCN Network Tool - Backend API
 Netmiko/NAPALM SSH tool for Enterprise Network infrastructure.
 Supports Junos (SRX firewalls, EX/QFX switches, MX routers) and Arista EOS.
+
+SECURITY NOTES (read these before using outside a lab):
+  * Read-only by design — every SSH path that accepts user-supplied commands
+    funnels through is_command_blocked(); CMD_BLOCKED_PREFIXES /
+    CMD_BLOCKED_CONTAINS are the single source of truth for the blocklist.
+    No `configure`, `set`, `delete`, `commit`, `rollback`, `request system`,
+    `clear`, `restart`, `file copy/delete` etc. is ever forwarded.
+  * paramiko.AutoAddPolicy() is used everywhere on purpose. This is a lab and
+    portfolio tool — FRR containers rebuild with fresh host keys constantly,
+    and first-run UX against a real customer device matters more than strict
+    TOFU. If you deploy this in production, swap to RejectPolicy + a populated
+    known_hosts.
+  * `verify=False` is set on the LibreNMS proxy (_lnms_api) and the NetPortal
+    proxy (_netportal_api) only — both reach private corporate URLs that
+    typically use internal CAs. All other HTTPS callers (Anthropic, Docker
+    Model Runner over TCP, etc.) verify normally.
+  * No secrets in this file. Anthropic key, NetBox token, LibreNMS tokens,
+    YubiKey PIN, FRR lab password, CLI proxy password all load from env
+    (.env via python-dotenv). CLI_PROXY_PASSWORD and FRR_DEFAULT_PASSWORD
+    fail closed when unset; LibreNMS tokens default to empty (calls error
+    out cleanly rather than authenticating with a placeholder).
+  * Bounded in-memory state — _napalm_jobs, _PENDING_CHANGES, _pyez_cache,
+    _PYATS_SNAPSHOTS use _bounded_insert() with FIFO eviction so a load test
+    or fuzzer can't OOM the process. _OBSERVER_EVENTS and _GLOBAL_AGENT_LOG
+    have inline cap logic with the same intent.
 """
 
 import os
@@ -14,7 +39,6 @@ import json
 import math
 import re
 import subprocess
-import tempfile
 import threading
 import time
 import xml.etree.ElementTree as ET
@@ -174,12 +198,6 @@ def _ssh_connect(client, ip, port=22):
     transport = client.get_transport()
     if transport:
         transport.set_keepalive(15)
-
-def _ssh_pkey():
-    """Return a paramiko PKey for the current SSH mode."""
-    if SSH_MODE == "pkcs11":
-        return _pkcs11_init()
-    return paramiko.RSAKey.from_private_key_file(SSH_KEY_PATH)
 
 def _ssh_run_cmd(ip, command, port=22, timeout=None):
     """Run a single SSH command via paramiko exec_command.
@@ -398,6 +416,32 @@ _lab_hostnames = {d["hostname"] for d in _FRR_LAB_DEVICES}
 DEVICES = _FRR_LAB_DEVICES + [d for d in DEVICES if d["hostname"] not in _lab_hostnames]
 print(f"Lab FRR devices: {len(_FRR_LAB_DEVICES)} prepended to inventory (total {len(DEVICES)})")
 
+# O(1) device lookup indexes — populated once after DEVICES is finalized.
+# Use case-insensitive hostname keys; IP keys are exact match.
+_DEVICE_BY_HOSTNAME = {d["hostname"].lower(): d for d in DEVICES}
+_DEVICE_BY_IP = {d["ip"]: d for d in DEVICES if d.get("ip")}
+
+def get_device_by_hostname(hostname):
+    """O(1) hostname → device dict lookup. Returns None if unknown."""
+    if not hostname:
+        return None
+    return _DEVICE_BY_HOSTNAME.get(hostname.lower().split(".")[0])
+
+def get_device_by_ip(ip):
+    """O(1) IP → device dict lookup. Returns None if unknown."""
+    return _DEVICE_BY_IP.get(ip) if ip else None
+
+
+# ── Pre-compiled regex patterns used in hot parsing loops ───────────────────
+# Compiling these once at module load avoids redundant work inside ARP, MAC,
+# interface, and topology parsing routines that may iterate over thousands of
+# lines per device collection pass.
+_IPV4_RE       = re.compile(r"^\d+\.\d+\.\d+\.\d+$")
+_IPV4_ANY_RE   = re.compile(r"\d+\.\d+\.\d+\.\d+")
+_MAC_COLON_RE  = re.compile(r"^[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}", re.I)
+_MAC_DOT_RE    = re.compile(r"^[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}$", re.I)
+_JUNOS_PHYS_RE = re.compile(r"^(xe|et|ge|xle|fte)-")
+
 # ── Auto-populate NAPALM_SITES from inventory ─────────────────────────────────
 for _d in DEVICES:
     _site = _d["site"].lower()
@@ -492,9 +536,43 @@ COMMANDS = {
     }
 }
 
-# ── Connection Cache ───────────────────────────────────────────────────────────
-_conn_cache = {}
-_conn_lock = threading.Lock()
+# ── Read-only safety: single source of truth for blocked write commands ─────
+# Used by every endpoint that proxies user-supplied commands to a device.
+CMD_BLOCKED_PREFIXES = (
+    "configure", "edit", "set ", "delete ", "deactivate ", "activate ",
+    "rollback", "commit", "load ", "save ",
+    "request system reboot", "request system halt", "request system zeroize",
+    "request system power", "request system software",
+    "clear ", "restart ", "file delete", "file copy",
+)
+CMD_BLOCKED_CONTAINS = ("| save", "cli -c")
+
+def is_command_blocked(cmd: str) -> bool:
+    """Return True if `cmd` is a write/destructive command that must not run."""
+    if not cmd:
+        return False
+    c = cmd.strip().lower()
+    return (any(c.startswith(p) for p in CMD_BLOCKED_PREFIXES) or
+            any(s in c for s in CMD_BLOCKED_CONTAINS))
+
+
+def _bounded_insert(d: dict, key, value, max_size: int) -> None:
+    """Insert into d with FIFO eviction once len(d) exceeds max_size.
+
+    Relies on Python 3.7+ dict insertion-order guarantee. Updating an
+    existing key refreshes its position via re-insertion so frequently-
+    touched entries aren't first to evict. Used for in-memory job/cache
+    state to bound memory under load tests or fuzzing.
+    """
+    if key in d:
+        del d[key]
+    d[key] = value
+    while len(d) > max_size:
+        try:
+            d.pop(next(iter(d)), None)
+        except StopIteration:
+            break
+
 
 def get_device_type_netmiko(dtype):
     return "juniper_junos" if dtype == "junos" else "arista_eos"
@@ -601,27 +679,6 @@ def _flush(conn):
         conn.read_channel()
     except Exception:
         pass
-
-def _strip_cmd_and_prompt(output, command, prompt_escaped):
-    """Remove the echoed command line from the top and the prompt from the bottom."""
-    lines = output.splitlines()
-    # Drop leading blank lines and the echoed command line
-    start = 0
-    cmd_stripped = command.strip()
-    for i, line in enumerate(lines):
-        stripped = line.strip()
-        if stripped == "" or cmd_stripped in stripped:
-            start = i + 1
-            continue
-        break
-    lines = lines[start:]
-    # Drop trailing prompt lines (e.g. '{primary:node0}' and 'user@host>')
-    while lines and (not lines[-1].strip() or
-                     lines[-1].strip().startswith("{primary") or
-                     lines[-1].strip().startswith("{secondary") or
-                     ">" in lines[-1] or "#" in lines[-1]):
-        lines.pop()
-    return "\n".join(lines).strip()
 
 def _clean_prompt(raw_prompt):
     """Extract just the last line of the prompt (handles chassis cluster prefix like '(primary:node0)')."""
@@ -855,7 +912,7 @@ def run_command():
     # Resolve hostname → ip + port + dtype from loaded inventory
     port = int(data.get("port") or 22)
     if hostname:
-        dev = next((d for d in DEVICES if d["hostname"] == hostname), None)
+        dev = get_device_by_hostname(hostname)
         if dev:
             ip    = ip or dev["ip"]
             port  = int(data.get("port") or dev.get("port") or 22)
@@ -867,20 +924,9 @@ def run_command():
         return jsonify({"success": False, "error": "Missing ip"}), 400
 
     # Safety: block write/destructive commands (read-only mode)
-    _CMD_BLOCKED_PREFIXES = {
-        "configure", "edit", "set ", "delete ", "deactivate ", "activate ",
-        "rollback", "commit", "load ", "save ",
-        "request system reboot", "request system halt", "request system zeroize",
-        "request system power", "request system software",
-        "clear ", "restart ", "file delete", "file copy",
-    }
-    _CMD_BLOCKED_CONTAINS = {"| save", "cli -c"}
-
     if raw:
-        cmd_lower = raw.strip().lower()
-        if any(cmd_lower.startswith(b) for b in _CMD_BLOCKED_PREFIXES) or \
-           any(b in cmd_lower for b in _CMD_BLOCKED_CONTAINS):
-            return jsonify({"success": False, "error": f"BLOCKED: write/destructive commands not allowed (read-only mode)"}), 403
+        if is_command_blocked(raw):
+            return jsonify({"success": False, "error": "BLOCKED: write/destructive commands not allowed (read-only mode)"}), 403
         command = raw
     elif cmd_key:
         command = COMMANDS.get(dtype, {}).get(cmd_key)
@@ -970,7 +1016,7 @@ def session_audit():
                 p = parts[idx]
                 p_lower = p.lower()
                 # Skip IP addresses and login timestamps
-                if re.match(r'^\d+\.\d+\.\d+\.\d+$', p):
+                if _IPV4_RE.match(p):
                     continue
                 if "am" in p_lower or "pm" in p_lower:
                     continue
@@ -2725,9 +2771,11 @@ def deep_analysis():
                     ssh_key_path=os.environ.get("DCN_SSH_KEY", os.path.expanduser("~/Downloads/05_Networking/netlab_admin")),
                     ssh_timeout=20,
                 )
-                # Cache the fresh result for reuse
+                # Cache the fresh result for reuse — entries also TTL-checked at read time
                 if pyez.get("netconf_available"):
-                    _pyez_cache[cache_key] = {"result": pyez, "timestamp": time.time()}
+                    _bounded_insert(_pyez_cache, cache_key,
+                                    {"result": pyez, "timestamp": time.time()},
+                                    max_size=50)
             if pyez.get("netconf_available"):
                 report["pyez_enriched"] = True
                 cats = report.get("categories", {})
@@ -3914,7 +3962,7 @@ def _analyze_topology(hostname, dtype, results):
     remote_devices = set()
     for n in neighbors:
         rd = n["remote_device"].lower().split(".")[0]
-        if rd and not re.match(r"^\d+\.\d+\.\d+\.\d+$", rd):
+        if rd and not _IPV4_RE.match(rd):
             remote_devices.add(rd)
 
     return {
@@ -5904,7 +5952,7 @@ def _parse_arp_junos(arp_output):
         if len(parts) < 4:
             continue
         mac = parts[0]
-        if not re.match(r'^[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}', mac, re.I):
+        if not _MAC_COLON_RE.match(mac):
             continue
         ip_addr = parts[1]
         # Detect format: if parts[2] looks like an interface (contains . or /) it's no-resolve
@@ -5928,7 +5976,7 @@ def _parse_arp_eos(arp_output):
         if len(parts) < 4:
             continue
         ip_addr = parts[0]
-        if not re.match(r'^\d+\.\d+\.\d+\.\d+$', ip_addr):
+        if not _IPV4_RE.match(ip_addr):
             continue
         mac = parts[2]
         iface = parts[3] if len(parts) > 3 else ""
@@ -5967,7 +6015,7 @@ def _parse_mac_per_vlan_junos(mac_output):
         if len(parts) < 5:
             continue
         mac = parts[1] if len(parts) >= 6 else ""
-        if not re.match(r'^[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}', mac, re.I):
+        if not _MAC_COLON_RE.match(mac):
             continue
         vlan = parts[0]
         vlan_macs.setdefault(vlan, set()).add(mac.lower())
@@ -6275,7 +6323,9 @@ def pyez_stats(hostname):
                         "hint": "NETCONF may not be enabled on this device (set system services netconf ssh)"}), 502
 
     # Cache the result
-    _pyez_cache[cache_key] = {"result": result, "timestamp": time.time()}
+    _bounded_insert(_pyez_cache, cache_key,
+                    {"result": result, "timestamp": time.time()},
+                    max_size=50)
     result["from_cache"] = False
 
     return jsonify({"success": True, **result})
@@ -6799,15 +6849,7 @@ def jmcp_execute():
     if not device or not command:
         return jsonify({"error": "device and command are required"}), 400
     # Safety: block write/destructive commands at proxy level (read-only mode)
-    cmd_lower = command.lower().strip()
-    blocked_prefixes = ["configure", "edit", "set ", "delete ", "deactivate ", "activate ",
-                        "rollback", "commit", "load ", "save ", "request system reboot",
-                        "request system halt", "request system zeroize",
-                        "request system power", "request system software",
-                        "clear ", "restart ", "file delete", "file copy"]
-    blocked_contains = ["| save", "cli -c"]
-    if any(cmd_lower.startswith(bp) for bp in blocked_prefixes) or \
-       any(bc in cmd_lower for bc in blocked_contains):
+    if is_command_blocked(command):
         return jsonify({"error": f"BLOCKED: '{command}' is not allowed (read-only mode)"}), 403
     # Use direct SSH (same as deep-analysis) — simpler than MCP protocol proxy
     all_devs = _generate_all_network_devices()
@@ -6848,14 +6890,8 @@ def jmcp_batch():
     if not devices_list or not command:
         return jsonify({"error": "devices[] and command are required"}), 400
     # Safety check
-    cmd_lower = command.lower().strip()
-    blocked_prefixes = ["configure", "edit", "set ", "delete ", "deactivate ", "activate ",
-                        "rollback", "commit", "load ", "request system reboot",
-                        "request system halt", "request system zeroize",
-                        "request system power", "request system software"]
-    for bp in blocked_prefixes:
-        if cmd_lower.startswith(bp):
-            return jsonify({"error": f"BLOCKED: '{command}' is not allowed (read-only mode)"}), 403
+    if is_command_blocked(command):
+        return jsonify({"error": f"BLOCKED: '{command}' is not allowed (read-only mode)"}), 403
     all_devs = _generate_all_network_devices()
     import concurrent.futures, time as _time
     results = []
@@ -7151,17 +7187,12 @@ def jmcp_ask():
         return cmd
 
     # Safety: filter out any write commands that slipped through
-    _BLOCKED = {"configure", "set ", "delete ", "commit", "rollback", "request system",
-                "edit ", "load ", "save ", "activate", "deactivate",
-                "clear ", "restart ", "file delete", "file copy"}
-    _BLOCKED_CONTAINS = {"| save", "cli -c"}
     safe_commands = []
     seen = set()
     for cmd in commands[:5]:
         cmd = _sanitize_cmd(cmd)
         cmd_lower = cmd.lower()
-        if any(cmd_lower.startswith(b) for b in _BLOCKED) or \
-           any(bc in cmd_lower for bc in _BLOCKED_CONTAINS):
+        if is_command_blocked(cmd):
             continue
         if cmd_lower in seen:
             continue
@@ -7355,13 +7386,9 @@ def jmcp_ask_site():
     if eos_targets:
         eos_cmds = _match_keywords(_EOS_KW_MAP, q_lower) or ["show system environment all", "show interfaces status"]
 
-    # Safety blocklist
-    _BLOCKED = {"configure", "set ", "delete ", "commit", "rollback", "request system",
-                "edit ", "load ", "save ", "activate", "deactivate"}
-    def _is_safe(cmd):
-        return not any(cmd.lower().startswith(b) for b in _BLOCKED)
-    junos_cmds = [c for c in junos_cmds if _is_safe(c)]
-    eos_cmds = [c for c in eos_cmds if _is_safe(c)]
+    # Safety blocklist (centralized in is_command_blocked)
+    junos_cmds = [c for c in junos_cmds if not is_command_blocked(c)]
+    eos_cmds = [c for c in eos_cmds if not is_command_blocked(c)]
 
     all_cmds_label = junos_cmds + ([f"(EOS) {c}" for c in eos_cmds] if eos_cmds else [])
 
@@ -8031,7 +8058,7 @@ def _llm_query(system_prompt, user_prompt, max_tokens=500):
             continue
         for api_path in socket_paths:
             try:
-                body = json.dumps(payload).encode()
+                body = json.dumps(docker_payload).encode()
                 req_str = (
                     f"POST {api_path} HTTP/1.1\r\n"
                     f"Host: localhost\r\n"
@@ -8423,7 +8450,7 @@ def topology_map(site_code):
 # ── 🗺️ LIVE TOPOLOGY — Dynamic site topology from SSH (LLDP + descriptions) ─
 # ══════════════════════════════════════════════════════════════════════════════
 
-_TOPO_CMDS_JUNOS = [
+_LIVE_TOPO_CMDS_JUNOS = [
     ("show lldp neighbors | no-more", "lldp"),
     ("show interfaces descriptions | no-more", "descriptions"),
     ("show interfaces terse | no-more", "terse"),
@@ -8438,7 +8465,7 @@ _TOPO_CMDS_JUNOS = [
     ("show vlans extensive | no-more", "vlans_detail"),
     ("show configuration vlans | display set | no-more", "vlans_config"),
 ]
-_TOPO_CMDS_EOS = [
+_LIVE_TOPO_CMDS_EOS = [
     ("show lldp neighbors | no-more", "lldp"),
     ("show interfaces description | no-more", "descriptions"),
     ("show interfaces status | no-more", "terse"),
@@ -8459,7 +8486,7 @@ def _topo_collect_device(dev):
     port = dev.get("port", 22)
     result = {"hostname": hostname, "ip": ip, "dtype": dtype, "role": dev.get("role", ""),
               "outputs": {}, "error": None}
-    cmds = _TOPO_CMDS_EOS if dtype == "eos" else _TOPO_CMDS_JUNOS
+    cmds = _LIVE_TOPO_CMDS_EOS if dtype == "eos" else _LIVE_TOPO_CMDS_JUNOS
 
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -9741,11 +9768,11 @@ def topology_live(site_code):
 def _napalm_new_job(job_type, site):
     job_id = f"{job_type}_{site}_{int(time.time())}"
     with _napalm_jobs_lock:
-        _napalm_jobs[job_id] = {
+        _bounded_insert(_napalm_jobs, job_id, {
             "id": job_id, "type": job_type, "site": site,
             "status": "running", "progress": 0, "message": "Starting...",
             "result": None, "started": datetime.now().isoformat(),
-        }
+        }, max_size=100)
     return job_id
 
 def _napalm_update_job(job_id, **kwargs):
@@ -11092,7 +11119,7 @@ def api_ai_command():
         return jsonify({"error": "query required"}), 400
 
     # Resolve device
-    dev = next((d for d in DEVICES if d["hostname"] == hostname), None)
+    dev = get_device_by_hostname(hostname)
     dtype = dev.get("type", "junos") if dev else "junos"
 
     # Step 1: LLM translates NL → CLI
@@ -11315,7 +11342,7 @@ _PYATS_SNAPSHOTS: dict[str, dict] = {}
 
 def _collect_state_snapshot(hostname: str) -> dict:
     """Collect structured state from a device via NAPALM getters."""
-    dev = next((d for d in DEVICES if d["hostname"] == hostname), None)
+    dev = get_device_by_hostname(hostname)
     if not dev:
         return {"error": f"Device '{hostname}' not found"}
     try:
@@ -11348,7 +11375,10 @@ def api_pyats_snapshot():
 
     snapshot = _collect_state_snapshot(hostname)
     key = f"{hostname}:{label}"
-    _PYATS_SNAPSHOTS[key] = {"ts": _time.time(), "data": snapshot, "hostname": hostname, "label": label}
+    # Snapshots can be large (BGP+interface state for one device) — cap at 50
+    _bounded_insert(_PYATS_SNAPSHOTS, key,
+                    {"ts": _time.time(), "data": snapshot, "hostname": hostname, "label": label},
+                    max_size=50)
     digest = _hashlib.md5(_json_mod.dumps(snapshot, sort_keys=True).encode()).hexdigest()[:8]
     return jsonify({"hostname": hostname, "label": label, "digest": digest, "error": snapshot.get("error")})
 
@@ -11683,7 +11713,7 @@ def api_device_health_card():
     if not hostname:
         return jsonify({"error": "hostname required"}), 400
 
-    dev = next((d for d in DEVICES if d["hostname"] == hostname), None)
+    dev = get_device_by_hostname(hostname)
     if not dev:
         return jsonify({"error": f"Device '{hostname}' not in inventory"}), 404
 
@@ -12061,7 +12091,7 @@ def api_config_change_propose():
     if not hostname or not intent:
         return jsonify({"error": "hostname and intent required"}), 400
 
-    dev = next((d for d in DEVICES if d["hostname"] == hostname), None)
+    dev = get_device_by_hostname(hostname)
     if not dev:
         return jsonify({"error": f"Device '{hostname}' not in inventory"}), 404
 
@@ -12105,7 +12135,7 @@ def api_config_change_propose():
     import uuid
     change_id = str(uuid.uuid4())[:8].upper()
     with _PENDING_CHANGES_LOCK:
-        _PENDING_CHANGES[change_id] = {
+        _bounded_insert(_PENDING_CHANGES, change_id, {
             "id": change_id,
             "hostname": hostname,
             "dtype": dtype,
@@ -12116,7 +12146,7 @@ def api_config_change_propose():
             "pre_state": pre_state,
             "status": "pending",
             "created_at": datetime.now().isoformat(),
-        }
+        }, max_size=50)
 
     return jsonify({
         "change_id": change_id,
@@ -12460,7 +12490,7 @@ def api_transport_bench():
     if not hostname:
         return jsonify({"error": "hostname required"}), 400
 
-    device = next((d for d in DEVICES if d["hostname"] == hostname), None)
+    device = get_device_by_hostname(hostname)
     # Fall back to lab synthetic device entry when hostname is a known lab proxy host
     if device is None and hostname in _CLI_PROXY_PORTS:
         lab_port_offset = list(_CLI_PROXY_PORTS.keys()).index(hostname) + 1
@@ -12773,7 +12803,7 @@ def _load_mv_live_config(hostname: str) -> tuple[str, dict] | tuple[None, None]:
 def _agent_diagnosis(message: str, hostname: str, context: dict) -> dict:
     """Collect per-device health data then ask LLM for root-cause analysis."""
     evidence: dict = {}
-    dev = next((d for d in DEVICES if d["hostname"] == hostname), None) if hostname else None
+    dev = get_device_by_hostname(hostname) if hostname else None
     if dev:
         ip, dtype, port = dev["ip"], dev.get("type", "junos"), dev.get("port", 22)
         cmd_set = _HEALTH_CMDS.get(dtype, _HEALTH_CMDS["junos"])
@@ -12805,7 +12835,7 @@ def _agent_compliance(message: str, hostname: str, context: dict) -> dict:
     """Pull running config and check against Batfish rules + LLM audit."""
     if not hostname:
         return {"error": f"Provide a hostname for compliance scan (device '{hostname}' not in inventory)"}
-    dev = next((d for d in DEVICES if d["hostname"] == hostname), None)
+    dev = get_device_by_hostname(hostname)
     config: str = ""
     source: str = ""
     if dev:
@@ -13051,7 +13081,7 @@ def api_chat():
             ]
 
         else:  # ai_command — NL→CLI fallback
-            dev   = next((d for d in DEVICES if d["hostname"] == hostname), None)
+            dev   = get_device_by_hostname(hostname)
             dtype = dev.get("type", "junos") if dev else "junos"
             translation_raw = _llm_query(
                 _NL_SYSTEM,
