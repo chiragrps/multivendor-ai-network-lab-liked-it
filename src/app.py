@@ -28,6 +28,11 @@ SECURITY NOTES (read these before using outside a lab):
     _PYATS_SNAPSHOTS use _bounded_insert() with FIFO eviction so a load test
     or fuzzer can't OOM the process. _OBSERVER_EVENTS and _GLOBAL_AGENT_LOG
     have inline cap logic with the same intent.
+  * Single-worker deployment assumption — in-memory job/cache state lives in
+    process locals. The Werkzeug dev server and `gunicorn -w 1` work as-is;
+    multi-worker setups need a shared backing store (Redis, etc.) before any
+    of the job-poll endpoints (`/api/napalm/jobs/*`, `/api/config-change/*`)
+    are usable.
 """
 
 import os
@@ -41,7 +46,14 @@ import re
 import subprocess
 import threading
 import time
-import xml.etree.ElementTree as ET
+# Prefer defusedxml (safe against XXE / billion-laughs); fall back to stdlib
+# so existing checkouts without the dependency don't break. The .drawio files
+# we parse are operator-authored local files, but defusedxml is the right
+# default for any ElementTree use.
+try:
+    import defusedxml.ElementTree as ET  # type: ignore[import-not-found]
+except ImportError:
+    import xml.etree.ElementTree as ET  # nosec: B405 — defusedxml preferred via requirements.txt
 from datetime import datetime
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
@@ -441,6 +453,10 @@ _IPV4_ANY_RE   = re.compile(r"\d+\.\d+\.\d+\.\d+")
 _MAC_COLON_RE  = re.compile(r"^[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}", re.I)
 _MAC_DOT_RE    = re.compile(r"^[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}$", re.I)
 _JUNOS_PHYS_RE = re.compile(r"^(xe|et|ge|xle|fte)-")
+# EOS / Arista interface names — used by port-capacity and MTU parsers
+_EOS_IFACE_RE      = re.compile(r"^(Ethernet\S+|Et\S+|Vlan\S+|Port-Channel\S+)")
+_EOS_IFACE_NAME_RE = re.compile(r"^(Ethernet\S+|Et\S+)\s*$")
+_EOS_IFACE_MTU_RE  = re.compile(r"^(Ethernet\S+|Et\S+|Vlan\S+|Port-Channel\S+).*MTU\s+(\d+)", re.I)
 
 # ── Auto-populate NAPALM_SITES from inventory ─────────────────────────────────
 for _d in DEVICES:
@@ -1536,7 +1552,7 @@ def analyze_output():
                         continue
                 # EOS: "Ethernet1 is up ... MTU 9214 bytes" or inline
                 if dtype == "eos":
-                    m_eos = re.match(r'^(Ethernet\S+|Et\S+|Vlan\S+|Port-Channel\S+)', line_s)
+                    m_eos = _EOS_IFACE_RE.match(line_s)
                     if m_eos:
                         iface = m_eos.group(1)
                         m_mtu = re.search(r'MTU\s+(\d+)', line_s, re.IGNORECASE)
@@ -1654,7 +1670,7 @@ def analyze_output():
 
                 # ── EOS detail format: "Ethernet1" on line by itself ──────
                 if dtype == "eos":
-                    m_eos_det = re.match(r'^(Ethernet\S+|Et\S+)\s*$', line_s)
+                    m_eos_det = _EOS_IFACE_NAME_RE.match(line_s)
                     if m_eos_det:
                         current_iface = m_eos_det.group(1)
                         sfp_data.setdefault(current_iface, {})
@@ -2438,7 +2454,7 @@ def _deep_analyze(hostname, dtype, results):
                 m2 = re.search(r'MTU:\s*(\d+)', ls)
                 if m2: mtu_map[current_iface] = int(m2.group(1)); current_iface = None
         else:
-            m = re.match(r'^(Ethernet\S+|Et\S+|Vlan\S+|Port-Channel\S+).*MTU\s+(\d+)', ls, re.I)
+            m = _EOS_IFACE_MTU_RE.match(ls)
             if m: mtu_map[m.group(1)] = int(m.group(2))
 
     if mtu_map:

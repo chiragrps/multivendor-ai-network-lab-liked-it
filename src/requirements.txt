@@ -5,3 +5,4 @@ netmiko==4.6.0
 requests==2.32.3
 gunicorn==23.0.0
 junos-eznc==2.7.6
+defusedxml==0.7.1
