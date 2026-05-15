@@ -13365,7 +13365,10 @@ def api_keep_trend():
     simulated trends for dashboard demonstration.
     """
     import random as _rnd
-    regions    = ["DE-FRA", "UK-LON", "NL-AMS", "US-NYC"]
+    # Round-7 P4: keep regions in sync with the 5-site inventory
+    # (DE-FRA, UK-LON, NL-AMS, US-NYC, EU-CDG). New sites here render
+    # as additional cards in the Noise Floor grid automatically.
+    regions    = ["DE-FRA", "UK-LON", "NL-AMS", "US-NYC", "EU-CDG"]
     lnms_url   = os.environ.get("LIBRENMS_URL", "")
     lnms_token = os.environ.get("LIBRENMS_TOKEN", "")
 

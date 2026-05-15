@@ -648,20 +648,20 @@ def start_syslog_receiver():
 import random as _random
 
 _DEMO_SYSLOG_MESSAGES = [
-    ("fra-mx-01",    "warning",  "daemon",  "%BGP-5-ADJCHANGE: neighbor 10.200.0.11 Up"),
-    ("fra-fw-01",    "notice",   "auth",    "%SEC-6-IPACCESSLOGP: list MGMT-IN permitted tcp 192.168.100.1->10.200.1.1:22"),
-    ("fra-ex-01",    "info",     "daemon",  "%LINEPROTO-5-UPDOWN: Line protocol on GigabitEthernet0/0/0, changed state to up"),
-    ("lon-fw-01",    "error",    "kern",    "%PLATFORM-4-ELEMENT_WARNING: Insufficient fan capacity"),
-    ("ams-eos-rt-01","warning",  "daemon",  "%BGP-3-NOTIFICATION: sent to neighbor 10.200.3.1 4/0 (hold time expired)"),
-    ("fra-core-01",  "info",     "daemon",  "BGP: rcvd UPDATE about 10.0.0.0/8 -- withdrawn"),
-    ("lon-core-01",  "error",    "daemon",  "OSPF: router 10.200.0.13 adj change: state -> Full"),
-    ("fra-eos-rt-01","warning",  "syslog",  "gNMI: subscription restarted for path /interfaces/interface"),
-    ("ams-fw-01",    "notice",   "auth",    "SSH: new session from 192.168.100.10 user netadmin1"),
-    ("fra-dist-01",  "info",     "daemon",  "BGP summary: 4 peers, 1245 prefixes received"),
-    ("nyc-fw-01",    "error",    "kern",    "ifnet: eth0 link down"),
-    ("cdg-mx-01",    "warning",  "daemon",  "RPD_BGP_NEIGHBOR_STATE_CHANGED: 203.0.113.1 -> Active"),
-    ("ams-eos-sw-01","info",     "daemon",  "MAC address 00:1a:2b:3c:4d:5e learned on Ethernet1"),
-    ("lon-ex-01",    "notice",   "daemon",  "RSTP topology change on port ge-0/0/5"),
+    ("de-fra-mx-01",    "warning",  "daemon",  "%BGP-5-ADJCHANGE: neighbor 10.200.0.11 Up"),
+    ("de-fra-fw-01",    "notice",   "auth",    "%SEC-6-IPACCESSLOGP: list MGMT-IN permitted tcp 192.168.100.1->10.200.1.1:22"),
+    ("de-fra-ex-01",    "info",     "daemon",  "%LINEPROTO-5-UPDOWN: Line protocol on GigabitEthernet0/0/0, changed state to up"),
+    ("uk-lon-fw-01",    "error",    "kern",    "%PLATFORM-4-ELEMENT_WARNING: Insufficient fan capacity"),
+    ("nl-ams-eos-rt-01","warning",  "daemon",  "%BGP-3-NOTIFICATION: sent to neighbor 10.200.3.1 4/0 (hold time expired)"),
+    ("de-fra-core-01", "info",    "daemon",  "BGP: rcvd UPDATE about 10.0.0.0/8 -- withdrawn"),
+    ("uk-lon-core-01", "error",   "daemon",  "OSPF: router 10.200.0.13 adj change: state -> Full"),
+    ("de-fra-eos-rt-01","warning",  "syslog",  "gNMI: subscription restarted for path /interfaces/interface"),
+    ("nl-ams-fw-01",    "notice",   "auth",    "SSH: new session from 192.168.100.10 user netadmin1"),
+    ("de-fra-dist-01", "info",   "daemon",  "BGP summary: 4 peers, 1245 prefixes received"),
+    ("us-nyc-fw-01",    "error",    "kern",    "ifnet: eth0 link down"),
+    ("eu-cdg-mx-01",    "warning",  "daemon",  "RPD_BGP_NEIGHBOR_STATE_CHANGED: 203.0.113.1 -> Active"),
+    ("nl-ams-eos-sw-01","info",     "daemon",  "MAC address 00:1a:2b:3c:4d:5e learned on Ethernet1"),
+    ("uk-lon-ex-01",    "notice",   "daemon",  "RSTP topology change on port ge-0/0/5"),
 ]
 
 def inject_demo_syslog(n: int = 20):
@@ -777,14 +777,14 @@ def start_trap_receiver():
 
 # Demo traps seed
 _DEMO_TRAPS = [
-    ("fra-core-01",  "linkDown"),
-    ("fra-fx-01",    "bgpBackwardTransition"),
-    ("lon-fw-01",    "linkUp"),
-    ("ams-eos-rt-01","bgpEstablished"),
-    ("fra-ex-01",    "authenticationFailure"),
-    ("nyc-eos-rt-01","linkDown"),
-    ("cdg-mx-01",    "bgpEstablished"),
-    ("lon-core-01",  "warmStart"),
+    ("de-fra-core-01", "linkDown"),
+    ("de-fra-fw-01",    "bgpBackwardTransition"),
+    ("uk-lon-fw-01",    "linkUp"),
+    ("nl-ams-eos-rt-01","bgpEstablished"),
+    ("de-fra-ex-01",    "authenticationFailure"),
+    ("us-nyc-eos-rt-01","linkDown"),
+    ("eu-cdg-mx-01",    "bgpEstablished"),
+    ("uk-lon-core-01", "warmStart"),
 ]
 
 def inject_demo_traps(n: int = 10):

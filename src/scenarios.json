@@ -6,7 +6,7 @@
       "title": "FRA core BGP peer to LON down",
       "category": "routing",
       "severity": "high",
-      "fault": {"type": "bgp_peer_down", "device": "fra-core-01", "peer_ip": "10.200.0.13", "peer_hostname": "lon-core-01"},
+      "fault": {"type": "bgp_peer_down", "device": "de-fra-core-01", "peer_ip": "10.200.0.13", "peer_hostname": "uk-lon-core-01"},
       "expected_root_cause_keywords": ["peer", "10.200.0.13", "down", "unreachable"],
       "expected_remediation_keywords": ["verify", "ping", "restart", "clear bgp"]
     },
@@ -15,7 +15,7 @@
       "title": "AS mismatch on FRA-AMS eBGP session",
       "category": "routing",
       "severity": "medium",
-      "fault": {"type": "bgp_as_mismatch", "device": "fra-core-02", "peer_hostname": "ams-core-01", "expected_as": 65004, "configured_as": 65999},
+      "fault": {"type": "bgp_as_mismatch", "device": "de-fra-core-02", "peer_hostname": "nl-ams-core-01", "expected_as": 65004, "configured_as": 65999},
       "expected_root_cause_keywords": ["AS", "mismatch", "65004", "65999"],
       "expected_remediation_keywords": ["correct", "remote-as", "65004"]
     },
@@ -24,16 +24,16 @@
       "title": "OSPF area mismatch FRA core-01 ↔ core-02",
       "category": "routing",
       "severity": "medium",
-      "fault": {"type": "ospf_area_mismatch", "device": "fra-core-01", "peer_hostname": "fra-core-02", "expected_area": "0.0.0.0", "configured_area": "0.0.0.1"},
+      "fault": {"type": "ospf_area_mismatch", "device": "de-fra-core-01", "peer_hostname": "de-fra-core-02", "expected_area": "0.0.0.0", "configured_area": "0.0.0.1"},
       "expected_root_cause_keywords": ["area", "mismatch", "OSPF"],
       "expected_remediation_keywords": ["align", "area", "0.0.0.0"]
     },
     {
       "id": "intf-001",
-      "title": "Physical interface down — fra-core-01 eth0",
+      "title": "Physical interface down — de-fra-core-01 eth0",
       "category": "interface",
       "severity": "high",
-      "fault": {"type": "interface_down", "device": "fra-core-01", "interface": "eth0"},
+      "fault": {"type": "interface_down", "device": "de-fra-core-01", "interface": "eth0"},
       "expected_root_cause_keywords": ["eth0", "down", "physical"],
       "expected_remediation_keywords": ["check", "cable", "no shutdown", "interface"]
     },
@@ -42,34 +42,34 @@
       "title": "MTU mismatch on FRA-LON link (1500 vs 9000)",
       "category": "interface",
       "severity": "medium",
-      "fault": {"type": "mtu_mismatch", "device_a": "fra-core-01", "device_b": "lon-core-01", "mtu_a": 1500, "mtu_b": 9000},
+      "fault": {"type": "mtu_mismatch", "device_a": "de-fra-core-01", "device_b": "uk-lon-core-01", "mtu_a": 1500, "mtu_b": 9000},
       "expected_root_cause_keywords": ["MTU", "mismatch", "1500", "9000"],
       "expected_remediation_keywords": ["align", "MTU", "set"]
     },
     {
       "id": "acl-001",
-      "title": "ACL blocks legitimate management traffic on lon-fw-01",
+      "title": "ACL blocks legitimate management traffic on uk-lon-fw-01",
       "category": "security",
       "severity": "high",
-      "fault": {"type": "acl_block", "device": "lon-fw-01", "src": "10.200.99.10", "dst_port": 22, "policy": "trust-to-mgmt"},
+      "fault": {"type": "acl_block", "device": "uk-lon-fw-01", "src": "10.200.99.10", "dst_port": 22, "policy": "trust-to-mgmt"},
       "expected_root_cause_keywords": ["ACL", "deny", "policy", "22"],
       "expected_remediation_keywords": ["permit", "policy", "trust-to-mgmt"]
     },
     {
       "id": "acl-002",
-      "title": "Overly-permissive any-any rule on fra-fw-01",
+      "title": "Overly-permissive any-any rule on de-fra-fw-01",
       "category": "security",
       "severity": "high",
-      "fault": {"type": "acl_overpermissive", "device": "fra-fw-01", "policy": "internet-out"},
+      "fault": {"type": "acl_overpermissive", "device": "de-fra-fw-01", "policy": "internet-out"},
       "expected_root_cause_keywords": ["any", "any", "overly", "permissive"],
       "expected_remediation_keywords": ["restrict", "specific", "least privilege"]
     },
     {
       "id": "cve-001",
-      "title": "Critical CVE on fra-fw-01 (Junos 19.4R3)",
+      "title": "Critical CVE on de-fra-fw-01 (Junos 19.4R3)",
       "category": "vulnerability",
       "severity": "critical",
-      "fault": {"type": "cve_present", "device": "fra-fw-01", "cve_id": "CVE-2022-22241"},
+      "fault": {"type": "cve_present", "device": "de-fra-fw-01", "cve_id": "CVE-2022-22241"},
       "expected_root_cause_keywords": ["CVE-2022-22241", "Junos", "RCE"],
       "expected_remediation_keywords": ["upgrade", "Junos", "patch"]
     },
@@ -78,16 +78,16 @@
       "title": "Intent drift — BGP peer in NetBox not present on device",
       "category": "intent",
       "severity": "medium",
-      "fault": {"type": "intent_drift", "device": "ams-core-01", "claimed_peer": "10.200.0.99", "observed": "absent"},
+      "fault": {"type": "intent_drift", "device": "nl-ams-core-01", "claimed_peer": "10.200.0.99", "observed": "absent"},
       "expected_root_cause_keywords": ["intent", "drift", "peer", "missing"],
       "expected_remediation_keywords": ["add", "peer", "config"]
     },
     {
       "id": "perf-001",
-      "title": "High CPU on lon-core-01 due to control-plane storm",
+      "title": "High CPU on uk-lon-core-01 due to control-plane storm",
       "category": "performance",
       "severity": "high",
-      "fault": {"type": "high_cpu", "device": "lon-core-01", "cpu_pct": 95, "cause": "control-plane policer breach"},
+      "fault": {"type": "high_cpu", "device": "uk-lon-core-01", "cpu_pct": 95, "cause": "control-plane policer breach"},
       "expected_root_cause_keywords": ["CPU", "95", "control-plane"],
       "expected_remediation_keywords": ["policer", "rate-limit", "investigate"]
     }

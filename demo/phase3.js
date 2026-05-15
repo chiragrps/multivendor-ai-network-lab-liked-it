@@ -101,7 +101,23 @@
         out.appendChild(grid);
       }
       setText('intent-status', '✓ done');
-    } catch (e) { setText('intent-status', '✗ ' + e.message); }
+      // Round-22 S37: stamp the last-run line so operators know freshness.
+      const lr = document.getElementById('intent-last-run');
+      if (lr) {
+        const ts = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        lr.textContent = `Last verified: ${ts} · ${j.drift_count || 0} drift event${(j.drift_count||0)===1?'':'s'} across ${j.total_sessions_checked || 0} sessions`;
+        lr.style.fontStyle = 'normal';
+        lr.style.color = (j.drift_count||0) > 0 ? 'var(--yellow)' : 'var(--green)';
+      }
+    } catch (e) {
+      setText('intent-status', '✗ ' + e.message);
+      const lr = document.getElementById('intent-last-run');
+      if (lr) {
+        lr.textContent = `Last verify attempt failed: ${e.message}`;
+        lr.style.color = 'var(--red)';
+        lr.style.fontStyle = 'normal';
+      }
+    }
   }
 
   // ── Eval Harness ──────────────────────────────────────────────
@@ -113,8 +129,17 @@
     while (sel.firstChild) sel.removeChild(sel.firstChild);
     try {
       const j = await api('/api/mv/eval/scenarios');
+      /* Round-9: scenarios.json on disk already uses the prefixed FRR
+         form (de-fra-core-01) — Flask re-reads it per request. If the
+         backend ever serves an older copy, the short→prefixed mapping
+         lives in window.HOST_ALIAS but we use a negative-lookbehind so
+         an already-prefixed name doesn't double-prefix. */
+      const norm = (s) => {
+        if (!window.HOST_ALIAS) return s;
+        return String(s).replace(/(?<![a-z-])(fra|lon|ams|nyc)-(core|edge|dist)-(\d+)\b/g, (m) => window.HOST_ALIAS[m] || m);
+      };
       for (const s of (j.scenarios || [])) {
-        const opt = el('option', { value: s.id, text: s.id + ' · ' + s.title });
+        const opt = el('option', { value: s.id, text: s.id + ' · ' + norm(s.title) });
         sel.appendChild(opt);
       }
     } catch (e) { _evalLoaded = false; setText('eval-status', '✗ ' + e.message); }
@@ -157,11 +182,27 @@
   }
 
   async function runEvalAll() {
-    setText('eval-status', '⏳ running 10 scenarios…');
     const sel = document.getElementById('eval-scenario');
     const agent = document.getElementById('eval-agent').value;
     const ids = Array.from(sel.options).map(o => o.value);
+    const total = ids.length;
+    /* Round-11 R11-3 / Round-13 R13-3: live progress in three places —
+       button label (Running n/10…), thin top progress bar, and the
+       status line with running avg + elapsed time. Button is disabled
+       while running to prevent re-entry. */
+    const btn = document.getElementById('eval-run-all-btn');
+    const btnOriginal = btn ? btn.textContent : null;
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.7'; btn.style.cursor = 'wait'; }
+    const out = clear('eval-out');
+    const bar = el('div', { style: 'height:6px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-bottom:8px;flex-shrink:0' });
+    const fill = el('div', { style: 'height:100%;width:0%;background:var(--accent);transition:width .25s ease-out' });
+    bar.appendChild(fill);
+    out.appendChild(bar);
+    setText('eval-status', `⏳ 0 / ${total} scenarios…`);
+    if (btn) btn.textContent = `⏳ 0 / ${total}…`;
     const rows = [];
+    let done = 0;
+    const t0 = performance.now();
     for (const id of ids) {
       try {
         const j = await api('/api/mv/eval/run', {
@@ -170,10 +211,19 @@
         });
         rows.push({ id, score: j.keyword_score ? j.keyword_score.score : 0, ms: j.total_ms, title: (j.scenario || {}).title });
       } catch (e) { rows.push({ id, score: 0, ms: 0, title: 'ERROR ' + e.message }); }
+      done++;
+      fill.style.width = Math.round(done / total * 100) + '%';
+      const avgSoFar = rows.reduce((a, b) => a + b.score, 0) / rows.length;
+      const elapsed = Math.round((performance.now() - t0) / 1000);
+      setText('eval-status', `⏳ ${done} / ${total} · avg ${avgSoFar.toFixed(1)}/10 · ${elapsed}s elapsed`);
+      if (btn) btn.textContent = `⏳ ${done} / ${total}…`;
+    }
+    if (btn) {
+      btn.disabled = false; btn.style.opacity = ''; btn.style.cursor = '';
+      if (btnOriginal !== null) btn.textContent = btnOriginal;
     }
     const avg = rows.reduce((a, b) => a + b.score, 0) / Math.max(rows.length, 1);
     setText('eval-kw', avg.toFixed(1));
-    const out = clear('eval-out');
     const grid = el('div', { style: 'display:grid;grid-template-columns:90px 1fr 80px 80px;gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:6px;overflow:hidden;font-size:12px' });
     ['ID','Title','Score','ms'].forEach(h => grid.appendChild(
       el('div', { style: 'padding:6px 10px;font-size:10px;text-transform:uppercase;color:var(--muted);background:var(--bg3)', text: h })
@@ -205,8 +255,34 @@
         dst.appendChild(el('option', { value: d.hostname, text: `${d.hostname} · ${d.site}` }));
       }
       if (src.options.length > 4) dst.selectedIndex = 4;
+      // Round-23 S40: run initial validation after population.
+      if (typeof window._pathTraceValidate === 'function') window._pathTraceValidate();
     } catch (e) { _pathLoaded = false; setText('path-status', '✗ ' + e.message); }
   }
+
+  /* Round-23 S40: live validation — surfaces a yellow inline warning and
+     disables the Trace button when src === dst, so the operator gets
+     immediate feedback rather than a generic "pick different devices"
+     status message after clicking. */
+  window._pathTraceValidate = function(){
+    const src = document.getElementById('path-src')?.value;
+    const dst = document.getElementById('path-dst')?.value;
+    const warn = document.getElementById('path-warn');
+    const btn  = document.getElementById('path-trace-btn');
+    const same = src && dst && src === dst;
+    if (warn) warn.style.display = same ? 'inline' : 'none';
+    if (btn) {
+      btn.disabled = !!same;
+      btn.style.opacity = same ? '0.5' : '';
+      btn.style.cursor  = same ? 'not-allowed' : '';
+    }
+  };
+  window._pathTraceGo = function(){
+    const src = document.getElementById('path-src')?.value;
+    const dst = document.getElementById('path-dst')?.value;
+    if (!src || !dst || src === dst) { window._pathTraceValidate(); return; }
+    runPathTrace();
+  };
 
   async function runPathTrace() {
     const src = document.getElementById('path-src').value;
@@ -277,18 +353,103 @@
       if (!events.length) {
         out.appendChild(el('div', { style: 'color:var(--muted);padding:10px', text: 'No GAIT events yet — invoke the Orchestrator or Eval Harness to generate audit entries.' }));
       } else {
-        const grid = el('div', { style: 'display:grid;grid-template-columns:140px 110px 110px 1fr 1fr;gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:6px;overflow:hidden;font-size:11px' });
-        ['Time','Actor','Action','Target/Tools','Response'].forEach(h => grid.appendChild(
-          el('div', { style: 'padding:5px 8px;font-size:10px;text-transform:uppercase;color:var(--muted);background:var(--bg3);font-weight:600', text: h })
+        // Round-8 P3/P6: 4 visible columns + click-row to reveal a full-width
+        // detail drawer with Target/Tools + complete Response text. Avoids
+        // the column-clipping problem entirely by collapsing the two
+        // information-heavy columns into an on-demand drawer.
+        // Round-9: minmax(220px, 1fr) on TARGET keeps it readable even when other
+        // columns absorb the remainder; the cell still ellipsizes + title-tooltips
+        // for very long values, and the click-drawer always reveals full content.
+        const grid = el('div', { style: 'display:grid;grid-template-columns:110px 100px 120px minmax(220px,1fr) 22px;gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:6px;overflow:hidden;font-size:11px' });
+        ['Time','Actor','Action','Target / Tools',''].forEach(h => grid.appendChild(
+          el('div', { style: 'padding:5px 8px;font-size:10px;text-transform:uppercase;color:var(--muted);background:var(--bg3);font-weight:600;white-space:nowrap', text: h })
         ));
+        const mkLabel = (txt) => el('div', {
+          style: 'font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px',
+          text: txt
+        });
+        const mkBody = (txt, color) => el('div', {
+          style: `margin-bottom:8px;word-break:break-word;${color?'color:'+color:''}`,
+          text: txt
+        });
         for (const e of events) {
           const sc = e.status === 'ok' ? 'var(--green)' : e.status === 'blocked' ? 'var(--yellow)' : 'var(--red)';
-          grid.appendChild(el('div', { style: 'padding:5px 8px;color:var(--muted);font-family:Consolas,monospace', text: (e.ts || '').slice(11, 19) }));
-          grid.appendChild(el('div', { style: `padding:5px 8px;color:${sc}`, text: e.actor }));
-          grid.appendChild(el('div', { style: 'padding:5px 8px', text: e.action || '' }));
-          grid.appendChild(el('div', { style: 'padding:5px 8px;color:var(--accent);font-family:Consolas,monospace', text: (e.target || '') + ' ' + (e.tools_called || []).join(' ') }));
-          grid.appendChild(el('div', { style: 'padding:5px 8px;color:var(--muted)', text: (e.response || '').slice(0, 80) }));
+          const target = (e.target || '') + (e.tools_called?.length ? ' · ' + e.tools_called.join(' ') : '');
+          const rowId = 'gait-row-' + Math.random().toString(36).slice(2, 8);
+          const cell = (txt, color, mono) => {
+            const d = el('div', {
+              style: `padding:5px 8px;${color ? 'color:' + color + ';' : ''}${mono ? "font-family:Consolas,monospace;" : ''}cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap`,
+              text: txt
+            });
+            d.dataset.rowId = rowId;
+            d.title = txt;
+            return d;
+          };
+          grid.appendChild(cell((e.ts || '').slice(11, 19), 'var(--muted)', true));
+          grid.appendChild(cell(e.actor || '', sc, false));
+          grid.appendChild(cell(e.action || '', null, false));
+          // Round-20 S23: device name in target cell becomes a clickable link
+          // that opens Inventory with the hostname pre-filtered. Tool tokens
+          // stay as plain text. Built with DOM nodes only (no innerHTML).
+          const targetCell = el('div', {
+            style: `padding:5px 8px;color:var(--accent);font-family:Consolas,monospace;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap`
+          });
+          targetCell.dataset.rowId = rowId;
+          targetCell.title = target;
+          if (e.target) {
+            const dev = window.normalizeHost ? window.normalizeHost(e.target) : e.target;
+            const link = el('button', {
+              style: 'background:none;border:none;color:var(--accent);font:inherit;cursor:pointer;padding:0;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px',
+              text: dev
+            });
+            link.setAttribute('aria-label', 'Open ' + dev + ' in Inventory');
+            link.title = 'Click to filter Inventory by ' + dev;
+            link.onclick = (ev) => {
+              ev.stopPropagation();
+              if (typeof window.switchTabById === 'function') window.switchTabById('mv-inventory');
+              setTimeout(() => {
+                window._mvInvFilter = dev;
+                const inp = document.getElementById('mv-inv-filter');
+                if (inp) { inp.value = dev; inp.focus(); }
+                if (typeof window.loadMvInventory === 'function') window.loadMvInventory();
+              }, 150);
+            };
+            targetCell.appendChild(link);
+            if (e.tools_called?.length) {
+              const tools = el('span', { style: 'color:var(--accent)', text: ' · ' + e.tools_called.join(' ') });
+              targetCell.appendChild(tools);
+            }
+          } else {
+            targetCell.textContent = target;
+          }
+          grid.appendChild(targetCell);
+          const chev = el('div', { style: 'padding:5px 4px;color:var(--muted);font-size:10px;cursor:pointer;text-align:center', text: '▸' });
+          chev.dataset.rowId = rowId;
+          chev.dataset.chev = '1';
+          chev.title = 'Click for full response';
+          grid.appendChild(chev);
+          // Hidden detail row — built with DOM nodes only (no innerHTML)
+          const detail = el('div', {
+            style: 'grid-column:1/-1;padding:10px 14px;background:var(--bg);border-top:1px solid var(--border);border-left:3px solid var(--accent);font-family:\'JetBrains Mono\',monospace;font-size:11px;line-height:1.55;color:var(--text);white-space:pre-wrap;word-break:break-word;display:none'
+          });
+          detail.dataset.detailFor = rowId;
+          detail.appendChild(mkLabel('Target / Tools'));
+          detail.appendChild(mkBody(target || '—', 'var(--accent)'));
+          detail.appendChild(mkLabel('Response'));
+          detail.appendChild(mkBody(e.response || '—', null));
+          grid.appendChild(detail);
         }
+        grid.addEventListener('click', ev => {
+          const target = ev.target.closest('[data-row-id]');
+          const id = target?.dataset?.rowId;
+          if (!id) return;
+          const det = grid.querySelector(`[data-detail-for="${id}"]`);
+          if (!det) return;
+          const open = det.style.display === 'none';
+          det.style.display = open ? 'block' : 'none';
+          const chev = grid.querySelector(`[data-row-id="${id}"][data-chev="1"]`);
+          if (chev) chev.textContent = open ? '▾' : '▸';
+        });
         out.appendChild(grid);
       }
       setText('gait-status', `✓ ${events.length} events`);
