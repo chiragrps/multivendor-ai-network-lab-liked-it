@@ -549,7 +549,32 @@ COMMANDS = {
         "isp_ifaces":    "show interfaces description | grep -i isp",
         "isp_optics":    "show interfaces transceiver",
         "mtu":           "show interfaces | grep -E 'Ethernet|Vlan|Port-Channel|Loopback' | grep -i mtu",
-    }
+    },
+    # FRR (vtysh) — lab containers. run_command_on_device() wraps these in
+    # `vtysh -c '<cmd>'` when dtype == "frr"; keep strings bare here.
+    "frr": {
+        "version":          "show version",
+        "uptime":           "show version",
+        "interfaces":       "show interface brief",
+        "interfaces_detail":"show interface",
+        "arp":              "show ip arp",
+        "route":            "show ip route summary",
+        "route_table":      "show ip route",
+        "bgp":              "show ip bgp summary",
+        "bgp_detail":       "show ip bgp neighbors",
+        "ospf":             "show ip ospf neighbor",
+        "ospf_database":    "show ip ospf database",
+        "isis":             "show isis neighbor",
+        "lldp":             "show lldp neighbors",
+        "logs":             "show logging",
+        "alarms":           "show logging | include -i error",
+        "config_full":      "show running-config",
+        "config_bgp":       "show running-config bgpd",
+        "config_routing":   "show running-config zebra",
+        "mtu":              "show interface | include MTU",
+        "memory":           "show memory summary",
+        "cpu":              "show processes cpu",
+    },
 }
 
 # ── Read-only safety: single source of truth for blocked write commands ─────
