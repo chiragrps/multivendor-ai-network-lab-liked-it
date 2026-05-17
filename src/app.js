@@ -254,7 +254,7 @@ async function runCmd(cmdKey) {
   setOutputLoading(`Running: ${cmdKey}…`);
   try {
     const r = await fetch(`${API}/run`, { method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ ip: selectedDev.ip, dtype: selectedDev.type, cmd_key: cmdKey }) });
+      body: JSON.stringify({ hostname: selectedDev.hostname, ip: selectedDev.ip, dtype: selectedDev.type, cmd_key: cmdKey }) });
     const d = await r.json();
     displayOutput(cmdKey, d);
     addHistory(cmdKey, d.command || cmdKey, d.success, selectedDev.hostname);

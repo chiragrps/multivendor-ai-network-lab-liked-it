@@ -957,16 +957,22 @@ def run_command():
     raw   = data.get("raw")
     cmd_key = data.get("cmd_key")
 
-    # Resolve hostname → ip + port + dtype from loaded inventory
-    port = int(data.get("port") or 22)
-    if hostname:
-        dev = get_device_by_hostname(hostname)
-        if dev:
-            ip    = ip or dev["ip"]
-            port  = int(data.get("port") or dev.get("port") or 22)
-            dtype = data.get("dtype") or dev.get("type", "junos")
-        elif not ip:
-            return jsonify({"success": False, "error": f"Unknown hostname: {hostname}"}), 400
+    # Resolve hostname → ip + port + dtype from loaded inventory.
+    # Fall back to IP lookup so clients that send {ip, dtype, cmd_key} (no hostname)
+    # still pick up the inventory's port mapping — critical for FRR lab containers
+    # where port 22 is mapped to localhost:220x and the bare default would fail.
+    port = int(data.get("port") or 0)
+    dev = get_device_by_hostname(hostname) if hostname else None
+    if not dev and ip:
+        dev = get_device_by_ip(ip)
+    if dev:
+        ip    = ip or dev["ip"]
+        port  = port or int(dev.get("port") or 22)
+        dtype = data.get("dtype") or dev.get("type", "junos")
+    elif hostname:
+        return jsonify({"success": False, "error": f"Unknown hostname: {hostname}"}), 400
+    if not port:
+        port = 22
 
     if not ip:
         return jsonify({"success": False, "error": "Missing ip"}), 400
