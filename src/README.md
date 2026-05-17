@@ -44,7 +44,7 @@ cd gesh-ai-network-tool
 ./network-lab/start_lab_tool.sh
 
 # Open the demo UI
-open http://localhost:8080/demo/index.html
+open http://localhost:8080/
 
 # Or use the Flask API directly
 open http://localhost:5757/api/devices

@@ -224,7 +224,7 @@ cd multivendor-ai-network-lab
 ./network-lab/start_lab_tool.sh
 
 # Open the demo
-open http://localhost:8080/demo/index.html
+open http://localhost:8080/
 ```
 
 Built by [Georgi Gaydarov](https://linkedin.com/in/gesh75) · 20+ yrs network engineering · open source.

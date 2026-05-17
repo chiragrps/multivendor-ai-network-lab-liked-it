@@ -48,7 +48,7 @@ echo "Demo UI  : http://localhost:8080/ (PID $!)"
 
 echo ""
 echo "  Flask API: http://localhost:$DCN_PORT"
-echo "  Demo UI  : http://localhost:8080/demo/index.html"
+echo "  Demo UI  : http://localhost:8080/"
 echo "═══════════════════════════════════════════════════"
 
 cd "$APP_DIR"
