@@ -89,9 +89,16 @@ SSH_MODE     = os.environ.get("DCN_SSH_MODE",    "pkcs11")
 SSH_KEY_PATH = os.environ.get("DCN_SSH_KEY",     os.path.expanduser("~/Downloads/05_Networking/netlab_admin"))
 SSH_USER     = os.environ.get("DCN_SSH_USER",    "netadmin1" if SSH_MODE == "pkcs11" else "netadmin")
 SSH_TIMEOUT  = int(os.environ.get("DCN_SSH_TIMEOUT", "30"))
-# FRR lab SSH — always key-based with lab_key, independent of production SSH mode
-_FRR_SSH_KEY  = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                               "../../network-lab/ssh-keys/lab_key"))
+# FRR lab SSH — always key-based with lab_key, independent of production SSH mode.
+# Resolve relative to src/ layout (../../../) OR flat layout (../../) OR env override.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_FRR_SSH_KEY = os.environ.get("DCN_FRR_SSH_KEY") or next(
+    (p for p in (
+        os.path.normpath(os.path.join(_HERE, "../../../network-lab/ssh-keys/lab_key")),
+        os.path.normpath(os.path.join(_HERE, "../../network-lab/ssh-keys/lab_key")),
+    ) if os.path.exists(p)),
+    os.path.normpath(os.path.join(_HERE, "../../network-lab/ssh-keys/lab_key"))
+)
 _FRR_SSH_USER = "root"
 # PKCS#11 config (YubiKey)
 PKCS11_LIB   = os.environ.get("DCN_PKCS11_LIB",  "/usr/local/lib/libykcs11.dylib")
@@ -12547,9 +12554,8 @@ def api_transport_bench():
     https_result: dict = {}
     https_err: str = ""
 
-    _lab_key = os.path.join(os.path.dirname(__file__),
-                            "../../network-lab/ssh-keys/lab_key")
-    _lab_key = os.path.normpath(_lab_key) if os.path.exists(os.path.normpath(_lab_key)) else None
+    # Use module-level _FRR_SSH_KEY (handles src/ + flat + env override)
+    _lab_key = _FRR_SSH_KEY if os.path.exists(_FRR_SSH_KEY) else None
 
     def _run_ssh():
         nonlocal ssh_result
