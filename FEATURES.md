@@ -67,7 +67,13 @@
 | 22 | **NAPALM** | Multi-vendor abstraction · per-site batch collection |
 | 23 | **Nornir Engine** | Parallel fleet tasks · ~10× faster than sequential Netmiko · BGP health · version · interface check |
 
-### ✅ Change Control (5 panels)
+### ✅ Change Control (6 panels — Health Gate added Day-1)
+
+> 🛡 **Health Gate** — Observe → Decide → Act → Verify orchestrator. RFC 6241 §8.4
+> confirmed-commit. Clean window → confirm; any regression in BGP / interfaces /
+> alerts → device auto-reverts at NETCONF timeout. 20 pytest cases, simulated +
+> real (PyEZ) modes. See [HEALTH_GATE.md](HEALTH_GATE.md) and
+> `POST /api/mv/health-gate/apply`.
 
 | # | Panel | What it does |
 |---|---|---|

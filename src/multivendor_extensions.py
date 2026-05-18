@@ -1208,6 +1208,70 @@ def mv_gait_recent():
     return jsonify({"events": g.recent(limit=limit, actor=actor), "limit": limit})
 
 
+# ── Health Gate (Day-1 Observe→Decide→Act→Verify orchestrator) ──────────────
+#
+# POST /api/mv/health-gate/apply
+#   { hostname, edit_payload?, timeout_s?, tolerance? }
+#   → { job_id, hostname, mode, phase }
+#
+# GET  /api/mv/health-gate/status/<job_id>
+#   → full job dict (phase, progress_pct, snapshots, verdict, ...)
+#
+# GET  /api/mv/health-gate/recent?limit=20
+#   → newest jobs first
+#
+@mv_bp.route("/api/mv/health-gate/apply", methods=["POST"])
+def mv_health_gate_apply():
+    hg = _import_helper("health_gate")
+    data = request.get_json(force=True) or {}
+    hostname = (data.get("hostname") or "").strip()
+    if not hostname:
+        return jsonify({"error": "hostname required"}), 400
+    # Whitelist of demo / test hooks the UI is allowed to pass through.
+    # These are explicit no-ops in production — see health_gate._run_job.
+    _ALLOWED_HOOKS = {
+        "induce_regression_after_s",
+        "induce_alert_spike_after_s",
+        "fail_at_phase",
+    }
+    hooks = {k: data[k] for k in _ALLOWED_HOOKS if k in data and data[k] is not None}
+    try:
+        job = hg.submit(
+            hostname=hostname,
+            edit_payload=data.get("edit_payload") or "",
+            timeout_s=int(data.get("timeout_s") or hg.DEFAULT_TIMEOUT_S),
+            tolerance=data.get("tolerance") or None,
+            **hooks,
+        )
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except TypeError as e:
+        return jsonify({"error": f"bad arguments: {e}"}), 400
+    return jsonify({
+        "job_id": job.job_id,
+        "hostname": job.hostname,
+        "mode": job.mode,
+        "phase": job.phase,
+        "timeout_s": job.timeout_s,
+    })
+
+
+@mv_bp.route("/api/mv/health-gate/status/<job_id>", methods=["GET"])
+def mv_health_gate_status(job_id: str):
+    hg = _import_helper("health_gate")
+    job = hg.get_job(job_id)
+    if not job:
+        return jsonify({"error": "job not found"}), 404
+    return jsonify(job.to_dict())
+
+
+@mv_bp.route("/api/mv/health-gate/recent", methods=["GET"])
+def mv_health_gate_recent():
+    hg = _import_helper("health_gate")
+    limit = int(request.args.get("limit", 20))
+    return jsonify({"jobs": hg.list_recent_jobs(limit=limit), "limit": limit})
+
+
 @mv_bp.route("/api/mv/gait/stats", methods=["GET"])
 def mv_gait_stats():
     g = _import_helper("gait_audit")
