@@ -1278,6 +1278,38 @@ def mv_gait_stats():
     return jsonify(g.stats())
 
 
+# ── NetBox SoT (Day-3/4: source-of-truth drift detector) ────────────────────
+#
+# GET /api/mv/netbox-sot/devices      → { sot: [...], observed: [...], mode }
+# GET /api/mv/netbox-sot/drift        → DriftReport dict
+# POST /api/mv/netbox-sot/refresh     → DriftReport dict (force re-read)
+#
+@mv_bp.route("/api/mv/netbox-sot/devices", methods=["GET"])
+def mv_netbox_sot_devices():
+    nbs = _import_helper("netbox_sot")
+    sot = nbs.fetch_sot()
+    obs = nbs.fetch_observed()
+    return jsonify({
+        "sot": sot,
+        "observed": obs,
+        "sot_count": len(sot),
+        "observed_count": len(obs),
+        "mode": nbs._detect_mode(),
+    })
+
+
+@mv_bp.route("/api/mv/netbox-sot/drift", methods=["GET"])
+def mv_netbox_sot_drift():
+    nbs = _import_helper("netbox_sot")
+    return jsonify(nbs.compute_drift().to_dict())
+
+
+@mv_bp.route("/api/mv/netbox-sot/refresh", methods=["POST"])
+def mv_netbox_sot_refresh():
+    nbs = _import_helper("netbox_sot")
+    return jsonify(nbs.refresh().to_dict())
+
+
 # ── Runbooks ───────────────────────────────────────────────────────────────────
 
 @mv_bp.route("/api/mv/runbooks", methods=["GET"])

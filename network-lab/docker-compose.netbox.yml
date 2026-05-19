@@ -1,0 +1,75 @@
+# Optional NetBox stack for the NetBox SoT panel.
+#
+# This is NOT auto-started by start_lab_tool.sh — the SoT panel works in
+# simulated mode out of the box. Spin this up only if you want to demo the
+# panel against a real NetBox instance.
+#
+#   docker compose -f network-lab/docker-compose.netbox.yml up -d
+#   # wait ~60s for NetBox to migrate + seed
+#   docker compose -f network-lab/docker-compose.netbox.yml exec netbox \
+#       /opt/netbox/netbox/manage.py shell < network-lab/seed_netbox.py
+#
+# Then export:
+#   export NETBOX_URL=http://localhost:8000
+#   export NETBOX_TOKEN=0123456789abcdef0123456789abcdef01234567
+#   unset NETBOX_SOT_FORCE_SIMULATE
+#   # restart Flask — the panel will switch to real mode
+#
+# Tear down: docker compose -f network-lab/docker-compose.netbox.yml down -v
+
+version: "3.8"
+
+services:
+  netbox-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: netbox
+      POSTGRES_USER: netbox
+      POSTGRES_PASSWORD: netbox_demo_only
+    volumes:
+      - netbox-pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks: [lab]
+
+  netbox-redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass redis_demo_only
+    restart: unless-stopped
+    networks: [lab]
+
+  netbox-redis-cache:
+    image: redis:7-alpine
+    command: redis-server --requirepass redis_demo_only
+    restart: unless-stopped
+    networks: [lab]
+
+  netbox:
+    image: netboxcommunity/netbox:v4.1
+    depends_on: [netbox-postgres, netbox-redis, netbox-redis-cache]
+    environment:
+      DB_HOST: netbox-postgres
+      DB_NAME: netbox
+      DB_USER: netbox
+      DB_PASSWORD: netbox_demo_only
+      REDIS_HOST: netbox-redis
+      REDIS_PASSWORD: redis_demo_only
+      REDIS_CACHE_HOST: netbox-redis-cache
+      REDIS_CACHE_PASSWORD: redis_demo_only
+      SECRET_KEY: demo_only_secret_key_change_this_in_real_use_please_long_enough
+      SUPERUSER_NAME: admin
+      SUPERUSER_EMAIL: admin@example.com
+      SUPERUSER_PASSWORD: admin_demo_only
+      SUPERUSER_API_TOKEN: "0123456789abcdef0123456789abcdef01234567"
+      SKIP_SUPERUSER: "false"
+    ports:
+      - "8000:8080"
+    restart: unless-stopped
+    networks: [lab]
+
+volumes:
+  netbox-pgdata:
+
+networks:
+  lab:
+    external: true
+    name: network-lab_lab

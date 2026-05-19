@@ -298,8 +298,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       </div>
       <div class="box c-teal w2">
         <div class="box-title">⚡ Multivendor Blueprint <span class="p3-badge">PHASE 3</span></div>
-        <div class="box-body">/api/mv/* — 23 endpoints: devices · topology · batfish/fleet · suzieq/analyze · gnmi/query · syslog · traps · netconf · orchestrator · intent/verify · path/trace · eval/{scenarios,run} · gait/{recent,stats} · runbooks · runbook/execute · cve · translator · toon · <b>health-gate/{apply,status,recent}</b></div>
-        <div style="margin-top:6px"><span class="tag t-teal">multivendor_extensions.py</span><span class="tag t-teal">12 P3 endpoints</span><span class="tag t-teal">Day-1: Health Gate</span></div>
+        <div class="box-body">/api/mv/* — 26 endpoints: devices · topology · batfish/fleet · suzieq/analyze · gnmi/query · syslog · traps · netconf · orchestrator · intent/verify · path/trace · eval/{scenarios,run} · gait/{recent,stats} · runbooks · runbook/execute · cve · translator · toon · <b>health-gate/{apply,status,recent}</b> · <b>netbox-sot/{devices,drift,refresh}</b></div>
+        <div style="margin-top:6px"><span class="tag t-teal">multivendor_extensions.py</span><span class="tag t-teal">12 P3 endpoints</span><span class="tag t-teal">Day-1: Health Gate</span><span class="tag t-teal">Day-3/4: NetBox SoT</span></div>
       </div>
       <div class="box c-pink w2">
         <div class="box-title">🔌 MCP Server (fastmcp) <span class="p3-badge">49 TOOLS</span></div>
@@ -400,6 +400,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <div class="tab-box tab-p3"><div class="tab-name"><span class="tab-icon">🛣️</span> Path Trace <span class="p3-badge">P3</span></div><div class="tab-feat">Pick src + dst · Vendor-colored SVG · iBGP/eBGP/site-LAN edge labels</div></div>
       <div class="tab-box tab-p3"><div class="tab-name"><span class="tab-icon">📜</span> GAIT Audit <span class="p3-badge">P3</span></div><div class="tab-feat">Live event stream · Tokens In/Out · Filter by actor · Today's events</div></div>
       <div class="tab-box tab-p3"><div class="tab-name"><span class="tab-icon">🛡️</span> Health Gate <span class="new-badge">Day-1</span></div><div class="tab-feat">RFC 6241 §8.4 confirmed-commit · Observe → Decide → Act → Verify · BGP/iface/alerts watch · auto-confirm OR auto-revert · 20/20 pytest</div></div>
+      <div class="tab-box tab-p3"><div class="tab-name"><span class="tab-icon">📖</span> NetBox SoT <span class="new-badge">Day-3/4</span></div><div class="tab-feat">Source-of-truth drift detector · NetBox view vs running lab · severity-tiered (critical/high/medium/low) · presence + IP/AS/site/vendor/model/role/OS · pynetbox real-mode + seed simulated · 25/25 pytest</div></div>
       <div class="tab-box"><div class="tab-name"><span class="tab-icon">💬</span> AI Command</div><div class="tab-feat">NL → CLI → SSH → explain · Qwen3 / Claude Haiku · Real device exec</div></div>
     </div>
   </div>
