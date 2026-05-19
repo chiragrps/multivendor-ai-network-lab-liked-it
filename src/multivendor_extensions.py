@@ -1310,6 +1310,88 @@ def mv_netbox_sot_refresh():
     return jsonify(nbs.refresh().to_dict())
 
 
+# ── Closed-loop remediation (Day-5/6: drift → propose → approve → execute) ──
+#
+# POST /api/mv/remediation/propose          { runbook_id, device, rationale? }
+# POST /api/mv/remediation/propose-for-drift { drift_row }
+# POST /api/mv/remediation/approve/<proposal_id>  { actor?, timeout_s? }
+# POST /api/mv/remediation/reject/<proposal_id>   { actor?, reason? }
+# GET  /api/mv/remediation/get/<proposal_id>
+# GET  /api/mv/remediation/recent?limit=20
+#
+@mv_bp.route("/api/mv/remediation/propose", methods=["POST"])
+def mv_remediation_propose():
+    rem = _import_helper("remediation")
+    data = request.get_json(force=True) or {}
+    try:
+        p = rem.propose(
+            runbook_id=(data.get("runbook_id") or "").strip(),
+            device=(data.get("device") or "").strip(),
+            rationale=data.get("rationale") or "",
+        )
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    return jsonify(p.to_dict())
+
+
+@mv_bp.route("/api/mv/remediation/propose-for-drift", methods=["POST"])
+def mv_remediation_propose_for_drift():
+    rem = _import_helper("remediation")
+    data = request.get_json(force=True) or {}
+    drift = data.get("drift_row") or {}
+    try:
+        p = rem.propose_for_drift(drift)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    return jsonify(p.to_dict())
+
+
+@mv_bp.route("/api/mv/remediation/approve/<proposal_id>", methods=["POST"])
+def mv_remediation_approve(proposal_id: str):
+    rem = _import_helper("remediation")
+    data = request.get_json(silent=True) or {}
+    actor = (data.get("actor") or "operator").strip()
+    timeout_s = int(data.get("timeout_s") or 30)
+    try:
+        p = rem.approve(proposal_id, actor=actor, timeout_s=timeout_s)
+    except KeyError:
+        return jsonify({"error": "proposal not found"}), 404
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    return jsonify(p.to_dict())
+
+
+@mv_bp.route("/api/mv/remediation/reject/<proposal_id>", methods=["POST"])
+def mv_remediation_reject(proposal_id: str):
+    rem = _import_helper("remediation")
+    data = request.get_json(silent=True) or {}
+    actor = (data.get("actor") or "operator").strip()
+    reason = data.get("reason") or ""
+    try:
+        p = rem.reject(proposal_id, actor=actor, reason=reason)
+    except KeyError:
+        return jsonify({"error": "proposal not found"}), 404
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    return jsonify(p.to_dict())
+
+
+@mv_bp.route("/api/mv/remediation/get/<proposal_id>", methods=["GET"])
+def mv_remediation_get(proposal_id: str):
+    rem = _import_helper("remediation")
+    p = rem.get(proposal_id)
+    if not p:
+        return jsonify({"error": "proposal not found"}), 404
+    return jsonify(p.to_dict())
+
+
+@mv_bp.route("/api/mv/remediation/recent", methods=["GET"])
+def mv_remediation_recent():
+    rem = _import_helper("remediation")
+    limit = int(request.args.get("limit", 20))
+    return jsonify({"proposals": rem.list_recent(limit=limit), "limit": limit})
+
+
 # ── Runbooks ───────────────────────────────────────────────────────────────────
 
 @mv_bp.route("/api/mv/runbooks", methods=["GET"])
