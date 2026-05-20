@@ -1452,6 +1452,47 @@ def mv_postmortem_save():
     return jsonify({"incident": inc.to_dict(), "path": path, "markdown": pm.render_markdown(inc)})
 
 
+# ── CLI RAG (Day-10: BM25 retrieval over multivendor-cli-configurator) ─────
+#
+# GET  /api/mv/cli-rag/search?q=...&k=5&vendor=...&os=...&cat=...
+# POST /api/mv/cli-rag/explain   {snippet, vendor?}
+# GET  /api/mv/cli-rag/stats
+# POST /api/mv/cli-rag/reindex   {path?}  — re-read corpus + rebuild
+#
+@mv_bp.route("/api/mv/cli-rag/search", methods=["GET"])
+def mv_cli_rag_search():
+    rag = _import_helper("cli_rag")
+    q = (request.args.get("q") or "").strip()
+    k = int(request.args.get("k", 5))
+    vendor = request.args.get("vendor") or None
+    os_ = request.args.get("os") or None
+    cat = request.args.get("cat") or None
+    return jsonify(rag.search(q, k=k, vendor=vendor, os=os_, cat=cat))
+
+
+@mv_bp.route("/api/mv/cli-rag/explain", methods=["POST"])
+def mv_cli_rag_explain():
+    rag = _import_helper("cli_rag")
+    data = request.get_json(silent=True) or {}
+    snippet = (data.get("snippet") or "").strip()
+    vendor = data.get("vendor") or None
+    return jsonify(rag.explain(snippet, vendor=vendor))
+
+
+@mv_bp.route("/api/mv/cli-rag/stats", methods=["GET"])
+def mv_cli_rag_stats():
+    rag = _import_helper("cli_rag")
+    return jsonify(rag.stats())
+
+
+@mv_bp.route("/api/mv/cli-rag/reindex", methods=["POST"])
+def mv_cli_rag_reindex():
+    rag = _import_helper("cli_rag")
+    data = request.get_json(silent=True) or {}
+    path = data.get("path")
+    return jsonify(rag.reindex(path))
+
+
 # ── Runbooks ───────────────────────────────────────────────────────────────────
 
 @mv_bp.route("/api/mv/runbooks", methods=["GET"])

@@ -49,6 +49,12 @@
 > auto-detects P1 anchors on Health Gate abandons, markdown output ready to
 > paste into a ticket. 22 pytest cases. See [POSTMORTEM.md](POSTMORTEM.md)
 > and `POST /api/mv/postmortem/generate`.
+>
+> 📖 **CLI Reference** *(Day-10)* — BM25 retrieval over the sibling
+> `multivendor-cli-configurator` corpus. Paste a CLI snippet, get matching
+> documented entries ranked + citation-linked. Pure stdlib BM25 — no
+> embedding model, no API calls, <2ms latency at 7.7k entries. 24 pytest
+> cases. See [CLI_RAG.md](CLI_RAG.md) and `GET /api/mv/cli-rag/search`.
 
 
 

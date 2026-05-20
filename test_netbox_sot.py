@@ -66,7 +66,10 @@ class TestModeDetection:
         monkeypatch.delenv("NETBOX_SOT_FORCE_SIMULATE", raising=False)
         monkeypatch.setenv("NETBOX_URL", "https://nb.example.com")
         monkeypatch.setenv("NETBOX_TOKEN", "fake-token")
-        # pynetbox is not installed in the test env — should fall back
+        # Force pynetbox import to fail even if it's installed in the venv,
+        # so the test is deterministic across environments.
+        import sys
+        monkeypatch.setitem(sys.modules, "pynetbox", None)
         assert nbs._detect_mode() == "simulated"
 
 

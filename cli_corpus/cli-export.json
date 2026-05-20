@@ -1,0 +1,506 @@
+[
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "VPN",
+  "title": "hostname Switch1",
+  "cmd": "hostname Switch1                        # Set device hostname  \nip domain-name example.com              # Define domain name (needed for RSA key)  \ncrypto key generate rsa                 # Generate RSA keys for SSH  \nusername admin privilege 15 secret cisco123   # Create local admin user  \nline vty 0 4                            # Enter VTY line configuration (remote access)  \n transport input ssh                    # Allow only SSH (disable Telnet)  \n login local                            # Use local user database for login",
+  "desc": "SSH > Initial SSH Setup"
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "AAA",
+  "title": "ip ssh version 2",
+  "cmd": "ip ssh version 2                        # Enable SSH version 2 (more secure)  \nip ssh time-out 60                      # Set SSH idle timeout to 60 seconds  \nip ssh authentication-retries 3         # Allow max 3 login attempts",
+  "desc": "SSH > Modifying SSH Config"
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "VPN",
+  "title": "show ip ssh",
+  "cmd": "show ip ssh\nconf t\nip domain-name cisco.com\ncrypto key generate rsa",
+  "desc": "Basic Networking > Setup > Configure SSH"
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "System",
+  "title": "username admin secret ccna",
+  "cmd": "username admin secret ccna\nline vty 0 15\ntransport input ssh\nlogin local\nexit\nip ssh version 2\nexit",
+  "desc": "Basic Networking > Setup > Configure SSH"
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "AAA",
+  "title": "ip ssh time-out 60",
+  "cmd": "ip ssh time-out 60\nip ssh authentication-retries 3\nend",
+  "desc": "Basic Networking > Setup > Basic Hardening (Work Needed)"
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "MPLS",
+  "title": "Host# conf t",
+  "cmd": "Host# conf t\nHost(config)# username  <USER>  password <PASS>\nHost(config)# show user-account",
+  "desc": "SSH - How to login with SSH"
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "AAA",
+  "title": "Host(config)# aaa new-model",
+  "cmd": "Host(config)# aaa new-model",
+  "desc": "SSH - How to login with SSH"
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "VPN",
+  "title": "Host(config)# ip domain-name example.com",
+  "cmd": "Host(config)# ip domain-name example.com\nHost(config)# hostname test1\ntest1(config)# ip ssh version 2\ntest1(config)# crypto key generate rsa\nHow many bits in the modulus [512]:2048",
+  "desc": "SSH - How to login with SSH"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "ssh  user01@192.168.0.5",
+  "cmd": "ssh  user01@192.168.0.5\nconfigure       <- configuration mode",
+  "desc": "Configuration Flow > Configuration with set commands"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "ssh  user01@192.168.0.5",
+  "cmd": "ssh  user01@192.168.0.5\nconfigure       <- configuration mode\nload set terminal\n(abbr)\nCtrl + D\nshow | compare   <- diff configuration\ncommit check     <- check configuration\ncommit           <- commit configuration. If you want to cancel this configuration, You can use  \"rollback 0\" command.\nexit\nexit",
+  "desc": "Configuration Flow > Configuration with load set terminal"
+ },
+ {
+  "os": "junos",
+  "role": "firewall",
+  "vendor": "Juniper",
+  "cat": "VPN",
+  "title": "ssh  user01@192.168.0.5",
+  "cmd": "ssh  user01@192.168.0.5\nconfigure \nedit XXXXXXX     <- edit is like cd of linux.\nedit XXXXXXX\nup\ntop\nedit XXXXXX\nshow | display set\nset XXXX\ndelete XXXX\nshow | compare\ncommit check\ncommit\nexit             <- you need 'exit' command.\nexit",
+  "desc": "Configuration Flow > Step by Step Configuration with edit command"
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "System",
+  "title": "S1#show ip ssh",
+  "cmd": "S1#show ip ssh",
+  "desc": "Configuring SSH | Use it to verify that the switch supports SSH"
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "System",
+  "title": "S1(config)#ip domain-name [domain-name]",
+  "cmd": "S1(config)#ip domain-name [domain-name]",
+  "desc": "Configuring SSH | "
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "VPN",
+  "title": "S1(config)#crypto key generate rsa",
+  "cmd": "S1(config)#crypto key generate rsa",
+  "desc": "Configuring SSH | "
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "System",
+  "title": "S1(config)#line vty 0 15",
+  "cmd": "S1(config)#line vty 0 15",
+  "desc": "Configuring SSH | "
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "System",
+  "title": "S1(config-line)#transport input ssh",
+  "cmd": "S1(config-line)#transport input ssh",
+  "desc": "Configuring SSH | "
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "System",
+  "title": "S1(config-line)#login local",
+  "cmd": "S1(config-line)#login local",
+  "desc": "Configuring SSH | "
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "System",
+  "title": "S1(config-line)#exit",
+  "cmd": "S1(config-line)#exit",
+  "desc": "Configuring SSH | "
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "System",
+  "title": "S1(config)#ip ssh version 2",
+  "cmd": "S1(config)#ip ssh version 2",
+  "desc": "Configuring SSH | enable SSH version 2"
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "VPN",
+  "title": "S1(config)#crypto key zeroise rsa",
+  "cmd": "S1(config)#crypto key zeroise rsa",
+  "desc": "Configuring SSH | :warning: use to **delete** RSA key pair"
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "System",
+  "title": "S1(config)#ip ssh time-out [time]",
+  "cmd": "S1(config)#ip ssh time-out [time]",
+  "desc": "Configuring SSH > Modifying SSH configuration | Change timeout setting (time in seconds)"
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "AAA",
+  "title": "S1(config)#ip ssh authentication-retries [retries]",
+  "cmd": "S1(config)#ip ssh authentication-retries [retries]",
+  "desc": "Configuring SSH > Modifying SSH configuration | Change number of allowed authentication attempts"
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "ACL",
+  "title": "VTY access control",
+  "cmd": "line vty 0 4\n access-class MGMT in\n transport input ssh\n login local",
+  "desc": "Restrict management plane access."
+ },
+ {
+  "os": "junos",
+  "role": "firewall",
+  "vendor": "Juniper",
+  "cat": "Firewall",
+  "title": "Security zones",
+  "cmd": "set security zones security-zone trust interfaces ge-0/0/1.0\nset security zones security-zone untrust interfaces ge-0/0/0.0\nset security zones security-zone trust host-inbound-traffic system-services [ ssh ping ]",
+  "desc": "Map interfaces to zones."
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "AAA",
+  "title": "username demo9 algorithm-type scrypt secret cisco",
+  "cmd": "username demo9 algorithm-type scrypt secret cisco",
+  "desc": "Verifying SSH"
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "AAA",
+  "title": "show ip ssh",
+  "cmd": "show ip ssh",
+  "desc": "Verifies that SSH is enabled"
+ },
+ {
+  "os": "ios",
+  "role": "router",
+  "vendor": "Cisco",
+  "cat": "AAA",
+  "title": "show ssh",
+  "cmd": "show ssh",
+  "desc": "CONFIGURING PASSWORDS"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "AAA",
+  "title": "set system root-authentication ssh-rsa \"ssh-rsa",
+  "cmd": "set system root-authentication ssh-rsa \"ssh-rsa",
+  "desc": "Junos Configuration Basics"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "AAA",
+  "title": "set system login user vagrant authentication ssh-rsa \"ssh-rsa",
+  "cmd": "set system login user vagrant authentication ssh-rsa \"ssh-rsa",
+  "desc": "Junos Configuration Basics"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "set system services ssh root-login allow",
+  "cmd": "set system services ssh root-login allow",
+  "desc": "Junos Configuration Basics"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "set system services netconf ssh",
+  "cmd": "set system services netconf ssh",
+  "desc": "Junos Configuration Basics"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "ssh Start secure shell on another host",
+  "cmd": "ssh Start secure shell on another host",
+  "desc": "show\t\t Show system information"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "telnet Telnet to another host",
+  "cmd": "telnet Telnet to another host",
+  "desc": "ssh\t\t Start secure shell on another host"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "Telnet access and removing SSH and J-Web access:",
+  "cmd": "Telnet access and removing SSH and J-Web access:",
+  "desc": "The following example modifies a candidate configuration by enabling"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "set system services ssh",
+  "cmd": "set system services ssh",
+  "desc": "issue the following series of set commands:"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "set ssh",
+  "cmd": "set ssh",
+  "desc": "then issue the following commands:"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "set services telnet",
+  "cmd": "set services telnet",
+  "desc": "Telnet access and removing SSH and J-Web access:"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "delete services web-management",
+  "cmd": "delete services web-management",
+  "desc": "Telnet access and removing SSH and J-Web access:"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "delete services ssh",
+  "cmd": "delete services ssh",
+  "desc": "Now, display the resulting changes in the candidate compared to the"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "SSH and Telnet (See Chapter 7).",
+  "cmd": "SSH and Telnet (See Chapter 7).",
+  "desc": "management interface over the network using standard utilities such as"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "set system services ssh root-login deny",
+  "cmd": "set system services ssh root-login deny",
+  "desc": "BEST PRACTICE            Strengthen security by only allowing root access from the console port:"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "show system connections",
+  "cmd": "show system connections",
+  "desc": "VERIFY Show the SSH session connections:"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "ssh juniper1",
+  "cmd": "ssh juniper1",
+  "desc": "if the remote client is using SSH:"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "show system services outboundssh jefflee",
+  "cmd": "show system services outboundssh jefflee",
+  "desc": "show - Display device information"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "request chassis internal-ssh",
+  "cmd": "request chassis internal-ssh",
+  "desc": "request - System-level requests"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "System",
+  "title": "request security ssh key-pairidentity generate",
+  "cmd": "request security ssh key-pairidentity generate",
+  "desc": "request - System-level requests"
+ },
+ {
+  "os": "junos",
+  "role": "router",
+  "vendor": "Juniper",
+  "cat": "AAA",
+  "title": "request security ssh passwordless-authentication (Junos OS Evolved)",
+  "cmd": "request security ssh passwordless-authentication (Junos OS Evolved)",
+  "desc": "request - System-level requests"
+ },
+ {
+  "os": "eos",
+  "role": "switch",
+  "vendor": "Arista",
+  "cat": "System",
+  "title": "ip ssh client source-interface",
+  "cmd": "ip ssh [client] source-interface INTERFACE [vrf vrf_name]\nno ip ssh [client] source-interface\ndefault ip ssh [client] source-interface",
+  "desc": "The ip ssh client source-interface command specifies the source IP address for secure shell (SSH) connections."
+ },
+ {
+  "os": "eos",
+  "role": "switch",
+  "vendor": "Arista",
+  "cat": "System",
+  "title": "management security entropy",
+  "cmd": "management security entropy source [cpu jitter] [hardware exclusive]",
+  "desc": "The management security entropy command manages the source of cryptographic entropy (randomness) and provides high quality randomness for SSH keys, SSL/TLS certificates, and random session identifiers."
+ },
+ {
+  "os": "eos",
+  "role": "switch",
+  "vendor": "Arista",
+  "cat": "System",
+  "title": "management ssh",
+  "cmd": "management ssh\nno management ssh\ndefault management ssh",
+  "desc": "The management ssh command places the switch in SSH Management Configuration Mode to adjust SSH session connection parameters."
+ },
+ {
+  "os": "eos",
+  "role": "switch",
+  "vendor": "Arista",
+  "cat": "System",
+  "title": "timeout",
+  "cmd": "management [console | ssh | telnet] timeout timeout_period",
+  "desc": "The timeout command in the SSH, Telnet, or Console Management Configuration Mode specifies the maximum length of a management session regardless of activity during the session."
+ },
+ {
+  "os": "eos",
+  "role": "switch",
+  "vendor": "Arista",
+  "cat": "Logging",
+  "title": "logging console",
+  "cmd": "logging console [alerts | critical | debugging | emergencies | informational\nno | default logging console [alerts | critical | debugging | emergencies |\ninformational | notifications | warnings]",
+  "desc": "The logging console command in Global Configuration Mode controls which system log events display directly on the switch physical console port or on an administrator's remote terminal session such as SSH or"
+ },
+ {
+  "os": "eos",
+  "role": "switch",
+  "vendor": "Arista",
+  "cat": "Logging",
+  "title": "logging monitor",
+  "cmd": "logging monitor [alerts | critical | debugging | emergencies | informational\ninformational | notifications | warnings] 0_7",
+  "desc": "The logging monitor command in Global Configuration Mode controls the display of system log events on a switch, specifically for remote terminal sessions such as SSH or Telnet."
+ },
+ {
+  "os": "eos",
+  "role": "switch",
+  "vendor": "Arista",
+  "cat": "AAA",
+  "title": "AAA Commands",
+  "cmd": "AAA Commands",
+  "desc": "Local Security File Commands • aaa root • enable password • show privilege • show users • show users accounts • username • username ssh-key Accounting, Authentication, and Authorization Commands • aaa accounting"
+ },
+ {
+  "os": "eos",
+  "role": "switch",
+  "vendor": "Arista",
+  "cat": "AAA",
+  "title": "username ssh-key",
+  "cmd": "username name sshkey KEY\nno username name sshkey [role]\ndefault username name sshkey [role]",
+  "desc": "The username ssh-key command configures an SSH key for the specified username."
+ },
+ {
+  "os": "eos",
+  "role": "switch",
+  "vendor": "Arista",
+  "cat": "HA",
+  "title": "ip fhrp accept-mode",
+  "cmd": "ip fhrp accept-mode\nno ip fhrp accept-mode\ndefault ip fhrp accept-mode",
+  "desc": "The ip fhrp accept-mode command configures the switch to permit SSH access to the VRRP Master and VARP Master router."
+ }
+]
