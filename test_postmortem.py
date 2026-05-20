@@ -178,8 +178,10 @@ class TestAffectedDevices:
 
 class TestGenerate:
     def test_empty_window_returns_p3(self):
-        start = _now() - timedelta(hours=10)
-        end = _now() - timedelta(hours=9)
+        # Far-past window — GAIT only retains today + yesterday, so this is
+        # guaranteed to be empty regardless of how busy the live audit gets.
+        start = _now() - timedelta(days=365)
+        end = _now() - timedelta(days=364)
         inc = pm.generate(start, end)
         assert inc.severity == "P3"
         assert inc.events == []
