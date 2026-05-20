@@ -36,13 +36,19 @@
 | 6 | **Alert Correlation** | Multi-source alert dedup + correlation with remediation guidance |
 | 7 | **Noise Floor** | 5-site sparklines (raw · suppressed · incidents) · suppression efficiency per region |
 
-### 🗄  Inventory & Audit (6 panels — NetBox SoT added Day-3/4)
+### 🗄  Inventory & Audit (7 panels — Day-3/4: NetBox SoT, Day-8: Auto-Postmortem)
 
 > 📖 **NetBox SoT** — Source-of-truth drift detector. Compares NetBox view
 > against running lab. Severity-tiered (critical / high / medium / low) with
 > presence + field-level drift. 25 pytest cases, simulated + real (pynetbox)
 > modes. See [NETBOX_SOT.md](NETBOX_SOT.md) and
 > `GET /api/mv/netbox-sot/drift`.
+>
+> 📋 **Auto-Postmortem** — Correlates GAIT + Health Gate + Remediation events
+> into structured incident reports. Deterministic root-cause heuristics,
+> auto-detects P1 anchors on Health Gate abandons, markdown output ready to
+> paste into a ticket. 22 pytest cases. See [POSTMORTEM.md](POSTMORTEM.md)
+> and `POST /api/mv/postmortem/generate`.
 
 
 

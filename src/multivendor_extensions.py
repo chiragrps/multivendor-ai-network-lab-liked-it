@@ -1392,6 +1392,66 @@ def mv_remediation_recent():
     return jsonify({"proposals": rem.list_recent(limit=limit), "limit": limit})
 
 
+# ── Auto-Postmortem (Day-8: incident timeline generator) ────────────────────
+#
+# GET  /api/mv/postmortem/incidents?window_h=2  → auto-detected incidents
+# POST /api/mv/postmortem/generate              → {incident, markdown}
+# GET  /api/mv/postmortem/saved                 → list of persisted reports
+# POST /api/mv/postmortem/save                  → persist generated incident
+#
+from datetime import datetime, timedelta, timezone  # noqa: E402
+
+
+def _parse_window(data: dict) -> tuple:
+    """Accept either explicit ISO timestamps or a relative offset minutes_back."""
+    now = datetime.now(timezone.utc)
+    start = data.get("start")
+    end = data.get("end")
+    if start and end:
+        try:
+            return (datetime.fromisoformat(start.replace("Z", "+00:00")),
+                    datetime.fromisoformat(end.replace("Z", "+00:00")))
+        except ValueError:
+            pass
+    mins_back = int(data.get("minutes_back", 30))
+    return (now - timedelta(minutes=mins_back), now)
+
+
+@mv_bp.route("/api/mv/postmortem/incidents", methods=["GET"])
+def mv_postmortem_incidents():
+    pm = _import_helper("postmortem")
+    window_h = int(request.args.get("window_h", 2))
+    incs = pm.detect_incidents(window_h=window_h)
+    return jsonify({"incidents": [i.to_dict() for i in incs], "count": len(incs)})
+
+
+@mv_bp.route("/api/mv/postmortem/generate", methods=["POST"])
+def mv_postmortem_generate():
+    pm = _import_helper("postmortem")
+    data = request.get_json(silent=True) or {}
+    start, end = _parse_window(data)
+    devices = data.get("devices") or None
+    inc = pm.generate(start, end, devices=devices)
+    return jsonify({"incident": inc.to_dict(), "markdown": pm.render_markdown(inc)})
+
+
+@mv_bp.route("/api/mv/postmortem/saved", methods=["GET"])
+def mv_postmortem_saved():
+    pm = _import_helper("postmortem")
+    return jsonify({"saved": pm.list_saved()})
+
+
+@mv_bp.route("/api/mv/postmortem/save", methods=["POST"])
+def mv_postmortem_save():
+    pm = _import_helper("postmortem")
+    data = request.get_json(silent=True) or {}
+    start, end = _parse_window(data)
+    devices = data.get("devices") or None
+    inc = pm.generate(start, end, devices=devices)
+    path = pm.save(inc)
+    return jsonify({"incident": inc.to_dict(), "path": path, "markdown": pm.render_markdown(inc)})
+
+
 # ── Runbooks ───────────────────────────────────────────────────────────────────
 
 @mv_bp.route("/api/mv/runbooks", methods=["GET"])
