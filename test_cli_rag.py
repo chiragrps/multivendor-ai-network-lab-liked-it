@@ -56,13 +56,21 @@ class TestEntry:
         d = e.to_dict()
         assert d["vendor"] == "Cisco" and d["cmd"] == "router bgp 100"
 
-    def test_cite_url_anchor_from_desc(self):
-        e = _entry(desc="BGP > IPv4 Address Family")
-        assert e.cite_url.endswith("#bgp-ipv4-address-family")
+    def test_cite_url_uses_q_param(self):
+        e = _entry(title="router bgp 100", desc="BGP > IPv4 Address Family")
+        # SPA convention: ?q=<title> (no per-command anchors)
+        assert "?q=router" in e.cite_url
+        # And no broken /cheatsheet.html sub-page
+        assert "cheatsheet.html" not in e.cite_url
 
-    def test_cite_url_falls_back_when_desc_empty(self):
-        e = _entry(desc="")
+    def test_cite_url_falls_back_when_title_and_desc_empty(self):
+        e = _entry(title="", desc="")
         assert e.cite_url == rag.SIBLING_DEEP_LINK
+
+    def test_cite_url_uses_title_first_then_desc(self):
+        # Prefer title for the search query
+        e = _entry(title="show ip bgp summary", desc="BGP Status")
+        assert "show+ip+bgp+summary" in e.cite_url or "show%20ip%20bgp%20summary" in e.cite_url
 
 
 # ─── Tokenizer ──────────────────────────────────────────────────────────────

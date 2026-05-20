@@ -43,7 +43,10 @@ from typing import Any
 
 _HERE = Path(__file__).resolve().parent
 DEFAULT_CORPUS_PATH = _HERE.parent / "cli_corpus" / "cli-export.json"
-SIBLING_DEEP_LINK = "https://gesh75.github.io/multivendor-cli-configurator/cheatsheet.html"
+# The sibling project is a single-page app — there is no cheatsheet.html
+# subpage. Deep links go to the SPA with a ?q= query string so the search
+# filter pre-populates. Day-15-fix: replaced the dead cheatsheet.html URL.
+SIBLING_DEEP_LINK = "https://gesh75.github.io/multivendor-cli-configurator/"
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -67,9 +70,20 @@ class Entry:
 
     @property
     def cite_url(self) -> str:
-        """Best-effort deep link back to the sibling cheatsheet."""
-        anchor = re.sub(r"[^a-z0-9]+", "-", self.desc.lower()).strip("-")
-        return f"{SIBLING_DEEP_LINK}#{anchor}" if anchor else SIBLING_DEEP_LINK
+        """Deep link back to the sibling SPA — uses ?q=<title> because the
+        cheatsheet has no per-command anchors. The SPA's URLSearchParams
+        handler restores filters + search from the query string."""
+        from urllib.parse import quote
+        # Use the title as the search query — short, distinctive, vendor-stable.
+        # Strip trailing comments / multi-line tails for a clean URL.
+        raw = (self.title or self.desc or "")
+        lines = raw.splitlines()
+        q = lines[0].strip() if lines else ""
+        # Cap to a reasonable length so the URL stays readable
+        q = q[:80]
+        if not q:
+            return SIBLING_DEEP_LINK
+        return f"{SIBLING_DEEP_LINK}?q={quote(q)}"
 
 
 @dataclass(frozen=True)
