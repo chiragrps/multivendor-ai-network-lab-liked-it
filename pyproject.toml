@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "multivendor-ai-network-lab"
+version = "0.9.0"
+description = "Multivendor AI Network Lab — closed-loop NetOps tool with Health Gate, NetBox SoT, Auto-Remediate, Postmortem, and MCP server"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Georgi Gaydarov" }]
+keywords = ["network", "automation", "noc", "mcp", "ai", "claude", "netops"]
+dependencies = [
+    "flask>=3.0",
+    "requests>=2.32",
+    "pyyaml>=6.0",
+    "mcp[cli]>=1.12",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+real = [
+    "junos-eznc>=2.7",
+    "pynetbox>=7.4",
+    "netmiko>=4.4",
+    "nornir>=3.4",
+]
+
+[project.scripts]
+multivendor-ai-mcp = "mcp_server.server:main"
+
+[project.urls]
+Homepage = "https://github.com/gesh75/multivendor-ai-network-lab"
+Repository = "https://github.com/gesh75/multivendor-ai-network-lab"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mcp_server*"]
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+python_files = ["test_*.py"]
+filterwarnings = ["ignore::DeprecationWarning"]
