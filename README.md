@@ -1,5 +1,15 @@
 # Multivendor AI Network Lab
 
+> **🛰 Phase 4 (May 2026) — the closed-loop phase:** Health Gate (RFC 6241 §8.4
+> confirmed-commit) · NetBox SoT drift detector · Auto-Remediate proposal state
+> machine · Auto-Postmortem markdown writer · 9,802-command CLI BM25 retrieval ·
+> MCP layer extended to 49 tools (12 Phase-4 closed-loop). The lab now takes an
+> action *and takes it back* if any signal degrades during the watch window.
+>
+> Demo: [`demo/linkedin-demo.mp4`](demo/linkedin-demo.mp4) (1:30 · 1280×720) ·
+> [`demo/LINKEDIN_POST.md`](demo/LINKEDIN_POST.md) · full feature map in
+> [`FEATURES.md`](FEATURES.md).
+
 A 26-device multivendor (Juniper / Arista / FRR) network operations lab driven
 by a Pydantic-AI orchestrator, eval harness, and immutable AI audit trail.
 

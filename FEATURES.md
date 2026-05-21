@@ -1,7 +1,7 @@
 # AI Network Tool v4.0 — Feature Map
 
 > **Public repo:** https://github.com/gesh75/multivendor-ai-network-lab
-> **Demo video:** [`multivendor-ai-network-tool-demo-r27.mp4`](./multivendor-ai-network-tool-demo-r27.mp4) (60 s · 1920×1080)
+> **Demos:** [`closed-loop-demo.webm`](./closed-loop-demo.webm) · [`full-tour-demo.webm`](./full-tour-demo.webm) · [`day8-10-demo.webm`](./day8-10-demo.webm) · [`day12-15-demo.webm`](./day12-15-demo.webm)
 > **Lab:** 26 devices · 5 sites · 36 BGP sessions · multivendor (Juniper · Arista · FRR)
 
 ---
@@ -10,15 +10,34 @@
 
 | Metric | Value |
 |---|---|
-| Panels / features | **34** |
-| Interactive buttons | **185** (all labelled) |
-| Form inputs | **44** (all labelled) |
+| Panels / features | **35** (+ Change Pipeline, Postmortem, CLI Reference, Auto-Remediate, NetBox SoT, Health Gate, MCP server) |
+| Interactive buttons | **220+** (all labelled · WCAG-clean) |
+| REST endpoints | **40+** under `/api/mv/*` |
+| MCP tools / resources / prompts | **12 / 4 / 2** — Claude Code / Cursor / opencode callable |
+| CLI corpus (BM25 indexed) | **9,802 commands** sourced from sibling `multivendor-cli-configurator` |
+| Backend pytest | **137 / 137** in 1.1 s |
 | Lab devices | **26** across 5 sites — DE-FRA · UK-LON · NL-AMS · EU-CDG · US-NYC |
 | BGP sessions | 36 (10 FRR live containers · 16 sanitised real configs) |
-| Accessibility audit | **0 unlabelled elements** · 16 consecutive rounds |
-| Inspection rounds | 27 |
+| Accessibility audit | **0 unlabelled elements** · WCAG-clean |
 | Hostname convention | Universal `{site}-{vendor-role}-{nn}` (e.g. `de-fra-core-01`) |
-| Keyboard mode chords | 5 (`m o/d/p/u/l`) + 7 nav chords (`g h/s/t/o/a/c/i`) |
+| Keyboard chords | mode `m o/d/p/u/l` · nav `g h/s/t/o/a/c/i` · `[` collapse sidebar · `` ` `` dock · `a` triage · `?` help |
+
+---
+
+## 🛰️ The closed-loop story (Day 1 → Day 21 · R5-R7 polish)
+
+Three composable features turn the lab into a self-documenting NetOps platform:
+
+| Day | Feature | Purpose |
+|-----|---------|---------|
+| 1–2 | 🛡 **Health Gate** | RFC 6241 §8.4 confirmed-commit gate. Every config change runs inside a watch window; auto-reverts on regression. |
+| 3–4 | 📖 **NetBox SoT** | Steady-state drift detector. Severity-tiered comparison (critical/high/medium/low) between SoT and observed. |
+| 5–6 | 🤖 **Auto-Remediate** | Closed loop: drift → AI proposes runbook → human approves → executes *through* Health Gate. |
+| 8 | 📋 **Auto-Postmortem** | Stitches GAIT + Health Gate + Remediation events into a structured incident report. Auto-detects P1 anchors. |
+| 9 | 🔌 **MCP Server** | Extends the existing 49-tool MCP surface with the 4 closed-loop tools (drift.scan, remediation.approve, health_gate.apply, postmortem.generate). Callable from Claude Code / Cursor / opencode. |
+| 10 | 🔍 **CLI Reference** | BM25 retrieval over 9,802-cmd corpus. Cisco · Juniper · Arista with citation deep-links. |
+| 12–20 | 🎨 **GUI sprint** | 4 deep audits incorporated: NEW-badge 30-day auto-expiry, sidebar collapse, persistent dock bar with live BGP badge, vendor color tokens (Cisco blue / Juniper teal / Arista orange), mode chords (m+o/d/p/u), nav chords (g+i/c/h/t/a), breadcrumb, P1 dominance pill, Change Pipeline as 5-step hero, single-row header, device-context strip with mini-metrics. |
+| 21 | 🔔 **Day-21 polish (R5-R7)** | Pulsing dock alerts badge while any P1 is live + 3.3s attention spike on increase · device quick-action buttons inline-style bug fix (Terminal · Telemetry · Diagnose · Audit row now appears after `selectDev`) · panel keyboard-shortcut hints expanded 8 → 18 entries covering every closed-loop panel. |
 
 ---
 
@@ -36,34 +55,17 @@
 | 6 | **Alert Correlation** | Multi-source alert dedup + correlation with remediation guidance |
 | 7 | **Noise Floor** | 5-site sparklines (raw · suppressed · incidents) · suppression efficiency per region |
 
-### 🗄  Inventory & Audit (7 panels — Day-3/4: NetBox SoT, Day-8: Auto-Postmortem)
-
-> 📖 **NetBox SoT** — Source-of-truth drift detector. Compares NetBox view
-> against running lab. Severity-tiered (critical / high / medium / low) with
-> presence + field-level drift. 25 pytest cases, simulated + real (pynetbox)
-> modes. See [NETBOX_SOT.md](NETBOX_SOT.md) and
-> `GET /api/mv/netbox-sot/drift`.
->
-> 📋 **Auto-Postmortem** — Correlates GAIT + Health Gate + Remediation events
-> into structured incident reports. Deterministic root-cause heuristics,
-> auto-detects P1 anchors on Health Gate abandons, markdown output ready to
-> paste into a ticket. 22 pytest cases. See [POSTMORTEM.md](POSTMORTEM.md)
-> and `POST /api/mv/postmortem/generate`.
->
-> 📖 **CLI Reference** *(Day-10)* — BM25 retrieval over the sibling
-> `multivendor-cli-configurator` corpus. Paste a CLI snippet, get matching
-> documented entries ranked + citation-linked. Pure stdlib BM25 — no
-> embedding model, no API calls, <2ms latency at 7.7k entries. 24 pytest
-> cases. See [CLI_RAG.md](CLI_RAG.md) and `GET /api/mv/cli-rag/search`.
-
-
+### 🗄  Inventory & Audit (6 panels — NetBox SoT added Day-3/4)
 
 | # | Panel | What it does |
 |---|---|---|
 | 8 | **Inventory** | 26-device table · free-text filter across hostname / site / vendor / role / model · sortable columns · `aria-grid` |
+| 8b | **📖 NetBox SoT** *(NEW)* | Source-of-truth drift detector · compares NetBox view against running lab · severity-tiered (critical / high / medium / low) · presence + field drift (IP / AS / site / vendor / model / role / OS) · simulated seed bakes in 5 drift rows · 25/25 pytest. See [NETBOX_SOT.md](../04_Scripts_Tools/DCN_Network_Tool/NETBOX_SOT.md) |
 | 9 | **Fleet Audit** | Batfish-style fleet config analysis · per-device score · errors / warnings / passed |
 | 10 | **Compliance** | Scans configs for BGP MD5 auth · prefix-limits · OSPF fast timers · explicit router-ID · backbone area |
 | 11 | **GAIT Audit** | Immutable append-only AI audit trail · clickable target hostnames → Inventory · tokens-in / tokens-out · download today's log |
+| 11b | **📋 Auto-Postmortem** *(NEW)* | Correlates GAIT + Health Gate + Remediation into structured incident reports · auto-detects P1 incidents · markdown output ready to paste · split view (report + event table) · 22/22 pytest. See [POSTMORTEM.md](../04_Scripts_Tools/DCN_Network_Tool/POSTMORTEM.md) |
+| 11c | **📖 CLI Reference** *(NEW)* | BM25 retrieval over sibling [multivendor-cli-configurator](https://gesh75.github.io/multivendor-cli-configurator/) corpus · paste a CLI snippet, get vendor-specific matches with citation links · stdlib-only (no embeddings, no model download) · 24/24 pytest. See [CLI_RAG.md](../04_Scripts_Tools/DCN_Network_Tool/CLI_RAG.md) |
 | 12 | **Shadow Auditor** | Asynchronous second-opinion audit channel running in parallel with the orchestrator |
 
 ### 🧠 Diagnose — AI surfaces (6 panels)
@@ -87,19 +89,7 @@
 | 22 | **NAPALM** | Multi-vendor abstraction · per-site batch collection |
 | 23 | **Nornir Engine** | Parallel fleet tasks · ~10× faster than sequential Netmiko · BGP health · version · interface check |
 
-### ✅ Change Control (7 panels — Day-1: Health Gate, Day-5/6: Auto-Remediate)
-
-> 🛡 **Health Gate** — Observe → Decide → Act → Verify orchestrator. RFC 6241 §8.4
-> confirmed-commit. Clean window → confirm; any regression in BGP / interfaces /
-> alerts → device auto-reverts at NETCONF timeout. 20 pytest cases, simulated +
-> real (PyEZ) modes. See [HEALTH_GATE.md](HEALTH_GATE.md) and
-> `POST /api/mv/health-gate/apply`.
->
-> 🤖 **Auto-Remediate** — Closed loop on top of Health Gate + NetBox SoT.
-> Drift → AI proposes runbook → human approves → executes *through* Health
-> Gate (so the fix gets its own confirmed-commit watch). Auto-rejects cosmetic
-> drift; full GAIT lineage on every proposal. 25 pytest cases.
-> See [REMEDIATION.md](REMEDIATION.md) and `POST /api/mv/remediation/propose-for-drift`.
+### ✅ Change Control (6 panels)
 
 | # | Panel | What it does |
 |---|---|---|
@@ -108,6 +98,8 @@
 | 26 | **Observer-Actor** | Auto-rollback proposals when Chaos Monkey or telemetry detects regressions |
 | 27 | **Pre-Deploy Analysis** | What-if config simulation before rollout (Batfish-backed) |
 | 28 | **Blast Radius** | Predicted impact of a proposed change · affected devices + sessions |
+| 28b | **🛡 Health Gate** *(NEW)* | Observe → Decide → Act → Verify orchestrator · RFC 6241 §8.4 confirmed-commit · clean window → confirm, regression → auto-revert · 3 demo scenarios · full GAIT audit trail · 20/20 pytest. See [HEALTH_GATE.md](../04_Scripts_Tools/DCN_Network_Tool/HEALTH_GATE.md) |
+| 28c | **🤖 Auto-Remediate** *(NEW)* | Closed-loop: drift → AI proposes runbook → human approves → executes *through* Health Gate · auto-rejects cosmetic drift · 4 lifecycle tiles (pending / executing / confirmed / abandoned) · 25/25 pytest. See [REMEDIATION.md](../04_Scripts_Tools/DCN_Network_Tool/REMEDIATION.md) |
 
 ### 🗺  Topology (3 panels)
 
