@@ -1,6 +1,6 @@
 # LinkedIn launch — Phase 4 (the closed-loop phase)
 
-> Attach: **`linkedin-demo.mp4`** (1:30 · 3.3 MB · 1280×720 · H.264 LinkedIn-compatible).
+> Attach: **`linkedin-demo.mp4`** (0:52 · 1.9 MB · 1280×720 · H.264 LinkedIn-compatible · one-take tight cut of the closed loop).
 > Repo: https://github.com/gesh75/multivendor-ai-network-lab
 > Prior post: [Phase 3 on LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7458139826265939968/)
 

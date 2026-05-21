@@ -6,7 +6,7 @@
 > MCP layer extended to 49 tools (12 Phase-4 closed-loop). The lab now takes an
 > action *and takes it back* if any signal degrades during the watch window.
 >
-> Demo: [`demo/linkedin-demo.mp4`](demo/linkedin-demo.mp4) (1:30 · 1280×720) ·
+> Demo: [`demo/linkedin-demo.mp4`](demo/linkedin-demo.mp4) (0:52 · 1280×720) ·
 > [`demo/LINKEDIN_POST.md`](demo/LINKEDIN_POST.md) · full feature map in
 > [`FEATURES.md`](FEATURES.md).
 
