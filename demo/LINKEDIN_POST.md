@@ -1,7 +1,7 @@
 # LinkedIn launch — Phase 4 (the closed-loop phase)
 
 > Attach to post: **`linkedin-demo.mp4`** (0:52 · 1.9 MB · 1280×720 · H.264 · tight cut of the closed loop).
-> Deep-dive companion (link in first comment): **`full-tour-demo.mp4`** (2:51 · 6.4 MB · every panel + every primary CTA + captions).
+> Deep-dive companion (2:51 · 6.4 MB · every panel + every primary CTA + captions): see "First comment strategy" below — *don't* link the blob URL on GitHub, it exceeds GitHub's inline preview cap and lands viewers on a dead-end page.
 > Repo: https://github.com/gesh75/multivendor-ai-network-lab
 > Prior post: [Phase 3 on LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7458139826265939968/)
 
@@ -126,12 +126,76 @@ ffmpeg -ss 22 -to 95 -i demo/linkedin-demo.webm \
 
 - [ ] Upload **`linkedin-demo.mp4`** (the 0:52 tight cut) as the post's primary video — better LinkedIn compression + autoplay
 - [ ] Thumbnail: a frame showing the Change Pipeline 5-step or the Health Gate countdown ring
-- [ ] First comment — three links pinned:
+- [ ] First comment — pin these (see "First comment strategy" below for the full-tour link tradeoffs):
       1. Repo: `github.com/gesh75/multivendor-ai-network-lab`
-      2. **Full tour video (2:51) — `demo/full-tour-demo.mp4` on the repo** for anyone who wants every panel walked through
+      2. Full tour link — **pick ONE of the three strategies below**
       3. Phase 3 permalink so readers can see the arc
 - [ ] Tag the people whose work seeded the patterns: NetClaw author, NIKA team, Hugo Tinoco, codingnetworks.blog
 - [ ] Reply to the first 5 comments within an hour
+
+## First comment strategy — the full-tour link problem
+
+GitHub's blob view refuses to render MP4s over ~5 MB inline, so the obvious
+`/blob/main/demo/full-tour-demo.mp4` URL lands viewers on a "Sorry, can't show
+files that are this big" page with just a Download button. That's a friction
+wall most LinkedIn readers won't push through. Three workarounds, ranked:
+
+### 🥇 Option A — YouTube unlisted (best · 5 min setup)
+
+Upload `demo/full-tour-demo.mp4` as an **unlisted** YouTube video. Unlisted =
+only people with the link see it, no public discoverability. LinkedIn renders
+an inline play card in the comment. Highest click-through, lowest friction.
+
+Copy-paste-ready upload metadata:
+
+```text
+Title:        Multivendor AI Network Lab — full feature tour (Phase 4)
+Visibility:   Unlisted
+Description:  Full 2:51 walkthrough of all 40 panels in the Multivendor AI
+              Network Lab — telemetry, audit, AI surfaces, the closed-loop
+              change pipeline (Health Gate · NetBox SoT drift · Auto-Remediate
+              · Auto-Postmortem), topology, path trace, and the eval/chaos
+              surfaces. Captioned, no narration. Open source, MIT.
+
+              Repo: https://github.com/gesh75/multivendor-ai-network-lab
+              Tight 0:52 cut for the LinkedIn post:
+              https://github.com/gesh75/multivendor-ai-network-lab/blob/main/demo/linkedin-demo.mp4
+
+Tags:         networking, network automation, multivendor, aiops, claude,
+              juniper, arista, frr, bgp, netconf, rfc6241, closed loop,
+              netops, mcp, open source
+```
+
+Then paste the YouTube URL into the LinkedIn first comment.
+
+### 🥈 Option B — Link the repo root (simplest · zero new infra)
+
+Don't link the video file at all. Link the repo root and write the comment
+copy to do the work:
+
+> Full code, architecture diagram, and a 2:51 captioned feature tour video
+> are all in the repo →
+> github.com/gesh75/multivendor-ai-network-lab
+
+LinkedIn renders a clean OpenGraph card for the repo. Anyone who wants the
+video clicks into `demo/full-tour-demo.mp4`, where GitHub *will* offer a
+Download button — but framed as "explore the repo," the friction makes sense.
+This sidesteps the blob-preview problem entirely.
+
+### 🥉 Option C — Raw GitHub URL (functional but ugly)
+
+```text
+https://github.com/gesh75/multivendor-ai-network-lab/raw/refs/heads/main/demo/full-tour-demo.mp4
+```
+
+Serves the raw MP4 bytes. Modern desktop browsers will play it in their
+built-in video player. **Mobile browsers often prompt a download instead of
+playing.** No LinkedIn preview card — just a bare URL in the comment.
+
+Use only if you can't be bothered with YouTube and want the video to be the
+first thing the user sees. Otherwise Option B is cleaner.
+
+**Recommendation: Option A if you have 5 minutes. Option B otherwise.**
 
 ## Hashtag pool (pick 4–5)
 
