@@ -10,15 +10,17 @@ SECURITY NOTES (read these before using outside a lab):
     CMD_BLOCKED_CONTAINS are the single source of truth for the blocklist.
     No `configure`, `set`, `delete`, `commit`, `rollback`, `request system`,
     `clear`, `restart`, `file copy/delete` etc. is ever forwarded.
-  * paramiko.AutoAddPolicy() is used everywhere on purpose. This is a lab and
-    portfolio tool — FRR containers rebuild with fresh host keys constantly,
-    and first-run UX against a real customer device matters more than strict
-    TOFU. If you deploy this in production, swap to RejectPolicy + a populated
-    known_hosts.
-  * `verify=False` is set on the LibreNMS proxy (_lnms_api) and the NetPortal
-    proxy (_netportal_api) only — both reach private corporate URLs that
-    typically use internal CAs. All other HTTPS callers (Anthropic, Docker
-    Model Runner over TCP, etc.) verify normally.
+  * SSH host-key + SSL verification are env-var gated (Phase-1 hardening):
+        DCN_SSH_STRICT_HOST_KEY=true  →  paramiko.RejectPolicy()
+        DCN_SSH_STRICT_HOST_KEY=false →  paramiko.AutoAddPolicy() (lab default)
+        DCN_VERIFY_SSL=true           →  requests verify=True
+        DCN_VERIFY_SSL=false          →  requests verify=False (lab default)
+    Both default to permissive so a developer-laptop lab boot works out of
+    the box (FRR containers rebuild with fresh host keys; LibreNMS/NetPortal
+    reach private corporate URLs on internal CAs). Set both to true in any
+    deployment beyond a laptop. Stderr emits a [WARNING] line on every boot
+    when running in permissive mode so it shows up in service logs.
+    Single source of truth: apply_ssh_policy() helper at line 208.
   * No secrets in this file. Anthropic key, NetBox token, LibreNMS tokens,
     YubiKey PIN, FRR lab password, CLI proxy password all load from env
     (.env via python-dotenv). CLI_PROXY_PASSWORD and FRR_DEFAULT_PASSWORD
@@ -197,6 +199,21 @@ if SSH_MODE == "pkcs11":
         SSH_MODE = "key"
         SSH_USER = "netadmin"
 
+DCN_SSH_STRICT_HOST_KEY = os.environ.get("DCN_SSH_STRICT_HOST_KEY", "False").lower() == "true"
+DCN_VERIFY_SSL = os.environ.get("DCN_VERIFY_SSL", "False").lower() == "true"
+import sys
+if not DCN_SSH_STRICT_HOST_KEY:
+    print("[WARNING] DCN_SSH_STRICT_HOST_KEY is False. Using paramiko.AutoAddPolicy() - permissive mode.", file=sys.stderr)
+if not DCN_VERIFY_SSL:
+    print("[WARNING] DCN_VERIFY_SSL is False. SSL certificate validation is disabled for external calls.", file=sys.stderr)
+
+def apply_ssh_policy(client):
+    """Apply Strict or AutoAdd policy based on DCN_SSH_STRICT_HOST_KEY."""
+    if DCN_SSH_STRICT_HOST_KEY:
+        client.set_missing_host_key_policy(paramiko.RejectPolicy())
+    else:
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # nosec B507 - gated by DCN_SSH_STRICT_HOST_KEY
+
 print(f"[SSH] mode={SSH_MODE}  user={SSH_USER}  pkcs11={'yes' if SSH_MODE=='pkcs11' else 'no'}")
 
 def _ssh_connect(client, ip, port=22):
@@ -226,7 +243,7 @@ def _ssh_run_cmd(ip, command, port=22, timeout=None):
     """
     _timeout = timeout or SSH_TIMEOUT + 10
     client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    apply_ssh_policy(client)
     try:
         _ssh_connect(client, ip, port=port)
         stdin, stdout, stderr = client.exec_command(command, timeout=_timeout)
@@ -741,7 +758,7 @@ def run_command_on_device(ip, dtype, command, port=22):
     FRR devices use exec_command + vtysh -c instead of an interactive shell.
     """
     client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    apply_ssh_policy(client)
     try:
         # FRR lab devices: use lab_key/root + localhost port mapping (not internal Docker IP)
         if dtype == "frr":
@@ -4740,7 +4757,7 @@ def _lnms_api(region, path, params=None, timeout=15):
         cookies["ztasid"] = ztasid
     try:
         r = _requests.get(url, headers=headers, cookies=cookies, params=params,
-                          timeout=timeout, verify=False)
+                          timeout=timeout, verify=DCN_VERIFY_SSL)
         if r.status_code == 200:
             return r.json()
         return {"error": f"HTTP {r.status_code}", "detail": r.text[:300]}
@@ -6684,7 +6701,7 @@ def _netportal_api(path, timeout=30):
     """Call NetPortal Capacity API (private IP, no auth needed)."""
     url = f"{_NETPORTAL_BASE}/capacity/api{path}"
     try:
-        r = _requests.get(url, timeout=timeout, verify=False)
+        r = _requests.get(url, timeout=timeout, verify=DCN_VERIFY_SSL)
         r.raise_for_status()
         return r.json()
     except Exception as e:
@@ -6913,7 +6930,7 @@ def jmcp_execute():
     try:
         import paramiko
         ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        apply_ssh_policy(ssh)
         _ssh_connect(ssh, dev_info["ip"], port=dev_info["port"])
         stdin, stdout, stderr = ssh.exec_command(command, timeout=timeout)
         output = stdout.read().decode("utf-8", errors="replace")
@@ -6958,7 +6975,7 @@ def jmcp_batch():
         try:
             import paramiko
             ssh = paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            apply_ssh_policy(ssh)
             _ssh_connect(ssh, dev_info["ip"], port=dev_info["port"])
             stdin, stdout, stderr = ssh.exec_command(command, timeout=timeout)
             output = stdout.read().decode("utf-8", errors="replace")
@@ -6997,7 +7014,7 @@ def jmcp_facts():
     try:
         import paramiko
         ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        apply_ssh_policy(ssh)
         _ssh_connect(ssh, dev_info["ip"], port=dev_info["port"])
         # Gather facts via CLI commands — different for Junos vs EOS
         dtype = dev_info.get("dtype", "junos")
@@ -7261,7 +7278,7 @@ def jmcp_ask():
     cmd_outputs = {}
     try:
         ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        apply_ssh_policy(ssh)
         _ssh_connect(ssh, dev_info["ip"], port=dev_info["port"])
         for cmd in safe_commands:
             try:
@@ -7457,7 +7474,7 @@ def jmcp_ask_site():
         result = {"device": dev_name, "ip": info["ip"], "dtype": dt, "outputs": {}, "status": "success"}
         try:
             ssh = paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            apply_ssh_policy(ssh)
             _ssh_connect(ssh, info["ip"], port=info["port"])
             for cmd in cmds:
                 try:
@@ -8085,7 +8102,7 @@ def _llm_query(system_prompt, user_prompt, max_tokens=500):
         ]:
             try:
                 url = f"{MODEL_RUNNER_URL.rstrip('/')}{path}"
-                r = _requests.post(url, json=docker_payload, timeout=LLM_TIMEOUT, verify=False)
+                r = _requests.post(url, json=docker_payload, timeout=LLM_TIMEOUT, verify=DCN_VERIFY_SSL)
                 if r.status_code == 200:
                     msg = r.json()["choices"][0]["message"]
                     text = msg.get("content") or msg.get("reasoning_content") or ""
@@ -8265,7 +8282,7 @@ def llm_status():
     # Try TCP fallback
     try:
         url = f"{MODEL_RUNNER_URL.rstrip('/')}/engines/llama.cpp/v1/models"
-        r = _requests.get(url, timeout=5, verify=False)
+        r = _requests.get(url, timeout=5, verify=DCN_VERIFY_SSL)
         if r.status_code == 200:
             models = [m.get("id") for m in r.json().get("data", [])]
             return jsonify({"enabled": True, "available": True, "model": LLM_MODEL,
@@ -8543,7 +8560,7 @@ def _topo_collect_device(dev):
     cmds = _LIVE_TOPO_CMDS_EOS if dtype == "eos" else _LIVE_TOPO_CMDS_JUNOS
 
     ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    apply_ssh_policy(ssh)
     try:
         _ssh_connect(ssh, ip, port=port)
         for cmd, key in cmds:
@@ -9862,7 +9879,7 @@ def _junos_ssh_collect(hostname, ip, getters):
     """Collect NAPALM-style getter data from Junos via paramiko SSH + CLI parsing."""
     result = {"hostname": hostname, "ip": ip, "driver": "junos", "data": {}, "error": None}
     client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    apply_ssh_policy(client)
     try:
         _ssh_connect(client, ip)
         for g in getters:
@@ -10464,7 +10481,7 @@ def _eos_parse_interfaces_ip(client):
 def _eos_ssh_collect(hostname, ip, getters):
     result = {"hostname": hostname, "ip": ip, "driver": "eos", "data": {}, "error": None}
     client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    apply_ssh_policy(client)
     try:
         _ssh_connect(client, ip)
         for g in getters:
@@ -11493,7 +11510,7 @@ def api_keep_correlate():
         lnms_token = os.environ.get("LIBRENMS_TOKEN", "")
         if lnms_url and lnms_token:
             resp = _requests.get(f"{lnms_url}/api/v0/alerts?state=1",
-                                 headers={"X-Auth-Token": lnms_token}, timeout=8, verify=False)
+                                 headers={"X-Auth-Token": lnms_token}, timeout=8, verify=DCN_VERIFY_SSL)
             if resp.status_code == 200:
                 for a in (resp.json().get("alerts") or []):
                     raw_alerts.append({"source": "librenms", "device": a.get("hostname", ""),
@@ -12570,7 +12587,7 @@ def api_transport_bench():
         for cmd in commands:
             ct0 = time.time()
             cli = paramiko.SSHClient()
-            cli.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            apply_ssh_policy(cli)
             out_str = ""
             try:
                 if _lab_key:
@@ -12953,7 +12970,7 @@ def _agent_forecast(message: str, hostname: str, context: dict) -> dict:
     try:
         dev_resp = _requests.get(
             f"{lnms_url}/api/v0/devices?hostname={hostname}",
-            headers={"X-Auth-Token": lnms_token}, timeout=8, verify=False,
+            headers={"X-Auth-Token": lnms_token}, timeout=8, verify=DCN_VERIFY_SSL,
         )
         devs = dev_resp.json().get("devices", [])
         if not devs:
@@ -12961,7 +12978,7 @@ def _agent_forecast(message: str, hostname: str, context: dict) -> dict:
         device_id = devs[0]["device_id"]
         ports_resp = _requests.get(
             f"{lnms_url}/api/v0/ports/{device_id}",
-            headers={"X-Auth-Token": lnms_token}, timeout=8, verify=False,
+            headers={"X-Auth-Token": lnms_token}, timeout=8, verify=DCN_VERIFY_SSL,
         )
         ports = ports_resp.json().get("ports", [])
     except Exception as exc:
@@ -13418,7 +13435,7 @@ def api_keep_trend():
             try:
                 prefix = region.lower().replace("-", "")
                 r = _requests.get(f"{lnms_url}/api/v0/alerts?state=1",
-                                  headers={"X-Auth-Token": lnms_token}, timeout=5, verify=False)
+                                  headers={"X-Auth-Token": lnms_token}, timeout=5, verify=DCN_VERIFY_SSL)
                 if r.status_code == 200:
                     raw_live = sum(1 for a in (r.json().get("alerts") or [])
                                    if prefix in a.get("hostname", "").lower())

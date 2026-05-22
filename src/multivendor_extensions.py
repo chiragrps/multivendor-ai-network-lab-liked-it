@@ -29,6 +29,25 @@ from flask import Blueprint, request, jsonify
 
 log = logging.getLogger(__name__)
 
+# Phase-1 security: env-var gates mirroring app.py so this Blueprint can be
+# loaded standalone (e.g. in tests) without depending on app.py's module state.
+DCN_SSH_STRICT_HOST_KEY = os.environ.get("DCN_SSH_STRICT_HOST_KEY", "False").lower() == "true"
+DCN_VERIFY_SSL = os.environ.get("DCN_VERIFY_SSL", "False").lower() == "true"
+
+
+def apply_ssh_policy(client):
+    """Apply strict or AutoAdd host-key policy based on DCN_SSH_STRICT_HOST_KEY.
+
+    Lab default is permissive (AutoAddPolicy) because the FRR containers'
+    host keys rotate every rebuild. Set DCN_SSH_STRICT_HOST_KEY=true in any
+    deployment beyond a developer laptop.
+    """
+    import paramiko as _pm
+    if DCN_SSH_STRICT_HOST_KEY:
+        client.set_missing_host_key_policy(_pm.RejectPolicy())
+    else:
+        client.set_missing_host_key_policy(_pm.AutoAddPolicy())  # nosec B507 - gated by DCN_SSH_STRICT_HOST_KEY
+
 mv_bp = Blueprint("mv", __name__)
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
@@ -481,7 +500,7 @@ def _gnmi_worker(dev: dict, vtysh_cmd: str) -> dict:
         import paramiko as _pm
         _LAB_KEY = os.path.normpath(os.path.join(_LAB_DIR, "ssh-keys/lab_key"))
         client = _pm.SSHClient()
-        client.set_missing_host_key_policy(_pm.AutoAddPolicy())
+        apply_ssh_policy(client)
         client.connect(
             hostname="127.0.0.1",
             port=dev["port"],
