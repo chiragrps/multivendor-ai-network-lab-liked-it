@@ -1,15 +1,13 @@
 # LinkedIn launch — Phase 4 (the closed-loop phase)
 
-> Attach to post: **`linkedin-demo.mp4`** (0:52 · 1.9 MB · 1280×720 · H.264 · tight cut of the closed loop).
-> Deep-dive companion (link in first comment): **[YouTube — full feature tour](https://youtu.be/wWPJTiRm5qs)** (2:51 · every panel + every primary CTA + captions).
-> Repo: https://github.com/gesh75/multivendor-ai-network-lab
-> Prior post: [Phase 3 on LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7458139826265939968/)
-
-The previous post (Phase 3) introduced the brain — Pydantic-AI orchestrator, LLM switcher, NIKA harness, path trace, GAIT audit, 49-tool MCP. This post must NOT re-list those. **Phase 4 is the safety + autonomy layer** — the part that lets the lab take an action and take it back if it goes wrong.
+> **Post video:** [`demo/linkedin-demo.mp4`](./linkedin-demo.mp4) · 0:52 · 1.9 MB · 1280×720 · H.264.
+> **First-comment link:** [YouTube — full feature tour](https://youtu.be/wWPJTiRm5qs) · 2:51 · every panel + captions.
+> **Repo:** <https://github.com/gesh75/multivendor-ai-network-lab>
+> **Prior post:** [Phase 3 on LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7458139826265939968/)
 
 ---
 
-## 🥇 Recommended — matches Phase 3 voice exactly
+## 📋 The post (paste this into LinkedIn)
 
 Phase 4 ships on the multivendor AI network ops lab.
 
@@ -38,191 +36,52 @@ Always open to discussions about closed-loop NetOps and confirmed-commit safety 
 
 ---
 
-## 🥈 Variant — shorter / "one idea" version
+## ✅ Posting steps
 
-Phase 4 ships on the multivendor AI network ops lab.
+### Step 1 — Create the LinkedIn post
 
-One idea this time: **a config push that watches itself**.
+1. Open LinkedIn → Start a post.
+2. Click the **video icon** → upload `demo/linkedin-demo.mp4`.
+3. Paste the post copy from the section above into the body.
+4. Wait for the video to finish uploading (the progress bar fills, thumbnail appears).
 
-Every change now flows through RFC 6241 §8.4 confirmed-commit. The Health Gate module watches BGP peers, interface state, and alert count for the duration of the window. If any signal degrades, the device auto-reverts at the NETCONF timeout. The tool cannot leave a router worse than it found it.
+### Step 2 — Set the thumbnail
 
-Around that core, four more pieces landed:
+1. Click the video preview → **Edit** → **Thumbnail**.
+2. Scrub to a frame showing either the **Change Pipeline 5-step** view or the **Health Gate countdown ring** — either reads strongly at thumbnail size.
+3. Save.
 
-• NetBox SoT drift detector — severity-tiered (critical / high / medium / low), SoT-side None suppression to keep the dashboard quiet.
-• Auto-Remediate — proposal state machine, deterministic runbook table, AI proposes / human approves.
-• Auto-Postmortem — heuristic root-cause priority, stitches GAIT audit + HG verdict + remediation history into Markdown in ~0.2 s.
-• CLI Reference BM25 — 9,802 commands (Cisco / Juniper / Arista), pure stdlib, sub-millisecond. No embedding model, no API calls.
+### Step 3 — Publish
 
-The MCP server now exposes the full loop, so Claude Code can run the whole thing without a browser.
+1. Click **Post**.
+2. Stay on the post page — you need to add the first comment immediately after publish so it locks in as the top comment.
 
-Same lab as before — 26 devices, 5 sites, 10 live FRR containers, 137/137 pytest, MIT, no cloud. Built solo over 20 focused days.
+### Step 4 — Add the first comment (do this within 30 seconds of publishing)
 
-github.com/gesh75/multivendor-ai-network-lab
+Paste this exact text as a single comment:
 
-#NetworkAutomation #AIOps #NetOps #ClosedLoop #ClaudeAI
+```text
+🎥 Full feature tour (2:51 · every panel + captions): https://youtu.be/wWPJTiRm5qs
+
+📦 Repo, architecture diagram, all docs: https://github.com/gesh75/multivendor-ai-network-lab
+
+🔁 Phase 3 (the brain) for context: https://www.linkedin.com/feed/update/urn:li:activity:7458139826265939968/
+```
+
+Then click the `⋮` on your own comment → **Pin to top of comments**.
+
+### Step 5 — Tag + engage (first hour matters most for reach)
+
+1. Tag in a reply (not the post body — keeps the post clean):
+   - the NetClaw author (`@automateyournetwork`)
+   - the sands-lab / NIKA team
+   - Hugo Tinoco
+   - codingnetworks.blog
+2. Reply to every comment in the first hour. LinkedIn boosts reach when the post has comment velocity in the first 60 minutes.
+3. Re-share the post to your own feed from a different angle ~24 hours later if engagement is strong.
 
 ---
 
-## 🥉 Variant — engineer-to-engineer (depth, less "ship" framing)
+## 🏷 Hashtag pool (the post uses 5 — swap if needed)
 
-Closed-loop NetOps without the buzzword soup. What's actually inside Phase 4:
-
-**Health Gate** — submit a config edit. The module reads a pre-snapshot (BGP peers + interfaces up + alert count), opens a NETCONF `<commit confirmed timeout="N"/>` session, polls signals every 5 s. If any tolerance threshold is breached → no confirm → device auto-reverts at NETCONF timeout. RFC 6241 §8.4. Two paths: real (PyEZ + Juniper devices) and simulated (FRR lab + everything else). 20 pytest, ~0.5 s.
-
-**NetBox SoT drift** — severity-tiered comparison. Wrong AS/IP = high. Extra device in lab = critical. Wrong model = low. SoT-side None suppresses drift to avoid false positives on optional metadata. 25 pytest.
-
-**Auto-Remediate** — proposal state machine: pending → approved → executing → done | error. Each drift row maps to a runbook via a deterministic table. Background watcher mirrors Health Gate verdict into the Proposal so the UI polls one endpoint, not two. 25 pytest.
-
-**Auto-Postmortem** — heuristic root-cause priority: chaos > HG-abandon > remediation > fleet-cluster > local > unknown. Anchors on Health Gate abandons + clusters of 3+ error events in 60 s. 22 pytest. ~0.2 s to generate a report.
-
-**MCP layer extended** — the Phase-3 MCP server picked up four new tools (drift.scan, remediation.approve, health_gate.apply, postmortem.generate), so the full loop is drivable from Claude Code without a browser.
-
-**CLI Reference BM25** — pure stdlib Okapi BM25 in ~40 lines. 9,802 commands from sibling `multivendor-cli-configurator` (Cisco / Juniper / Arista). Sub-millisecond at 10k entries. No embedding model, no API calls, deterministic.
-
-**GUI sprint** — single-row top bar · persistent dock with live BGP-session badge · vendor color tokens · mode-aware canvas navigation · Change Pipeline as 5-step view · device-context strip with mini-metrics · breadcrumb · P1 dominance pill · NEW-badge 30-day auto-expiry. 4 deep accessibility audits absorbed.
-
-26 devices · 5 sites · 40 REST endpoints · 137/137 pytest · MIT · no cloud.
-
-github.com/gesh75/multivendor-ai-network-lab
-
-#NetOps #Python #FastAPI #FastMCP #RFC6241 #BGP #Networking #SRE
-
----
-
-## 🎥 Companion video — recommendation
-
-The Phase 3 post used a compact tour video. Phase 4 has one story and it should drive the video: **the closed loop**. Don't show every panel — show one round trip.
-
-| Option | Length | What it shows | Why |
-| --- | --- | --- | --- |
-| **A. Tight loop cut** ⭐ | 60–75 s | break → drift → propose → approve → Health Gate → recover → postmortem | Matches the "one idea" of the post. Mirrors Phase 3's pacing. **First choice.** |
-| B. Master demo as-is | 1:52 | the existing 5-act `linkedin-demo.mp4` | Already produced. Use if there's no time to recut. |
-| C. Pure Health Gate clip | 30–40 s | confirmed-commit window + auto-revert under chaos | Strongest single visual. Great for a follow-up comment / second slide. |
-
-### Storyboard for Option A (60–75 s tight cut)
-
-1. **0:00 – 0:08** — Topology view, BGP sessions green. Caption: *"Phase 4. Watch a router fix itself."*
-2. **0:08 – 0:18** — Click Chaos Monkey ⚡ Break. One link flips red. Caption: *"Break a session."*
-3. **0:18 – 0:32** — Open NetBox Drift. Severity-tier list populates. AI proposes the runbook. Caption: *"Drift detected · runbook proposed."*
-4. **0:32 – 0:48** — Click Approve. Health Gate window opens with the conic-gradient countdown ring. BGP signal swings, then settles green. Caption: *"Confirmed-commit · auto-revert armed · BGP recovered."*
-5. **0:48 – 0:62** — Click "Generate Postmortem". Markdown scrolls. Caption: *"~0.2 s — incident report written. Ready to paste into a ticket."*
-6. **0:62 – 0:70** — End frame: repo URL + "github.com/gesh75/multivendor-ai-network-lab · MIT · single laptop"
-
-Existing `record-linkedin.cjs` already covers acts 2–4 — recut by trimming the cold-open and the CLI Reference tour, then re-encoding from the existing `linkedin-demo.webm` source.
-
-### Recut command (no re-record needed)
-
-```bash
-# trim master to the loop-only segment (~22s in to ~95s in = 73s)
-ffmpeg -ss 22 -to 95 -i demo/linkedin-demo.webm \
-  -c:v libx264 -crf 22 -preset slow -pix_fmt yuv420p \
-  -movflags +faststart \
-  demo/linkedin-demo-loop.mp4
-```
-
----
-
-## Posting checklist
-
-- [x] **Full tour uploaded to YouTube** → [youtu.be/wWPJTiRm5qs](https://youtu.be/wWPJTiRm5qs)
-- [ ] Upload **`linkedin-demo.mp4`** (the 0:52 tight cut) as the post's primary video — better LinkedIn compression + autoplay
-- [ ] Thumbnail: a frame showing the Change Pipeline 5-step or the Health Gate countdown ring
-- [ ] First comment — pin these three links (in this order):
-      1. **Full feature tour (2:51 · YouTube):** [youtu.be/wWPJTiRm5qs](https://youtu.be/wWPJTiRm5qs)
-      2. **Repo:** [github.com/gesh75/multivendor-ai-network-lab](https://github.com/gesh75/multivendor-ai-network-lab)
-      3. **Phase 3 post** so readers can see the arc
-- [ ] Tag the people whose work seeded the patterns: NetClaw author, NIKA team, Hugo Tinoco, codingnetworks.blog
-- [ ] Reply to the first 5 comments within an hour
-
-## First comment strategy — ✅ resolved (YouTube)
-
-**Shipped:** full feature tour is live at [youtu.be/wWPJTiRm5qs](https://youtu.be/wWPJTiRm5qs).
-Paste that URL into the LinkedIn first comment and LinkedIn renders an inline
-play card.
-
-Context for why this matters: GitHub's blob view refuses to render MP4s over
-~5 MB inline, so a naive `/blob/main/demo/full-tour-demo.mp4` URL would land
-viewers on a "Sorry, can't show files that are this big" page with just a
-Download button. The YouTube path sidesteps that entirely.
-
-Below are the alternate strategies (kept for future re-use if you ever want
-to launch a Phase 5 demo without YouTube).
-
-### 🥇 Option A — YouTube unlisted (chosen for this launch)
-
-Upload `demo/full-tour-demo.mp4` as an **unlisted** YouTube video. Unlisted =
-only people with the link see it, no public discoverability. LinkedIn renders
-an inline play card in the comment. Highest click-through, lowest friction.
-
-Copy-paste-ready upload metadata. **Important:** keep URLs flush to the left
-margin — YouTube's description parser refuses to auto-link URLs that have
-leading whitespace, which is why a naive indented copy-paste produces grey
-plain text instead of blue clickable links.
-
-**Title:**
-
-```text
-Multivendor AI Network Lab — full feature tour (Phase 4)
-```
-
-**Visibility:** Unlisted (or Public if you want it discoverable on YouTube).
-
-**Description** (paste exactly as-is, no extra indentation):
-
-```text
-Full 2:51 walkthrough of all 40 panels in the Multivendor AI Network Lab — telemetry, audit, AI surfaces, the closed-loop change pipeline (Health Gate · NetBox SoT drift · Auto-Remediate · Auto-Postmortem), topology, path trace, and the eval/chaos surfaces. Captioned, no narration. Open source, MIT.
-
-Repo:
-https://github.com/gesh75/multivendor-ai-network-lab
-
-Tight 0:52 cut of the closed loop:
-https://github.com/gesh75/multivendor-ai-network-lab/blob/main/demo/linkedin-demo.mp4
-```
-
-**Tags** (Show more → Tags field, comma-separated):
-
-```text
-networking, network automation, multivendor, aiops, claude, juniper, arista, frr, bgp, netconf, rfc6241, closed loop, netops, mcp, open source
-```
-
-Then paste the YouTube URL into the LinkedIn first comment.
-
-> If the URLs in the description show as grey plain text instead of blue
-> clickable links, two causes: (a) leading whitespace from your paste — fix
-> by re-pasting flush left, or (b) YouTube throttles auto-linking on very new
-> videos / low-subscriber channels for ~1-2 hours after publish. Fastest
-> workaround: **pin a comment on your own video** with the same URLs —
-> channel-owner comments always auto-link regardless of channel age.
-
-### 🥈 Option B — Link the repo root (simplest · zero new infra)
-
-Don't link the video file at all. Link the repo root and write the comment
-copy to do the work:
-
-> Full code, architecture diagram, and a 2:51 captioned feature tour video
-> are all in the repo →
-> github.com/gesh75/multivendor-ai-network-lab
-
-LinkedIn renders a clean OpenGraph card for the repo. Anyone who wants the
-video clicks into `demo/full-tour-demo.mp4`, where GitHub *will* offer a
-Download button — but framed as "explore the repo," the friction makes sense.
-This sidesteps the blob-preview problem entirely.
-
-### 🥉 Option C — Raw GitHub URL (functional but ugly)
-
-```text
-https://github.com/gesh75/multivendor-ai-network-lab/raw/refs/heads/main/demo/full-tour-demo.mp4
-```
-
-Serves the raw MP4 bytes. Modern desktop browsers will play it in their
-built-in video player. **Mobile browsers often prompt a download instead of
-playing.** No LinkedIn preview card — just a bare URL in the comment.
-
-Use only if you can't be bothered with YouTube and want the video to be the
-first thing the user sees. Otherwise Option B is cleaner.
-
-**Decision for this launch:** Option A — the YouTube upload is done and the URL is at the top of the Posting checklist.
-
-## Hashtag pool (pick 4–5)
-
-`#NetworkAutomation` `#AIOps` `#NetOps` `#ClosedLoop` `#ClaudeAI` `#RFC6241` `#BGP` `#OpenSource`
+`#NetworkAutomation` `#AIOps` `#ClaudeAI` `#NetOps` `#ClosedLoop` · spares: `#RFC6241` `#BGP` `#OpenSource` `#FastMCP` `#SRE`
