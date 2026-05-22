@@ -1,6 +1,7 @@
 # LinkedIn launch — Phase 4 (the closed-loop phase)
 
-> Attach: **`linkedin-demo.mp4`** (0:52 · 1.9 MB · 1280×720 · H.264 LinkedIn-compatible · one-take tight cut of the closed loop).
+> Attach to post: **`linkedin-demo.mp4`** (0:52 · 1.9 MB · 1280×720 · H.264 · tight cut of the closed loop).
+> Deep-dive companion (link in first comment): **`full-tour-demo.mp4`** (2:51 · 6.4 MB · every panel + every primary CTA + captions).
 > Repo: https://github.com/gesh75/multivendor-ai-network-lab
 > Prior post: [Phase 3 on LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7458139826265939968/)
 
@@ -123,10 +124,12 @@ ffmpeg -ss 22 -to 95 -i demo/linkedin-demo.webm \
 
 ## Posting checklist
 
-- [ ] Upload **MP4** (better LinkedIn compression + autoplay)
+- [ ] Upload **`linkedin-demo.mp4`** (the 0:52 tight cut) as the post's primary video — better LinkedIn compression + autoplay
 - [ ] Thumbnail: a frame showing the Change Pipeline 5-step or the Health Gate countdown ring
-- [ ] Pin repo link in **first comment** so post body stays clean
-- [ ] First comment should also include the Phase 3 permalink — gives readers the arc
+- [ ] First comment — three links pinned:
+      1. Repo: `github.com/gesh75/multivendor-ai-network-lab`
+      2. **Full tour video (2:51) — `demo/full-tour-demo.mp4` on the repo** for anyone who wants every panel walked through
+      3. Phase 3 permalink so readers can see the arc
 - [ ] Tag the people whose work seeded the patterns: NetClaw author, NIKA team, Hugo Tinoco, codingnetworks.blog
 - [ ] Reply to the first 5 comments within an hour
 
