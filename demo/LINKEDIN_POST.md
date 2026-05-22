@@ -1,7 +1,7 @@
 # LinkedIn launch — Phase 4 (the closed-loop phase)
 
 > Attach to post: **`linkedin-demo.mp4`** (0:52 · 1.9 MB · 1280×720 · H.264 · tight cut of the closed loop).
-> Deep-dive companion (2:51 · 6.4 MB · every panel + every primary CTA + captions): see "First comment strategy" below — *don't* link the blob URL on GitHub, it exceeds GitHub's inline preview cap and lands viewers on a dead-end page.
+> Deep-dive companion (link in first comment): **[YouTube — full feature tour](https://youtu.be/wWPJTiRm5qs)** (2:51 · every panel + every primary CTA + captions).
 > Repo: https://github.com/gesh75/multivendor-ai-network-lab
 > Prior post: [Phase 3 on LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7458139826265939968/)
 
@@ -124,23 +124,31 @@ ffmpeg -ss 22 -to 95 -i demo/linkedin-demo.webm \
 
 ## Posting checklist
 
+- [x] **Full tour uploaded to YouTube** → [youtu.be/wWPJTiRm5qs](https://youtu.be/wWPJTiRm5qs)
 - [ ] Upload **`linkedin-demo.mp4`** (the 0:52 tight cut) as the post's primary video — better LinkedIn compression + autoplay
 - [ ] Thumbnail: a frame showing the Change Pipeline 5-step or the Health Gate countdown ring
-- [ ] First comment — pin these (see "First comment strategy" below for the full-tour link tradeoffs):
-      1. Repo: `github.com/gesh75/multivendor-ai-network-lab`
-      2. Full tour link — **pick ONE of the three strategies below**
-      3. Phase 3 permalink so readers can see the arc
+- [ ] First comment — pin these three links (in this order):
+      1. **Full feature tour (2:51 · YouTube):** [youtu.be/wWPJTiRm5qs](https://youtu.be/wWPJTiRm5qs)
+      2. **Repo:** [github.com/gesh75/multivendor-ai-network-lab](https://github.com/gesh75/multivendor-ai-network-lab)
+      3. **Phase 3 post** so readers can see the arc
 - [ ] Tag the people whose work seeded the patterns: NetClaw author, NIKA team, Hugo Tinoco, codingnetworks.blog
 - [ ] Reply to the first 5 comments within an hour
 
-## First comment strategy — the full-tour link problem
+## First comment strategy — ✅ resolved (YouTube)
 
-GitHub's blob view refuses to render MP4s over ~5 MB inline, so the obvious
-`/blob/main/demo/full-tour-demo.mp4` URL lands viewers on a "Sorry, can't show
-files that are this big" page with just a Download button. That's a friction
-wall most LinkedIn readers won't push through. Three workarounds, ranked:
+**Shipped:** full feature tour is live at [youtu.be/wWPJTiRm5qs](https://youtu.be/wWPJTiRm5qs).
+Paste that URL into the LinkedIn first comment and LinkedIn renders an inline
+play card.
 
-### 🥇 Option A — YouTube unlisted (best · 5 min setup)
+Context for why this matters: GitHub's blob view refuses to render MP4s over
+~5 MB inline, so a naive `/blob/main/demo/full-tour-demo.mp4` URL would land
+viewers on a "Sorry, can't show files that are this big" page with just a
+Download button. The YouTube path sidesteps that entirely.
+
+Below are the alternate strategies (kept for future re-use if you ever want
+to launch a Phase 5 demo without YouTube).
+
+### 🥇 Option A — YouTube unlisted (chosen for this launch)
 
 Upload `demo/full-tour-demo.mp4` as an **unlisted** YouTube video. Unlisted =
 only people with the link see it, no public discoverability. LinkedIn renders
@@ -213,7 +221,7 @@ playing.** No LinkedIn preview card — just a bare URL in the comment.
 Use only if you can't be bothered with YouTube and want the video to be the
 first thing the user sees. Otherwise Option B is cleaner.
 
-**Recommendation: Option A if you have 5 minutes. Option B otherwise.**
+**Decision for this launch:** Option A — the YouTube upload is done and the URL is at the top of the Posting checklist.
 
 ## Hashtag pool (pick 4–5)
 
