@@ -146,27 +146,45 @@ Upload `demo/full-tour-demo.mp4` as an **unlisted** YouTube video. Unlisted =
 only people with the link see it, no public discoverability. LinkedIn renders
 an inline play card in the comment. Highest click-through, lowest friction.
 
-Copy-paste-ready upload metadata:
+Copy-paste-ready upload metadata. **Important:** keep URLs flush to the left
+margin — YouTube's description parser refuses to auto-link URLs that have
+leading whitespace, which is why a naive indented copy-paste produces grey
+plain text instead of blue clickable links.
+
+**Title:**
 
 ```text
-Title:        Multivendor AI Network Lab — full feature tour (Phase 4)
-Visibility:   Unlisted
-Description:  Full 2:51 walkthrough of all 40 panels in the Multivendor AI
-              Network Lab — telemetry, audit, AI surfaces, the closed-loop
-              change pipeline (Health Gate · NetBox SoT drift · Auto-Remediate
-              · Auto-Postmortem), topology, path trace, and the eval/chaos
-              surfaces. Captioned, no narration. Open source, MIT.
+Multivendor AI Network Lab — full feature tour (Phase 4)
+```
 
-              Repo: https://github.com/gesh75/multivendor-ai-network-lab
-              Tight 0:52 cut for the LinkedIn post:
-              https://github.com/gesh75/multivendor-ai-network-lab/blob/main/demo/linkedin-demo.mp4
+**Visibility:** Unlisted (or Public if you want it discoverable on YouTube).
 
-Tags:         networking, network automation, multivendor, aiops, claude,
-              juniper, arista, frr, bgp, netconf, rfc6241, closed loop,
-              netops, mcp, open source
+**Description** (paste exactly as-is, no extra indentation):
+
+```text
+Full 2:51 walkthrough of all 40 panels in the Multivendor AI Network Lab — telemetry, audit, AI surfaces, the closed-loop change pipeline (Health Gate · NetBox SoT drift · Auto-Remediate · Auto-Postmortem), topology, path trace, and the eval/chaos surfaces. Captioned, no narration. Open source, MIT.
+
+Repo:
+https://github.com/gesh75/multivendor-ai-network-lab
+
+Tight 0:52 cut of the closed loop:
+https://github.com/gesh75/multivendor-ai-network-lab/blob/main/demo/linkedin-demo.mp4
+```
+
+**Tags** (Show more → Tags field, comma-separated):
+
+```text
+networking, network automation, multivendor, aiops, claude, juniper, arista, frr, bgp, netconf, rfc6241, closed loop, netops, mcp, open source
 ```
 
 Then paste the YouTube URL into the LinkedIn first comment.
+
+> If the URLs in the description show as grey plain text instead of blue
+> clickable links, two causes: (a) leading whitespace from your paste — fix
+> by re-pasting flush left, or (b) YouTube throttles auto-linking on very new
+> videos / low-subscriber channels for ~1-2 hours after publish. Fastest
+> workaround: **pin a comment on your own video** with the same URLs —
+> channel-owner comments always auto-link regardless of channel age.
 
 ### 🥈 Option B — Link the repo root (simplest · zero new infra)
 
