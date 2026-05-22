@@ -36,6 +36,18 @@ hooks for Cisco IOS-XE / NX-OS.
 | 🔍 **CVE scanner** — static `(vendor, OS version)` lookup over fleet | `src/cve_db.json`, `/api/mv/cve` | NetClaw |
 | ⚙️ **MCP server** — 49 tools so Claude Code can call any capability | `src/mcp_dcn_server.py` | coding-networks-blog |
 
+## How does this compare to RANCID, Oxidized, SolarWinds NCM, Forward Networks, NetSpectraAI?
+
+Most network-config tools are **backup + diff** (RANCID / Oxidized / NCM) or
+**formal verification at Fortune-500 prices** (Forward Networks). A newer
+generation of SaaS analyzers (NetSpectraAI) bolts an LLM on top of backup +
+diff and sells it per-seat. This tool is in a different category: a **live
+closed loop** — observe → diagnose → remediate → verify → document — with
+confirmed-commit safety (RFC 6241 §8.4), auto-postmortems, and MCP-native
+agent integration.
+
+→ Full side-by-side comparison: [`COMPARISON.md`](COMPARISON.md)
+
 ## The lab
 
 26 devices across 5 sites — DE-FRA · UK-LON · NL-AMS · EU-CDG · US-NYC

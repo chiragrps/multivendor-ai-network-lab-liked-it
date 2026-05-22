@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phase 4 — The Closed Loop · Multivendor AI Network Lab</title>
+<style>
+:root{
+  --bg:#05050e;--bg2:#0a0a18;--card:#10102a;--border:#1a1a38;
+  --accent:#00d4ff;--green:#22c55e;--red:#ff4444;--red-glow:#ff5566;
+  --yellow:#ffd700;--purple:#a855f7;--orange:#ff8c42;
+  --teal:#00e5cc;--pink:#ff6eb4;--blue:#3b82f6;
+  --text:#e2e8f0;--muted:#4a5568;--muted2:#64748b;
+  --font:'SF Mono','Fira Code',Consolas,monospace;
+  --font-display:'Inter','SF Pro Display',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
+
+/* ─── Animated starfield backdrop ───────────────────────────── */
+.starfield{position:fixed;inset:0;z-index:0;background:
+  radial-gradient(2px 2px at 20% 30%,rgba(0,212,255,.4),transparent),
+  radial-gradient(1px 1px at 50% 60%,rgba(168,85,247,.3),transparent),
+  radial-gradient(2px 2px at 80% 20%,rgba(34,197,94,.3),transparent),
+  radial-gradient(1px 1px at 30% 80%,rgba(255,215,0,.25),transparent),
+  radial-gradient(1.5px 1.5px at 70% 90%,rgba(0,229,204,.3),transparent),
+  radial-gradient(1px 1px at 90% 50%,rgba(255,110,180,.25),transparent);
+  background-size:300px 300px,250px 250px,400px 400px,200px 200px,350px 350px,280px 280px;
+  animation:starfield 90s linear infinite;opacity:.6}
+@keyframes starfield{from{background-position:0 0,0 0,0 0,0 0,0 0,0 0}
+                       to{background-position:300px 300px,250px 250px,400px 400px,200px 200px,350px 350px,280px 280px}}
+.starfield::after{content:'';position:absolute;inset:0;background:
+  radial-gradient(ellipse at 50% 50%,transparent 0%,rgba(5,5,14,.8) 70%);}
+
+main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:36px 28px 80px}
+
+/* ─── Header ─────────────────────────────────────────────── */
+.hero-title{text-align:center;font-family:var(--font-display);font-weight:800;
+  font-size:clamp(28px,4vw,46px);background:linear-gradient(90deg,var(--accent) 0%,var(--teal) 35%,var(--green) 65%,var(--yellow) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:-.01em;line-height:1.1;margin-bottom:8px}
+.hero-tag{text-align:center;font-size:12px;color:var(--muted2);letter-spacing:.18em;text-transform:uppercase;margin-bottom:6px}
+.hero-sub{text-align:center;font-family:var(--font-display);font-size:15px;color:var(--text);max-width:680px;margin:14px auto 36px;line-height:1.55;opacity:.85}
+.hero-sub b{color:var(--accent);font-weight:600}
+
+/* ─── KPI strip ──────────────────────────────────────────── */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:42px}
+.kpi{background:linear-gradient(180deg,rgba(0,212,255,.04) 0%,rgba(0,212,255,0) 100%);
+  border:1px solid var(--border);border-radius:10px;padding:14px 12px;text-align:center;
+  position:relative;overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s}
+.kpi:hover{transform:translateY(-3px);border-color:rgba(0,212,255,.4);box-shadow:0 8px 26px rgba(0,212,255,.12)}
+.kpi-val{font-family:var(--font-display);font-weight:800;font-size:30px;color:var(--accent);line-height:1.05;letter-spacing:-.02em}
+.kpi-lbl{font-size:10px;color:var(--muted2);letter-spacing:.14em;text-transform:uppercase;margin-top:6px}
+.kpi-pulse{position:absolute;top:8px;right:8px;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:kpi-pulse 2s ease-in-out infinite}
+@keyframes kpi-pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
+.kpi.g .kpi-val{color:var(--green)}.kpi.t .kpi-val{color:var(--teal)}
+.kpi.y .kpi-val{color:var(--yellow)}.kpi.p .kpi-val{color:var(--purple)}
+
+/* ─── The closed loop — center stage ───────────────────────── */
+.loop-stage{position:relative;width:100%;aspect-ratio:1.2;max-width:1100px;margin:0 auto 40px}
+.loop-svg{position:absolute;inset:0;width:100%;height:100%}
+
+/* Quadrant cards */
+.quad{position:absolute;width:30%;min-width:240px;max-width:340px;padding:18px 18px;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  backdrop-filter:blur(10px);transition:transform .3s,box-shadow .3s,border-color .3s;
+  box-shadow:0 6px 24px rgba(0,0,0,.5)}
+.quad:hover{transform:scale(1.03)}
+.quad-icon{font-size:24px;display:inline-block;margin-bottom:6px}
+.quad-title{font-family:var(--font-display);font-weight:700;font-size:18px;letter-spacing:.02em;margin-bottom:4px}
+.quad-feat{font-size:11px;color:var(--muted2);line-height:1.5;margin-top:8px}
+.quad-feat b{color:var(--text);font-weight:600}
+.quad-chip{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 7px;border-radius:4px;margin-top:4px;margin-right:4px}
+
+.q-observe{top:4%;left:4%}
+.q-diagnose{top:4%;right:4%}
+.q-remediate{bottom:4%;right:4%}
+.q-verify{bottom:4%;left:4%}
+
+.q-observe{border-color:rgba(0,212,255,.4);box-shadow:0 6px 24px rgba(0,0,0,.5),inset 0 0 30px rgba(0,212,255,.04)}
+.q-observe .quad-title{color:var(--accent)}
+.q-observe .quad-chip{background:rgba(0,212,255,.12);color:var(--accent);border:1px solid rgba(0,212,255,.3)}
+.q-observe:hover{border-color:rgba(0,212,255,.7);box-shadow:0 6px 30px rgba(0,212,255,.25),inset 0 0 30px rgba(0,212,255,.06)}
+
+.q-diagnose{border-color:rgba(168,85,247,.4);box-shadow:0 6px 24px rgba(0,0,0,.5),inset 0 0 30px rgba(168,85,247,.04)}
+.q-diagnose .quad-title{color:var(--purple)}
+.q-diagnose .quad-chip{background:rgba(168,85,247,.12);color:var(--purple);border:1px solid rgba(168,85,247,.3)}
+.q-diagnose:hover{border-color:rgba(168,85,247,.7);box-shadow:0 6px 30px rgba(168,85,247,.25),inset 0 0 30px rgba(168,85,247,.06)}
+
+.q-remediate{border-color:rgba(255,140,66,.4);box-shadow:0 6px 24px rgba(0,0,0,.5),inset 0 0 30px rgba(255,140,66,.04)}
+.q-remediate .quad-title{color:var(--orange)}
+.q-remediate .quad-chip{background:rgba(255,140,66,.12);color:var(--orange);border:1px solid rgba(255,140,66,.3)}
+.q-remediate:hover{border-color:rgba(255,140,66,.7);box-shadow:0 6px 30px rgba(255,140,66,.25),inset 0 0 30px rgba(255,140,66,.06)}
+
+.q-verify{border-color:rgba(34,197,94,.4);box-shadow:0 6px 24px rgba(0,0,0,.5),inset 0 0 30px rgba(34,197,94,.04)}
+.q-verify .quad-title{color:var(--green)}
+.q-verify .quad-chip{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.q-verify:hover{border-color:rgba(34,197,94,.7);box-shadow:0 6px 30px rgba(34,197,94,.25),inset 0 0 30px rgba(34,197,94,.06)}
+
+/* Center hub */
+.hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,229,204,.18) 0%,rgba(0,212,255,.05) 60%,transparent 100%);
+  border:2px solid rgba(0,229,204,.4);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  animation:hub-pulse 4s ease-in-out infinite;z-index:5}
+@keyframes hub-pulse{0%,100%{box-shadow:0 0 30px rgba(0,229,204,.2),inset 0 0 30px rgba(0,229,204,.1);transform:translate(-50%,-50%) scale(1)}
+                       50%{box-shadow:0 0 60px rgba(0,229,204,.4),inset 0 0 50px rgba(0,229,204,.2);transform:translate(-50%,-50%) scale(1.04)}}
+.hub-num{font-family:var(--font-display);font-weight:800;font-size:36px;color:var(--teal);line-height:1;letter-spacing:-.02em}
+.hub-lbl{font-size:10px;color:var(--muted2);letter-spacing:.16em;text-transform:uppercase;margin-top:4px}
+.hub-sub{font-size:10px;color:var(--text);margin-top:8px;opacity:.7;line-height:1.5}
+
+/* Concentric rings around hub */
+.hub-ring{position:absolute;left:50%;top:50%;border:1px solid;border-radius:50%;pointer-events:none;z-index:4}
+.hub-ring.r1{width:260px;height:260px;border-color:rgba(0,229,204,.15);animation:ring-rot 25s linear infinite}
+.hub-ring.r2{width:330px;height:330px;border-color:rgba(0,212,255,.10);border-style:dashed;animation:ring-rot 40s linear infinite reverse}
+@keyframes ring-rot{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+/* Traveling pulse along the closed loop */
+.pulse-dot{position:absolute;width:14px;height:14px;border-radius:50%;
+  box-shadow:0 0 18px currentColor,0 0 32px currentColor;
+  margin-left:-7px;margin-top:-7px;z-index:6;will-change:transform}
+.pulse-dot.observe{color:var(--accent);background:var(--accent)}
+.pulse-dot.diagnose{color:var(--purple);background:var(--purple)}
+.pulse-dot.remediate{color:var(--orange);background:var(--orange)}
+.pulse-dot.verify{color:var(--green);background:var(--green)}
+
+/* Flow path animations — pulses orbit the 4 quadrants */
+@keyframes orbit-pulse{
+  0%   {top:18%;left:18%}   /* observe */
+  24%  {top:18%;left:82%}   /* diagnose */
+  50%  {top:82%;left:82%}   /* remediate */
+  76%  {top:82%;left:18%}   /* verify */
+  100% {top:18%;left:18%}
+}
+.pulse-1{animation:orbit-pulse 14s linear infinite}
+.pulse-2{animation:orbit-pulse 14s linear infinite;animation-delay:-3.5s}
+.pulse-3{animation:orbit-pulse 14s linear infinite;animation-delay:-7s}
+
+/* Auto-revert dramatic moment — red pulse appears every ~28s, flowing backwards */
+@keyframes auto-revert{
+  0%, 70%   {opacity:0;top:82%;left:82%}      /* hidden most of cycle */
+  72%       {opacity:1;top:82%;left:82%}      /* appears at Remediate (regression detected) */
+  78%       {opacity:1;top:82%;left:18%}      /* back to Verify (auto-revert kicks in) */
+  84%       {opacity:1;top:18%;left:18%}      /* up to Observe */
+  90%       {opacity:1;top:18%;left:82%}      /* back to Diagnose */
+  92%, 100% {opacity:0;top:18%;left:82%}      /* fade and reset */
+}
+.revert-pulse{position:absolute;width:18px;height:18px;border-radius:50%;
+  background:var(--red);color:var(--red-glow);box-shadow:0 0 22px var(--red-glow),0 0 36px var(--red-glow);
+  margin-left:-9px;margin-top:-9px;z-index:7;
+  animation:auto-revert 28s linear infinite;animation-delay:14s}
+
+/* Pulse trail effect */
+.trail{position:absolute;border-radius:50%;pointer-events:none;z-index:5;mix-blend-mode:screen}
+@keyframes trail-fade{0%{opacity:.5;transform:scale(1)}100%{opacity:0;transform:scale(2.5)}}
+
+/* ─── Feature legend strip ───────────────────────────────── */
+.feat-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:36px}
+.feat{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:10px;
+  padding:14px 12px;transition:all .25s;cursor:default;position:relative;overflow:hidden}
+.feat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:currentColor;
+  opacity:.6;transition:opacity .25s}
+.feat:hover::before{opacity:1}
+.feat:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.feat-icon{font-size:24px;margin-bottom:8px;display:block}
+.feat-name{font-family:var(--font-display);font-weight:700;font-size:13px;color:var(--text);margin-bottom:4px;letter-spacing:.01em}
+.feat-meta{font-size:10px;color:var(--muted2);line-height:1.55}
+.feat-meta b{color:var(--text);font-weight:600}
+
+.f-hg{color:var(--green)}.f-hg:hover{border-color:rgba(34,197,94,.6)}.f-hg .feat-name{color:var(--green)}
+.f-sot{color:var(--accent)}.f-sot:hover{border-color:rgba(0,212,255,.6)}.f-sot .feat-name{color:var(--accent)}
+.f-ar{color:var(--orange)}.f-ar:hover{border-color:rgba(255,140,66,.6)}.f-ar .feat-name{color:var(--orange)}
+.f-pm{color:var(--purple)}.f-pm:hover{border-color:rgba(168,85,247,.6)}.f-pm .feat-name{color:var(--purple)}
+.f-cli{color:var(--teal)}.f-cli:hover{border-color:rgba(0,229,204,.6)}.f-cli .feat-name{color:var(--teal)}
+.f-mcp{color:var(--yellow)}.f-mcp:hover{border-color:rgba(255,215,0,.6)}.f-mcp .feat-name{color:var(--yellow)}
+
+/* ─── MCP strip ──────────────────────────────────────────── */
+.mcp-strip{background:linear-gradient(90deg,rgba(255,215,0,.06) 0%,rgba(255,215,0,.02) 50%,rgba(255,215,0,.06) 100%);
+  border:1px solid rgba(255,215,0,.25);border-radius:12px;padding:18px 22px;margin-bottom:36px;
+  display:flex;align-items:center;gap:18px}
+.mcp-strip .mcp-icon{font-size:32px}
+.mcp-strip .mcp-text{flex:1}
+.mcp-strip .mcp-title{font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--yellow);margin-bottom:2px}
+.mcp-strip .mcp-meta{font-size:11px;color:var(--muted2);line-height:1.6}
+.mcp-strip .mcp-meta b{color:var(--text);font-weight:600}
+.mcp-strip .mcp-counts{display:flex;gap:18px}
+.mcp-count{text-align:center}
+.mcp-count-val{font-family:var(--font-display);font-weight:800;font-size:26px;color:var(--yellow)}
+.mcp-count-lbl{font-size:9px;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase}
+
+/* ─── Timeline / sequence diagram ────────────────────────── */
+.sequence{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:36px}
+.seq-title{font-family:var(--font-display);font-weight:700;font-size:18px;color:var(--text);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.seq-title .seq-tag{font-size:10px;font-family:var(--font);color:var(--accent);background:rgba(0,212,255,.1);padding:3px 8px;border-radius:5px;border:1px solid rgba(0,212,255,.2);letter-spacing:.08em}
+.seq-row{display:grid;grid-template-columns:80px 1fr 120px;gap:14px;padding:10px 0;border-bottom:1px dashed rgba(255,255,255,.06);align-items:center}
+.seq-row:last-child{border-bottom:none}
+.seq-t{font-size:11px;color:var(--muted2);font-family:var(--font);text-align:right}
+.seq-step{font-size:13px;color:var(--text);font-family:var(--font-display)}
+.seq-step b{font-weight:700}
+.seq-step .arrow{color:var(--muted);margin:0 6px}
+.seq-stat{text-align:right;font-size:11px;font-weight:700;font-family:var(--font)}
+.seq-stat.ok{color:var(--green)}
+.seq-stat.warn{color:var(--yellow)}
+.seq-stat.crit{color:var(--red)}
+.seq-stat.info{color:var(--accent)}
+
+/* ─── Footer ─────────────────────────────────────────────── */
+.cta{text-align:center;padding:24px 12px;border-top:1px solid var(--border);margin-top:32px}
+.cta-title{font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--text);margin-bottom:10px}
+.cta-link{display:inline-block;padding:8px 18px;border-radius:7px;background:rgba(0,212,255,.08);
+  border:1px solid rgba(0,212,255,.3);color:var(--accent);font-size:13px;text-decoration:none;
+  font-family:var(--font-display);font-weight:600;letter-spacing:.02em;margin:0 6px;transition:all .25s}
+.cta-link:hover{background:rgba(0,212,255,.18);border-color:var(--accent);box-shadow:0 0 14px rgba(0,212,255,.3)}
+.cta-meta{font-size:10px;color:var(--muted);margin-top:14px;letter-spacing:.1em}
+
+/* ─── Mobile responsive ──────────────────────────────────── */
+@media (max-width:900px){
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .kpi:nth-child(5){grid-column:span 2}
+  .feat-grid{grid-template-columns:repeat(2,1fr)}
+  .mcp-strip{flex-direction:column;align-items:flex-start}
+  .loop-stage{aspect-ratio:1}
+  .quad{width:42%;min-width:160px;padding:12px 12px}
+  .quad-title{font-size:14px}
+  .quad-feat{font-size:10px}
+  .hub{width:140px;height:140px}
+  .hub-num{font-size:24px}
+  .hub-ring.r1{width:180px;height:180px}.hub-ring.r2{width:230px;height:230px}
+  .seq-row{grid-template-columns:60px 1fr 90px}
+  .seq-step{font-size:12px}
+}
+</style>
+</head>
+<body>
+<div class="starfield"></div>
+
+<main>
+  <!-- ─── HERO ─────────────────────────────────── -->
+  <div class="hero-tag">Phase 4 · The Closed Loop · May 2026</div>
+  <h1 class="hero-title">Brain. Hands. Undo.</h1>
+  <p class="hero-sub">
+    Phase 3 gave the lab a brain. <b>Phase 4 gave it hands</b> — and a way to take them back if something goes wrong.
+    Every config push now flows through <b>RFC 6241 §8.4 confirmed-commit</b>. The Health Gate watches BGP peers,
+    interface state, and alert counts for the entire window. If any signal degrades, the device auto-reverts at the NETCONF timeout.
+    The tool literally <b>cannot leave a router worse than it found it</b>.
+  </p>
+
+  <!-- ─── KPI strip — Phase 4 stats ────────────── -->
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-pulse"></div><div class="kpi-val">26</div><div class="kpi-lbl">Devices · 5 sites · 4 vendors</div></div>
+    <div class="kpi g"><div class="kpi-pulse"></div><div class="kpi-val">49</div><div class="kpi-lbl">MCP tools · 12 closed-loop</div></div>
+    <div class="kpi t"><div class="kpi-pulse"></div><div class="kpi-val">137/137</div><div class="kpi-lbl">pytest · 100% pass</div></div>
+    <div class="kpi y"><div class="kpi-pulse"></div><div class="kpi-val">~0.2s</div><div class="kpi-lbl">postmortem generation</div></div>
+    <div class="kpi p"><div class="kpi-pulse"></div><div class="kpi-val">9,802</div><div class="kpi-lbl">CLI commands · BM25 · sub-ms</div></div>
+  </div>
+
+  <!-- ─── THE CLOSED LOOP ──────────────────────── -->
+  <div class="loop-stage">
+    <!-- SVG: connecting arcs between quadrants -->
+    <svg class="loop-svg" viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <defs>
+        <!-- Gradient arcs for each leg -->
+        <linearGradient id="g-od" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#a855f7" stop-opacity="0.6"/>
+        </linearGradient>
+        <linearGradient id="g-dr" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#a855f7" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#ff8c42" stop-opacity="0.6"/>
+        </linearGradient>
+        <linearGradient id="g-rv" x1="1" y1="0" x2="0" y2="0">
+          <stop offset="0%" stop-color="#ff8c42" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#22c55e" stop-opacity="0.6"/>
+        </linearGradient>
+        <linearGradient id="g-vo" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="#22c55e" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#00d4ff" stop-opacity="0.6"/>
+        </linearGradient>
+        <!-- Glow for arcs -->
+        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="6" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <!-- Observe (180,140) → Diagnose (820,140) — top arc curving up -->
+      <path d="M 230 165 Q 500 60 770 165" stroke="url(#g-od)" stroke-width="2.5" fill="none" filter="url(#glow)" stroke-linecap="round" stroke-dasharray="6 4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-200" dur="6s" repeatCount="indefinite"/>
+      </path>
+      <!-- Diagnose → Remediate — right arc curving right -->
+      <path d="M 845 195 Q 950 400 845 605" stroke="url(#g-dr)" stroke-width="2.5" fill="none" filter="url(#glow)" stroke-linecap="round" stroke-dasharray="6 4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-200" dur="6s" repeatCount="indefinite"/>
+      </path>
+      <!-- Remediate → Verify — bottom arc curving down -->
+      <path d="M 770 635 Q 500 740 230 635" stroke="url(#g-rv)" stroke-width="2.5" fill="none" filter="url(#glow)" stroke-linecap="round" stroke-dasharray="6 4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-200" dur="6s" repeatCount="indefinite"/>
+      </path>
+      <!-- Verify → Observe — left arc curving left -->
+      <path d="M 155 605 Q 50 400 155 195" stroke="url(#g-vo)" stroke-width="2.5" fill="none" filter="url(#glow)" stroke-linecap="round" stroke-dasharray="6 4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-200" dur="6s" repeatCount="indefinite"/>
+      </path>
+
+      <!-- Stage labels along arcs -->
+      <text x="500" y="58" text-anchor="middle" fill="#00d4ff" font-family="Inter,sans-serif" font-size="11" font-weight="600" letter-spacing="3" opacity="0.55">DRIFT &#x2192; PROPOSAL</text>
+      <text x="952" y="404" text-anchor="middle" fill="#a855f7" font-family="Inter,sans-serif" font-size="11" font-weight="600" letter-spacing="3" opacity="0.55" transform="rotate(90 952 404)">PROPOSAL &#x2192; APPLY</text>
+      <text x="500" y="752" text-anchor="middle" fill="#ff8c42" font-family="Inter,sans-serif" font-size="11" font-weight="600" letter-spacing="3" opacity="0.55">APPLY &#x2192; VERIFY</text>
+      <text x="48" y="404" text-anchor="middle" fill="#22c55e" font-family="Inter,sans-serif" font-size="11" font-weight="600" letter-spacing="3" opacity="0.55" transform="rotate(-90 48 404)">VERIFY &#x2192; OBSERVE</text>
+    </svg>
+
+    <!-- Quadrant 1 — Observe -->
+    <div class="quad q-observe">
+      <span class="quad-icon">&#x1F441;&#xFE0F;</span>
+      <div class="quad-title">Observe</div>
+      <span class="quad-chip">live state</span>
+      <span class="quad-chip">netbox sot</span>
+      <div class="quad-feat">
+        <b>NetBox SoT drift detector</b> with severity tiers (critical / high / low).<br>
+        <b>SuzieQ</b> offline parse · <b>gNMI</b> streaming · live BGP/OSPF mesh · 26 devices.
+      </div>
+    </div>
+
+    <!-- Quadrant 2 — Diagnose -->
+    <div class="quad q-diagnose">
+      <span class="quad-icon">&#x1F9E0;</span>
+      <div class="quad-title">Diagnose</div>
+      <span class="quad-chip">10 agents</span>
+      <span class="quad-chip">cli rag</span>
+      <div class="quad-feat">
+        <b>AI Coordinator</b> routes NL → 10 specialist agents (diagnosis, remediation, verification, &hellip;).<br>
+        <b>CLI Reference BM25</b> — 9,802 commands, sub-ms retrieval, no embeddings.
+      </div>
+    </div>
+
+    <!-- Quadrant 3 — Remediate -->
+    <div class="quad q-remediate">
+      <span class="quad-icon">&#x1F6E0;&#xFE0F;</span>
+      <div class="quad-title">Remediate</div>
+      <span class="quad-chip">state machine</span>
+      <span class="quad-chip">health gate</span>
+      <div class="quad-feat">
+        <b>Auto-Remediate</b> — proposal state machine: pending &rarr; approved &rarr; executing &rarr; done.<br>
+        <b>Health Gate</b> (RFC 6241 §8.4) — watches BGP / iface / alerts, auto-reverts on degrade.
+      </div>
+    </div>
+
+    <!-- Quadrant 4 — Verify -->
+    <div class="quad q-verify">
+      <span class="quad-icon">&#x2705;</span>
+      <div class="quad-title">Verify</div>
+      <span class="quad-chip">pyats diff</span>
+      <span class="quad-chip">postmortem</span>
+      <div class="quad-feat">
+        <b>pyATS state diff</b> — before/after snapshot of every device.<br>
+        <b>Auto-Postmortem</b> writer — heuristic root-cause priority &rarr; structured Markdown in ~0.2s.
+      </div>
+    </div>
+
+    <!-- Concentric rings around hub -->
+    <div class="hub-ring r1"></div>
+    <div class="hub-ring r2"></div>
+
+    <!-- Center hub -->
+    <div class="hub">
+      <div class="hub-num">26</div>
+      <div class="hub-lbl">live devices</div>
+      <div class="hub-sub">5 sites · 4 vendors<br>Juniper · Arista · FRR · Cisco</div>
+    </div>
+
+    <!-- Traveling pulses around the loop -->
+    <div class="pulse-dot observe pulse-1"></div>
+    <div class="pulse-dot diagnose pulse-2"></div>
+    <div class="pulse-dot remediate pulse-3"></div>
+
+    <!-- Auto-revert dramatic pulse — appears periodically -->
+    <div class="revert-pulse" title="auto-revert: Health Gate detected regression"></div>
+  </div>
+
+  <!-- ─── 6 Phase 4 features ───────────────────── -->
+  <div class="feat-grid">
+    <div class="feat f-hg">
+      <span class="feat-icon">&#x1F6E1;&#xFE0F;</span>
+      <div class="feat-name">Health Gate</div>
+      <div class="feat-meta">RFC 6241 §8.4 confirmed-commit.<br>Auto-reverts if <b>BGP peer count</b>, <b>interface state</b>, or <b>alert delta</b> degrades during watch window.</div>
+    </div>
+    <div class="feat f-sot">
+      <span class="feat-icon">&#x1F4D6;</span>
+      <div class="feat-name">NetBox SoT Drift</div>
+      <div class="feat-meta">Source-of-truth vs observed config diff with <b>severity tiers</b>. None-suppression on optional fields. Surfaces real drift, hides cosmetic noise.</div>
+    </div>
+    <div class="feat f-ar">
+      <span class="feat-icon">&#x1F916;</span>
+      <div class="feat-name">Auto-Remediate</div>
+      <div class="feat-meta">Proposal <b>state machine</b>: pending &rarr; approved &rarr; executing &rarr; done. Deterministic drift &rarr; runbook table. AI proposes, human approves.</div>
+    </div>
+    <div class="feat f-pm">
+      <span class="feat-icon">&#x1F4CB;</span>
+      <div class="feat-name">Auto-Postmortem</div>
+      <div class="feat-meta">Heuristic root-cause priority: <b>chaos &gt; HG-abandon &gt; remediation &gt; cluster &gt; local</b>. Stitches GAIT + verdict + history into Markdown.</div>
+    </div>
+    <div class="feat f-cli">
+      <span class="feat-icon">&#x1F4DA;</span>
+      <div class="feat-name">CLI BM25</div>
+      <div class="feat-meta"><b>9,802 commands</b> across Cisco / Juniper / Arista. Pure stdlib Okapi BM25 in ~40 lines. Sub-ms at 10k entries. <b>No embeddings.</b></div>
+    </div>
+    <div class="feat f-mcp">
+      <span class="feat-icon">&#x1F517;</span>
+      <div class="feat-name">MCP Layer +12</div>
+      <div class="feat-meta">drift.scan · remediation.approve · health_gate.apply · postmortem.generate &hellip; Claude Code now drives the entire closed loop <b>without a browser</b>.</div>
+    </div>
+  </div>
+
+  <!-- ─── MCP integration strip ─────────────────── -->
+  <div class="mcp-strip">
+    <div class="mcp-icon">&#x26A1;</div>
+    <div class="mcp-text">
+      <div class="mcp-title">Agent-Native: 49 MCP Tools</div>
+      <div class="mcp-meta">Claude Code (and any MCP client) drives the lab end-to-end. <b>12 new Phase-4 tools</b> wire the closed loop into the agent runtime — no browser, no GUI, no glue scripts.</div>
+    </div>
+    <div class="mcp-counts">
+      <div class="mcp-count"><div class="mcp-count-val">49</div><div class="mcp-count-lbl">total</div></div>
+      <div class="mcp-count"><div class="mcp-count-val">12</div><div class="mcp-count-lbl">phase 4</div></div>
+      <div class="mcp-count"><div class="mcp-count-val">100%</div><div class="mcp-count-lbl">closed loop</div></div>
+    </div>
+  </div>
+
+  <!-- ─── Sample incident timeline ──────────────── -->
+  <div class="sequence">
+    <div class="seq-title">A live incident — closed loop in ~90 seconds <span class="seq-tag">SAMPLE TRACE</span></div>
+
+    <div class="seq-row">
+      <div class="seq-t">T+0s</div>
+      <div class="seq-step"><b>SuzieQ</b> observes <span class="arrow">&rarr;</span> BGP peer <code>de-fra-core-01 &harr; uk-lon-core-01</code> drops from <b>Established</b></div>
+      <div class="seq-stat warn">DRIFT</div>
+    </div>
+    <div class="seq-row">
+      <div class="seq-t">T+1s</div>
+      <div class="seq-step"><b>NetBox SoT</b> diff <span class="arrow">&rarr;</span> session expected up, observed down <span class="arrow">&rarr;</span> severity = <b>HIGH</b></div>
+      <div class="seq-stat warn">SEVERITY</div>
+    </div>
+    <div class="seq-row">
+      <div class="seq-t">T+2s</div>
+      <div class="seq-step"><b>AI Coordinator</b> routes <span class="arrow">&rarr;</span> diagnosis agent + CLI BM25 lookup <span class="arrow">&rarr;</span> proposal drafted</div>
+      <div class="seq-stat info">PROPOSE</div>
+    </div>
+    <div class="seq-row">
+      <div class="seq-t">T+8s</div>
+      <div class="seq-step"><b>Auto-Remediate</b> <span class="arrow">&rarr;</span> queued for approval <span class="arrow">&rarr;</span> cosmetic drift auto-rejected, real drift awaits human OK</div>
+      <div class="seq-stat info">QUEUED</div>
+    </div>
+    <div class="seq-row">
+      <div class="seq-t">T+25s</div>
+      <div class="seq-step"><b>Health Gate</b> applies fix <span class="arrow">&rarr;</span> NETCONF confirmed-commit, watch window = <b>60s</b></div>
+      <div class="seq-stat info">APPLIED</div>
+    </div>
+    <div class="seq-row">
+      <div class="seq-t">T+85s</div>
+      <div class="seq-step"><b>Watch window passes</b> <span class="arrow">&rarr;</span> BGP up · iface up · alerts &le; baseline <span class="arrow">&rarr;</span> commit confirmed</div>
+      <div class="seq-stat ok">VERIFIED</div>
+    </div>
+    <div class="seq-row">
+      <div class="seq-t">T+85.2s</div>
+      <div class="seq-step"><b>Auto-Postmortem</b> writes <span class="arrow">&rarr;</span> structured Markdown to <code>postmortems/&lt;ts&gt;.md</code> with full GAIT trail</div>
+      <div class="seq-stat ok">CLOSED</div>
+    </div>
+    <div class="seq-row">
+      <div class="seq-t">— or —</div>
+      <div class="seq-step" style="color:var(--red-glow)"><b>Regression detected mid-window</b> <span class="arrow">&rarr;</span> Health Gate <b>auto-reverts</b> at NETCONF timeout <span class="arrow">&rarr;</span> postmortem records the abandon</div>
+      <div class="seq-stat crit">REVERTED</div>
+    </div>
+  </div>
+
+  <!-- ─── CTA ─────────────────────────────────── -->
+  <div class="cta">
+    <div class="cta-title">The lab takes an action — and takes it back if anything degrades.</div>
+    <a class="cta-link" href="https://github.com/gesh75/multivendor-ai-network-lab" target="_blank">GitHub</a>
+    <a class="cta-link" href="LINKEDIN_POST.md" target="_blank">LinkedIn Post</a>
+    <a class="cta-link" href="architecture.html" target="_blank">Layered Architecture</a>
+    <div class="cta-meta">Phase 4 · May 2026 · 26 devices · 137/137 pytest · MIT</div>
+  </div>
+</main>
+
+<script>
+// Subtle live-feeling tweak: rotate the KPI pulse colors gently
+(function(){
+  const pulses = document.querySelectorAll('.kpi-pulse');
+  const colors = ['#22c55e','#00d4ff','#ffd700','#a855f7','#00e5cc'];
+  let i = 0;
+  setInterval(() => {
+    pulses.forEach((p, idx) => {
+      p.style.background = colors[(i + idx) % colors.length];
+      p.style.boxShadow = `0 0 8px ${colors[(i + idx) % colors.length]}`;
+    });
+    i++;
+  }, 1800);
+})();
+</script>
+</body>
+</html>

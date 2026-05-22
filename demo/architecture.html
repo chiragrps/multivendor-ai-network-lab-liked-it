@@ -156,8 +156,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 </head>
 <body>
 
-<h1>⬡ Multivendor AI Network Lab · Phase 3</h1>
-<p class="subtitle">26 devices · Juniper / Arista / FRR · Pydantic-AI Orchestrator · NIKA-style Eval Harness · GAIT Audit · MCP Server (49 tools) · Vendor-Agnostic · May 2026</p>
+<h1>⬡ Multivendor AI Network Lab · Phase 4</h1>
+<p class="subtitle">26 devices · Juniper / Arista / FRR · Health Gate (RFC 6241 §8.4) · NetBox SoT drift · Auto-Remediate · Auto-Postmortem · 9,802-cmd CLI BM25 · MCP Server (49 tools · 12 closed-loop) · May 2026</p>
 
 <div class="diagram">
 
@@ -303,7 +303,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       </div>
       <div class="box c-pink w2">
         <div class="box-title">🔌 MCP Server (fastmcp) <span class="p3-badge">49 TOOLS</span></div>
-        <div class="box-body">mcp_dcn_server.py · Exposes every API endpoint as MCP tool so Claude Code can call directly · 34 legacy + 15 Phase 3 multivendor tools · stdio transport</div>
+        <div class="box-body">mcp_dcn_server.py · Exposes every API endpoint as MCP tool so Claude Code can call directly · 37 legacy + 12 Phase-4 closed-loop tools (49 total) · stdio transport</div>
         <div style="margin-top:6px"><span class="tag t-pink">fastmcp</span><span class="tag t-pink">JSON-RPC 2.0</span><span class="tag t-pink">mv_orchestrator</span><span class="tag t-pink">mv_path_trace</span><span class="tag t-pink">mv_eval_run</span></div>
       </div>
     </div>
@@ -313,7 +313,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
   <!-- ═══ LAYER 4: AI ORCHESTRATION & TOOLS ═══ -->
   <div class="layer">
-    <div class="layer-label">🧠 Layer 4 — AI Orchestration &amp; Phase 3 Tools (8 Modules)</div>
+    <div class="layer-label">🧠 Layer 4 — AI Orchestration &amp; Phase 4 Closed-Loop Modules</div>
     <div class="tool-grid">
       <div class="tool-box">
         <div class="tool-name">🤖 Pydantic-AI Orchestrator</div>
@@ -432,7 +432,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   <div class="leg-item"><div class="leg-dot" style="background:rgba(59,130,246,.45)"></div> Arista (eos)</div>
   <div class="leg-item"><div class="leg-dot" style="background:rgba(168,85,247,.45)"></div> FRR (live containers)</div>
   <div class="leg-item"><div class="leg-dot" style="background:rgba(0,212,255,.4)"></div> Core API / infrastructure</div>
-  <div class="leg-item"><div class="leg-dot" style="background:rgba(0,229,204,.45)"></div> Phase 3 Tools (8 modules)</div>
+  <div class="leg-item"><div class="leg-dot" style="background:rgba(0,229,204,.45)"></div> Phase 4 Closed-Loop Modules</div>
   <div class="leg-item"><div class="leg-dot" style="background:rgba(255,215,0,.45)"></div> P3 UI tabs / reference patterns</div>
   <div class="leg-item"><div class="leg-dot" style="background:rgba(255,110,180,.45)"></div> LLM (Anthropic Claude Haiku 4.5)</div>
   <div class="leg-item"><div class="leg-dot" style="background:rgba(255,140,66,.45)"></div> BGP / collection / external</div>
@@ -507,7 +507,7 @@ const flowLabels = [
   ['↓ Patterns Adapted to Multivendor + Vendor-Agnostic ↓','↓ NetClaw + NIKA + pydantic-ai + MPLS-MCP ↓','↓ All extracted features made vendor-neutral ↓'],
   ['↓ SSH · NETCONF · gNMI · Syslog · SNMP ↓','↓ 5 transport protocols · vendor-neutral ↓','↓ Single canonical task → 5 vendor CLIs ↓'],
   ['↓ Flask API + MCP Server ↓','↓ /api/mv/* — 20 endpoints ↓','↓ MCP tools — Claude Code direct call ↓'],
-  ['↓ AI Orchestration · Vendor-Agnostic Tools ↓','↓ Pydantic structured outputs ↓','↓ 8 Phase 3 modules · NetClaw + NIKA + pydantic ↓'],
+  ['↓ AI Orchestration · Vendor-Agnostic Tools ↓','↓ Pydantic structured outputs ↓','↓ Phase 4 closed-loop modules · NetClaw + NIKA + pydantic ↓'],
   ['↓ LLM Backbone (Anthropic Claude) ↓','↓ Claude Haiku 4.5 · ~2-4s · 0.85-0.95 confidence ↓','↓ Offline fallback when no API key ↓'],
   ['↓ Demo UI · 12 Tabs ↓','↓ 6 base MV + 5 P3 + AI Command ↓','↓ DOM-safe rendering · 0 console errors ↓'],
   ['↓ Storage / Persistence ↓','↓ JSONL append-only audit ↓','↓ All runtime data gitignored ↓'],
