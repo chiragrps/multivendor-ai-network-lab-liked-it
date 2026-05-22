@@ -58,27 +58,44 @@ Always open to discussions about closed-loop NetOps and confirmed-commit safety 
 
 ### Step 4 — Add the first comment (do this within 30 seconds of publishing)
 
-Paste this exact text as a single comment:
+Mirrors the Phase 3 pattern that hit 7K impressions — single comment with
+links + soft DM nudge. **Don't split into multiple comments.** Tags are
+already in the post body (the `@automateyournetwork's NetClaw…` line).
+
+Paste this exact text as a single comment, then click `⋮` → **Pin to top of comments**:
 
 ```text
-🎥 Full feature tour (2:51 · every panel + captions): https://youtu.be/wWPJTiRm5qs
+Full feature tour (2:51, every panel + captions):
+👉 https://youtu.be/wWPJTiRm5qs
 
-📦 Repo, architecture diagram, all docs: https://github.com/gesh75/multivendor-ai-network-lab
+Repo (clean public release, no internal references):
+👉 https://github.com/gesh75/multivendor-ai-network-lab
 
-🔁 Phase 3 (the brain) for context: https://www.linkedin.com/feed/update/urn:li:activity:7458139826265939968/
+Architecture diagram (animated, 8 layers):
+👉 demo/architecture.html in the repo [clone + open in browser]
+
+Open to consulting + senior network engineering roles —
+DM if you want to swap notes on closed-loop NetOps.
 ```
 
-Then click the `⋮` on your own comment → **Pin to top of comments**.
+### Step 5 — Engage in the first hour
 
-### Step 5 — Tag + engage (first hour matters most for reach)
+1. Set a 60-minute timer. LinkedIn's algorithm weights comment velocity
+   in the first 60 minutes more than any other signal.
+2. Reply to every comment that lands. Even a short *"appreciate you taking
+   a look, glad it lands"* counts — back-and-forth reply chains outperform
+   one-line acknowledgments.
+3. Vary the replies — don't paste the same canned sentence to everyone.
+4. For real questions: give a real answer. Engaged threads pull more reach.
 
-1. Tag in a reply (not the post body — keeps the post clean):
-   - the NetClaw author (`@automateyournetwork`)
-   - the sands-lab / NIKA team
-   - Hugo Tinoco
-   - codingnetworks.blog
-2. Reply to every comment in the first hour. LinkedIn boosts reach when the post has comment velocity in the first 60 minutes.
-3. Re-share the post to your own feed from a different angle ~24 hours later if engagement is strong.
+### Step 6 — (optional · 12–24h later) Behind-the-scenes follow-up comment
+
+When engagement starts cooling, drop a third comment to re-ignite the
+notification ticker for everyone who already engaged. Pick one:
+
+- *"The line I almost cut from the post: the BM25 implementation is 40 lines of stdlib Python and beat every embedding model I tested for vendor CLI search."*
+- *"Question that came up twice in DMs: 'how does Health Gate define regression?' — short answer: BGP peer count drop, interface state flip, alert count delta. Thresholds tunable per device."*
+- *"Surprise from this build: writing the postmortem generator took longer than the actual closed loop."*
 
 ---
 
