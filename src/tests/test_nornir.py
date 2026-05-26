@@ -135,12 +135,12 @@ class TestNornirRun:
         assert result["devices"] == 6
         assert len(result["results"]) == 6
 
-    def test_site_filter_de-fra_returns_3_devices(self):
+    def test_site_filter_de_fra_returns_3_devices(self):
         run_fn = self._make_run_fn()
         result = nornir_run(LAB_DEVICES, "bgp_health", site_filter="DE-FRA", run_fn=run_fn)
         assert result["devices"] == 3  # de-fra-core-01, de-fra-core-02, de-fra-edge-01
 
-    def test_site_filter_uk-lon_returns_2_devices(self):
+    def test_site_filter_uk_lon_returns_2_devices(self):
         run_fn = self._make_run_fn()
         result = nornir_run(LAB_DEVICES, "bgp_health", site_filter="UK-LON", run_fn=run_fn)
         assert result["devices"] == 2  # uk-lon-core-01, uk-lon-dist-01
@@ -229,7 +229,7 @@ class TestNornirEndpoint:
         assert data["devices"] == 6
         assert data["ok"] + data["warn"] + data["error"] == 6
 
-    def test_site_filter_de-fra(self, app_client, mock_ssh):
+    def test_site_filter_de_fra(self, app_client, mock_ssh):
         """DE-FRA site filter returns only DE-FRA devices (3)."""
         mock_ssh.return_value = {"success": True, "output": BGP_SUMMARY_OUTPUT, "command": "show bgp summary"}
 

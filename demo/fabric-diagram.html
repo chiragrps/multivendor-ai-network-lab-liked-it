@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GESH Multi-Vendor DC Fabric — Live Architecture</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #050a12;
+    color: #c8d6e5;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .header {
+    text-align: center;
+    padding: 30px 20px 20px;
+    background: linear-gradient(180deg, #0a1628 0%, #050a12 100%);
+    border-bottom: 1px solid #1a2840;
+  }
+  .header h1 {
+    font-size: 32px;
+    background: linear-gradient(135deg, #00d4ff 0%, #00e87a 50%, #f0b429 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+    letter-spacing: 2px;
+  }
+  .header .sub { color: #5a6a7a; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; }
+
+  .ticker {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 12px 20px;
+    background: #0a1220;
+    border-bottom: 1px solid #1a2840;
+    overflow: hidden;
+  }
+  .ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .ticker-item .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .dot-green { background: #00e87a; box-shadow: 0 0 6px #00e87a; }
+  .dot-cyan { background: #00d4ff; box-shadow: 0 0 6px #00d4ff; }
+  .dot-yellow { background: #f0b429; box-shadow: 0 0 6px #f0b429; }
+  .dot-purple { background: #c678dd; box-shadow: 0 0 6px #c678dd; }
+
+  .main { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 10px;
+    margin-bottom: 25px;
+  }
+  .stat-card {
+    background: #0d1520;
+    border: 1px solid #1a2840;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-card .val {
+    font-size: 24px;
+    font-weight: bold;
+    background: linear-gradient(135deg, #00d4ff, #00e87a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stat-card .lbl {
+    font-size: 9px;
+    color: #5a6a7a;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+
+  .fabric { position: relative; }
+
+  .tier-section {
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .tier-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-left: 5px;
+  }
+  .tier-header .tier-name {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #5a6a7a;
+  }
+  .tier-header .tier-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, #1a2840, transparent);
+  }
+  .tier-header .tier-tech {
+    display: flex;
+    gap: 6px;
+  }
+  .tech-pill {
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    letter-spacing: 1px;
+  }
+  .tech-bgp { background: #0a2a1a; color: #00e87a; border: 1px solid #00e87a40; }
+  .tech-evpn { background: #0a1a2a; color: #00d4ff; border: 1px solid #00d4ff40; }
+  .tech-vxlan { background: #2a1a0a; color: #f0b429; border: 1px solid #f0b42940; }
+  .tech-bfd { background: #1a0a2a; color: #c678dd; border: 1px solid #c678dd40; }
+  .tech-qos { background: #2a0a1a; color: #ff6b9d; border: 1px solid #ff6b9d40; }
+  .tech-stp { background: #0a2a2a; color: #56b6c2; border: 1px solid #56b6c240; }
+  .tech-lacp { background: #1a2a0a; color: #98c379; border: 1px solid #98c37940; }
+  .tech-lldp { background: #2a2a0a; color: #e5c07b; border: 1px solid #e5c07b40; }
+  .tech-ospf { background: #1a1a2a; color: #61afef; border: 1px solid #61afef40; }
+
+  .nodes-row {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .node-card {
+    background: #0d1520;
+    border: 1px solid #1a2840;
+    border-radius: 12px;
+    padding: 14px 16px;
+    min-width: 150px;
+    position: relative;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  .node-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 212, 255, 0.15);
+  }
+  .node-card.spine { border-top: 3px solid #f0b429; }
+  .node-card.spine:hover { border-color: #f0b429; box-shadow: 0 8px 25px rgba(240, 180, 41, 0.2); }
+  .node-card.leaf { border-top: 3px solid #00d4ff; }
+  .node-card.leaf:hover { border-color: #00d4ff; }
+  .node-card.host { border-top: 3px solid #00e87a; }
+  .node-card.host:hover { border-color: #00e87a; box-shadow: 0 8px 25px rgba(0, 232, 122, 0.2); }
+
+  .vendor-tag {
+    position: absolute;
+    top: -1px;
+    right: 10px;
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 0 0 6px 6px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+  .v-nokia { background: #0048ab; color: #fff; }
+  .v-arista { background: #0066cc; color: #fff; }
+  .v-frr { background: #ff6b35; color: #fff; }
+  .v-linux { background: #333; color: #aaa; }
+
+  .node-name { font-size: 15px; font-weight: bold; margin-bottom: 4px; }
+  .node-ip { font-size: 10px; color: #00d4ff; margin-bottom: 2px; }
+  .node-asn { font-size: 10px; color: #00e87a; margin-bottom: 4px; }
+  .node-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-top: 6px;
+  }
+  .feat {
+    font-size: 8px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: #1a2840;
+    color: #8899aa;
+  }
+
+  .connection-bar {
+    text-align: center;
+    padding: 8px 0;
+    position: relative;
+  }
+  .conn-svg { width: 100%; max-height: 40px; }
+  .conn-text {
+    font-size: 10px;
+    color: #5a6a7a;
+    letter-spacing: 2px;
+  }
+  .conn-line {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0;
+  }
+  .conn-dash {
+    width: 200px;
+    height: 1px;
+    background: repeating-linear-gradient(90deg, #1a2840, #1a2840 5px, transparent 5px, transparent 10px);
+  }
+  .conn-solid {
+    width: 200px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+  }
+
+  .tech-section {
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+  }
+  .tech-card {
+    background: #0d1520;
+    border: 1px solid #1a2840;
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .tech-card h3 {
+    font-size: 13px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tech-card h3 .icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+  .tech-card table { width: 100%; border-collapse: collapse; }
+  .tech-card th, .tech-card td {
+    text-align: left;
+    padding: 4px 6px;
+    font-size: 11px;
+    border-bottom: 1px solid #1a284020;
+  }
+  .tech-card th { color: #5a6a7a; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; font-weight: normal; }
+  .tech-card td { color: #c8d6e5; }
+  .status-up { color: #00e87a; }
+  .status-down { color: #ff3c5a; }
+
+  .ai-section {
+    margin-top: 30px;
+    background: linear-gradient(135deg, #0d1520 0%, #0a1628 100%);
+    border: 1px solid #1a2840;
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .ai-section h2 {
+    font-size: 16px;
+    background: linear-gradient(135deg, #c678dd, #61afef);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+  }
+  .ai-tools {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 12px;
+  }
+  .ai-tool {
+    background: #0a1220;
+    border: 1px solid #1a2840;
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .ai-tool .tool-name { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
+  .ai-tool .tool-desc { font-size: 10px; color: #5a6a7a; margin-bottom: 6px; }
+  .ai-tool .tool-status {
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .tool-connected { background: #0a2a1a; color: #00e87a; border: 1px solid #00e87a40; }
+  .tool-ready { background: #0a1a2a; color: #00d4ff; border: 1px solid #00d4ff40; }
+
+  .proto-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 15px;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 25px;
+    color: #3a4a5a;
+    font-size: 10px;
+    letter-spacing: 2px;
+    margin-top: 30px;
+    border-top: 1px solid #1a2840;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  .pulse { animation: pulse 2s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>GESH Multi-Vendor DC Fabric</h1>
+  <div class="sub">Containerlab · 15 Nodes · 3 Vendors · Apple Silicon M4 Max</div>
+</div>
+
+<div class="ticker">
+  <div class="ticker-item"><div class="dot dot-green pulse"></div>15/15 Nodes UP</div>
+  <div class="ticker-item"><div class="dot dot-cyan pulse"></div>36 BGP Sessions</div>
+  <div class="ticker-item"><div class="dot dot-yellow pulse"></div>3 VXLAN VNIs</div>
+  <div class="ticker-item"><div class="dot dot-purple pulse"></div>BFD 300ms</div>
+  <div class="ticker-item"><div class="dot dot-green"></div>QoS Active</div>
+  <div class="ticker-item"><div class="dot dot-cyan"></div>EVPN Type-2/3/5</div>
+  <div class="ticker-item"><div class="dot dot-yellow"></div>~12GB RAM</div>
+</div>
+
+<div class="main">
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card"><div class="val">15</div><div class="lbl">Nodes</div></div>
+    <div class="stat-card"><div class="val">3</div><div class="lbl">Vendors</div></div>
+    <div class="stat-card"><div class="val">24</div><div class="lbl">P2P Links</div></div>
+    <div class="stat-card"><div class="val">36</div><div class="lbl">BGP Peers</div></div>
+    <div class="stat-card"><div class="val">3</div><div class="lbl">VXLANs</div></div>
+    <div class="stat-card"><div class="val">6</div><div class="lbl">BFD</div></div>
+    <div class="stat-card"><div class="val">3</div><div class="lbl">Topologies</div></div>
+    <div class="stat-card"><div class="val">4</div><div class="lbl">AI Tools</div></div>
+    <div class="stat-card"><div class="val">9</div><div class="lbl">SNMP Agents</div></div>
+  </div>
+
+  <!-- SPINE LAYER -->
+  <div class="tier-section">
+    <div class="tier-header">
+      <span class="tier-name">Spine Layer — Route Reflectors</span>
+      <div class="tier-line"></div>
+      <div class="tier-tech">
+        <span class="tech-pill tech-bgp">eBGP AS65100</span>
+        <span class="tech-pill tech-evpn">EVPN RR</span>
+        <span class="tech-pill tech-bfd">BFD 300ms</span>
+        <span class="tech-pill tech-lldp">LLDP</span>
+      </div>
+    </div>
+    <div class="nodes-row">
+      <div class="node-card spine">
+        <span class="vendor-tag v-nokia">NOKIA</span>
+        <div class="node-name">spine1</div>
+        <div class="node-ip">10.255.0.1</div>
+        <div class="node-asn">AS 65100 · SR Linux v24.10</div>
+        <div class="node-features">
+          <span class="feat">RR</span><span class="feat">BFD</span><span class="feat">ECMP</span><span class="feat">gNMI</span><span class="feat">YANG</span>
+        </div>
+      </div>
+      <div class="node-card spine">
+        <span class="vendor-tag v-arista">ARISTA</span>
+        <div class="node-name">spine2</div>
+        <div class="node-ip">10.255.0.2</div>
+        <div class="node-asn">AS 65100 · cEOS v4.33.1F</div>
+        <div class="node-features">
+          <span class="feat">RR</span><span class="feat">ECMP</span><span class="feat">eAPI</span><span class="feat">LLDP</span><span class="feat">PFX-FILTER</span>
+        </div>
+      </div>
+      <div class="node-card spine">
+        <span class="vendor-tag v-frr">FRR</span>
+        <div class="node-name">spine3</div>
+        <div class="node-ip">10.255.0.3</div>
+        <div class="node-asn">AS 65100 · FRR v8.4</div>
+        <div class="node-features">
+          <span class="feat">RR</span><span class="feat">BFD</span><span class="feat">ECMP-64</span><span class="feat">NETCONF</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connection Bar -->
+  <div class="connection-bar">
+    <div class="conn-line"><div class="conn-solid"></div><span class="conn-text">18 eBGP + 12 iBGP EVPN</span><div class="conn-solid"></div></div>
+    <div class="conn-line"><div class="conn-dash"></div><span class="conn-text" style="color:#f0b429">VXLAN UDP:4789</span><div class="conn-dash"></div></div>
+  </div>
+
+  <!-- LEAF LAYER -->
+  <div class="tier-section">
+    <div class="tier-header">
+      <span class="tier-name">Leaf Layer — VTEPs · Anycast GW</span>
+      <div class="tier-line"></div>
+      <div class="tier-tech">
+        <span class="tech-pill tech-vxlan">VXLAN</span>
+        <span class="tech-pill tech-evpn">EVPN T2/T3/T5</span>
+        <span class="tech-pill tech-qos">QoS DSCP</span>
+        <span class="tech-pill tech-stp">Storm-Ctrl</span>
+        <span class="tech-pill tech-bfd">BFD</span>
+      </div>
+    </div>
+    <div class="nodes-row">
+      <div class="node-card leaf">
+        <span class="vendor-tag v-arista">ARISTA</span>
+        <div class="node-name">leaf1</div>
+        <div class="node-ip">10.255.1.1 · VTEP .100.1</div>
+        <div class="node-asn">AS 65001 · Rack-1</div>
+        <div class="node-features">
+          <span class="feat">VLAN10</span><span class="feat">VNI10010</span><span class="feat">QoS</span><span class="feat">BFD</span><span class="feat">IRB</span><span class="feat">Storm</span>
+        </div>
+      </div>
+      <div class="node-card leaf">
+        <span class="vendor-tag v-nokia">NOKIA</span>
+        <div class="node-name">leaf2</div>
+        <div class="node-ip">10.255.1.2 · VTEP .100.2</div>
+        <div class="node-asn">AS 65002 · Rack-1</div>
+        <div class="node-features">
+          <span class="feat">mac-vrf</span><span class="feat">VNI10010</span><span class="feat">EVPN</span><span class="feat">gNMI</span>
+        </div>
+      </div>
+      <div class="node-card leaf">
+        <span class="vendor-tag v-frr">FRR</span>
+        <div class="node-name">leaf3</div>
+        <div class="node-ip">10.255.1.3 · VTEP .100.3</div>
+        <div class="node-asn">AS 65003 · Rack-2</div>
+        <div class="node-features">
+          <span class="feat">VLAN20</span><span class="feat">VNI10020</span><span class="feat">BFD</span><span class="feat">PFX-LIMIT</span><span class="feat">COMM</span>
+        </div>
+      </div>
+      <div class="node-card leaf">
+        <span class="vendor-tag v-arista">ARISTA</span>
+        <div class="node-name">leaf4</div>
+        <div class="node-ip">10.255.1.4 · VTEP .100.4</div>
+        <div class="node-asn">AS 65004 · Rack-2</div>
+        <div class="node-features">
+          <span class="feat">VLAN20</span><span class="feat">VNI10020</span><span class="feat">QoS</span><span class="feat">BFD</span><span class="feat">Storm</span>
+        </div>
+      </div>
+      <div class="node-card leaf">
+        <span class="vendor-tag v-nokia">NOKIA</span>
+        <div class="node-name">leaf5</div>
+        <div class="node-ip">10.255.1.5 · VTEP .100.5</div>
+        <div class="node-asn">AS 65005 · Rack-3</div>
+        <div class="node-features">
+          <span class="feat">mac-vrf</span><span class="feat">VNI10030</span><span class="feat">EVPN</span><span class="feat">gNMI</span>
+        </div>
+      </div>
+      <div class="node-card leaf">
+        <span class="vendor-tag v-frr">FRR</span>
+        <div class="node-name">leaf6</div>
+        <div class="node-ip">10.255.1.6 · VTEP .100.6</div>
+        <div class="node-asn">AS 65006 · Rack-3</div>
+        <div class="node-features">
+          <span class="feat">VLAN30</span><span class="feat">VNI10030</span><span class="feat">BFD</span><span class="feat">VRF</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connection Bar -->
+  <div class="connection-bar">
+    <div class="conn-line"><div class="conn-solid" style="background:linear-gradient(90deg,transparent,#00e87a,transparent)"></div><span class="conn-text" style="color:#00e87a">Access Ports · VLAN 10/20/30</span><div class="conn-solid" style="background:linear-gradient(90deg,transparent,#00e87a,transparent)"></div></div>
+  </div>
+
+  <!-- HOST LAYER -->
+  <div class="tier-section">
+    <div class="tier-header">
+      <span class="tier-name">Host Layer — Traffic Endpoints</span>
+      <div class="tier-line"></div>
+      <div class="tier-tech">
+        <span class="tech-pill tech-stp">802.1Q</span>
+        <span class="tech-pill tech-ospf">ARP/MAC</span>
+        <span class="tech-pill tech-lldp">LLDP</span>
+      </div>
+    </div>
+    <div class="nodes-row">
+      <div class="node-card host"><span class="vendor-tag v-linux">H1</span><div class="node-name">host1</div><div class="node-ip">10.10.10.1/24</div><div class="node-asn">VLAN 10 → leaf1</div></div>
+      <div class="node-card host"><span class="vendor-tag v-linux">H2</span><div class="node-name">host2</div><div class="node-ip">10.10.10.2/24</div><div class="node-asn">VLAN 10 → leaf2</div></div>
+      <div class="node-card host"><span class="vendor-tag v-linux">H3</span><div class="node-name">host3</div><div class="node-ip">10.10.20.1/24</div><div class="node-asn">VLAN 20 → leaf3</div></div>
+      <div class="node-card host"><span class="vendor-tag v-linux">H4</span><div class="node-name">host4</div><div class="node-ip">10.10.20.2/24</div><div class="node-asn">VLAN 20 → leaf4</div></div>
+      <div class="node-card host"><span class="vendor-tag v-linux">H5</span><div class="node-name">host5</div><div class="node-ip">10.10.30.1/24</div><div class="node-asn">VLAN 30 → leaf5</div></div>
+      <div class="node-card host"><span class="vendor-tag v-linux">H6</span><div class="node-name">host6</div><div class="node-ip">10.10.30.2/24</div><div class="node-asn">VLAN 30 → leaf6</div></div>
+    </div>
+  </div>
+
+  <!-- Technology Deep Dive Cards -->
+  <div class="tech-section">
+    <div class="tech-card">
+      <h3><span class="icon" style="background:#00e87a20;color:#00e87a">B</span><span style="color:#00e87a">BGP Underlay</span></h3>
+      <table>
+        <tr><th>Design</th><td>eBGP RFC 7938 Clos</td></tr>
+        <tr><th>Spine ASN</th><td>65100 (shared)</td></tr>
+        <tr><th>Leaf ASNs</th><td>65001–65006 (unique)</td></tr>
+        <tr><th>Sessions</th><td class="status-up">18/18 Established</td></tr>
+        <tr><th>ECMP</th><td>3-way (all spines)</td></tr>
+        <tr><th>Timers</th><td>3s hold / 9s dead</td></tr>
+        <tr><th>Max Prefix</th><td>100 (80% warning)</td></tr>
+      </table>
+    </div>
+
+    <div class="tech-card">
+      <h3><span class="icon" style="background:#00d4ff20;color:#00d4ff">E</span><span style="color:#00d4ff">EVPN Overlay</span></h3>
+      <table>
+        <tr><th>Design</th><td>iBGP EVPN + RR</td></tr>
+        <tr><th>Overlay ASN</th><td>65199</td></tr>
+        <tr><th>Route Types</th><td>Type-2 (MAC/IP), Type-3 (IMET), Type-5 (IP Prefix)</td></tr>
+        <tr><th>RR Cluster</th><td>spine1 + spine2 + spine3</td></tr>
+        <tr><th>VRF</th><td>TENANT-A (L3VNI 50001)</td></tr>
+        <tr><th>IRB</th><td>Symmetric, anycast GW</td></tr>
+        <tr><th>ARP Suppress</th><td>Enabled on VTEPs</td></tr>
+      </table>
+    </div>
+
+    <div class="tech-card">
+      <h3><span class="icon" style="background:#f0b42920;color:#f0b429">V</span><span style="color:#f0b429">VXLAN Data Plane</span></h3>
+      <table>
+        <tr><th>Encap</th><td>VXLAN UDP 4789</td></tr>
+        <tr><th>MTU</th><td>9214 (fabric) / 1500 (host)</td></tr>
+        <tr><th>VNI 10010</th><td>VLAN 10 — Web (10.10.10.0/24)</td></tr>
+        <tr><th>VNI 10020</th><td>VLAN 20 — App (10.10.20.0/24)</td></tr>
+        <tr><th>VNI 10030</th><td>VLAN 30 — DB (10.10.30.0/24)</td></tr>
+        <tr><th>L3VNI 50001</th><td>VRF TENANT-A (inter-subnet)</td></tr>
+        <tr><th>BUM</th><td>Ingress replication via EVPN</td></tr>
+      </table>
+    </div>
+
+    <div class="tech-card">
+      <h3><span class="icon" style="background:#c678dd20;color:#c678dd">F</span><span style="color:#c678dd">BFD + Fast Failover</span></h3>
+      <table>
+        <tr><th>Tx Interval</th><td>300ms</td></tr>
+        <tr><th>Rx Interval</th><td>300ms</td></tr>
+        <tr><th>Multiplier</th><td>3 (detect in 900ms)</td></tr>
+        <tr><th>Spines</th><td class="status-up">BFD on all 6 downlinks</td></tr>
+        <tr><th>Leafs</th><td class="status-up">BFD on all 3 uplinks</td></tr>
+        <tr><th>BGP</th><td>fast-failover enabled</td></tr>
+        <tr><th>Convergence</th><td>&lt;1 second failover</td></tr>
+      </table>
+    </div>
+
+    <div class="tech-card">
+      <h3><span class="icon" style="background:#ff6b9d20;color:#ff6b9d">Q</span><span style="color:#ff6b9d">QoS Policies</span></h3>
+      <table>
+        <tr><th>Voice</th><td>DSCP EF, CoS 5 (UDP 16384-32767)</td></tr>
+        <tr><th>Bulk</th><td>DSCP AF21, CoS 2 (TCP 80/443)</td></tr>
+        <tr><th>Default</th><td>DSCP 0 (best effort)</td></tr>
+        <tr><th>Storm Ctrl</th><td>Broadcast/Mcast 10%</td></tr>
+        <tr><th>Applied</th><td>leaf1:et4, leaf4:et5 (access ports)</td></tr>
+        <tr><th>Communities</th><td>65003:100 (critical), 65003:200 (bulk)</td></tr>
+      </table>
+    </div>
+
+    <div class="tech-card">
+      <h3><span class="icon" style="background:#56b6c220;color:#56b6c2">L</span><span style="color:#56b6c2">L2 Features</span></h3>
+      <table>
+        <tr><th>LLDP</th><td class="status-up">Active on all cEOS</td></tr>
+        <tr><th>STP</th><td>MSTP (cEOS access)</td></tr>
+        <tr><th>MAC Aging</th><td>1800s (leaf4)</td></tr>
+        <tr><th>VLANs</th><td>10 (Web), 20 (App), 30 (DB)</td></tr>
+        <tr><th>Anycast GW</th><td>00:1c:73:00:00:01 (virtual MAC)</td></tr>
+        <tr><th>DHCP Relay</th><td>leaf1 Vlan10</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- AI Tools Integration -->
+  <div class="ai-section">
+    <h2>AI Network Tools Integration</h2>
+    <div class="ai-tools">
+      <div class="ai-tool">
+        <div class="tool-name" style="color:#00d4ff">DCN Network Tool</div>
+        <div class="tool-desc">CLI configurator, compliance scanner, multi-vendor config generation</div>
+        <span class="tool-status tool-connected">INVENTORY SYNCED</span>
+        <div style="font-size:9px;color:#5a6a7a;margin-top:4px">dcn_inventory.json → 9 devices</div>
+      </div>
+      <div class="ai-tool">
+        <div class="tool-name" style="color:#00e87a">netlog-ai</div>
+        <div class="tool-desc">AI log analyzer, anomaly detection, pattern recognition</div>
+        <span class="tool-status tool-connected">382 LOG ENTRIES</span>
+        <div style="font-size:9px;color:#5a6a7a;margin-top:4px">fabric_logs.json → docker logs stream</div>
+      </div>
+      <div class="ai-tool">
+        <div class="tool-name" style="color:#f0b429">Monitor Bridge</div>
+        <div class="tool-desc">Real-time BGP state, interface counters, fabric health</div>
+        <span class="tool-status tool-connected">20 BGP SESSIONS</span>
+        <div style="font-size:9px;color:#5a6a7a;margin-top:4px">fabric_state.json → 30s polling</div>
+      </div>
+      <div class="ai-tool">
+        <div class="tool-name" style="color:#c678dd">Ansible Automation</div>
+        <div class="tool-desc">Multi-vendor config push, compliance validation, drift detection</div>
+        <span class="tool-status tool-ready">INVENTORY READY</span>
+        <div style="font-size:9px;color:#5a6a7a;margin-top:4px">inventory.ini → nokia.srlinux + arista.eos + frr</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Protocol Summary -->
+  <div style="margin-top:20px;text-align:center;">
+    <div style="font-size:10px;color:#5a6a7a;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px">Protocols Active in Fabric</div>
+    <div class="proto-grid" style="justify-content:center">
+      <span class="tech-pill tech-bgp">eBGP RFC7938</span>
+      <span class="tech-pill tech-evpn">iBGP EVPN</span>
+      <span class="tech-pill tech-evpn">EVPN Type-2</span>
+      <span class="tech-pill tech-evpn">EVPN Type-3</span>
+      <span class="tech-pill tech-evpn">EVPN Type-5</span>
+      <span class="tech-pill tech-vxlan">VXLAN</span>
+      <span class="tech-pill tech-bfd">BFD</span>
+      <span class="tech-pill tech-qos">QoS DSCP/CoS</span>
+      <span class="tech-pill tech-stp">Storm Control</span>
+      <span class="tech-pill tech-stp">MSTP</span>
+      <span class="tech-pill tech-lacp">Symmetric IRB</span>
+      <span class="tech-pill tech-lldp">LLDP</span>
+      <span class="tech-pill tech-ospf">ARP Suppress</span>
+      <span class="tech-pill tech-ospf">ECMP</span>
+      <span class="tech-pill tech-bgp">BGP Communities</span>
+      <span class="tech-pill tech-bgp">Prefix Filtering</span>
+      <span class="tech-pill tech-lldp">gNMI Telemetry</span>
+      <span class="tech-pill tech-lldp">NETCONF/YANG</span>
+      <span class="tech-pill tech-lacp">REST/eAPI</span>
+      <span class="tech-pill tech-qos">DHCP Relay</span>
+      <span class="tech-pill tech-stp" style="background:rgba(255,140,0,.12);border-color:#f0b429;color:#f0b429">SNMPv2c Polling</span>
+      <span class="tech-pill tech-stp" style="background:rgba(255,140,0,.12);border-color:#f0b429;color:#f0b429">SNMP Traps → :1162</span>
+      <span class="tech-pill tech-stp" style="background:rgba(255,140,0,.12);border-color:#f0b429;color:#f0b429">AgentX (FRR)</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  GESH MULTI-VENDOR DC FABRIC · CONTAINERLAB ON APPLE SILICON M4 MAX · BUILT 2026-05-24
+</div>
+
+</body>
+</html>

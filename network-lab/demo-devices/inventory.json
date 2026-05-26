@@ -1,45 +1,940 @@
 {
-  "description": "Multivendor Demo Lab — 16 sanitized real configs + 10 FRR live containers",
-  "topology_version": "2.0",
-  "sites": ["DE-FRA", "UK-LON", "NL-AMS", "EU-CDG", "US-NYC"],
+  "description": "Multivendor Demo Lab \u2014 16 sanitized + 10 FRR live + 15 clab-clos-evpn (3 spines / 6 leafs / 6 hosts)",
+  "topology_version": "3.0",
+  "sites": [
+    "DE-FRA",
+    "UK-LON",
+    "NL-AMS",
+    "EU-CDG",
+    "US-NYC",
+    "CLAB-DC1"
+  ],
   "devices": [
-    {"hostname": "de-fra-fw-01",     "ip": "10.200.1.1",  "port": null, "vendor": "juniper", "model": "SRX345",       "role": "firewall",  "site": "DE-FRA", "config": "junos/de-fra-fw-01.txt",     "live": false, "os": "junos"},
-    {"hostname": "uk-lon-fw-01",     "ip": "10.200.2.1",  "port": null, "vendor": "juniper", "model": "SRX345",       "role": "firewall",  "site": "UK-LON", "config": "junos/uk-lon-fw-01.txt",     "live": false, "os": "junos"},
-    {"hostname": "nl-ams-fw-01",     "ip": "10.200.3.1",  "port": null, "vendor": "juniper", "model": "SRX345",       "role": "firewall",  "site": "NL-AMS", "config": "junos/nl-ams-fw-01.txt",     "live": false, "os": "junos"},
-    {"hostname": "us-nyc-fw-01",     "ip": "10.200.5.1",  "port": null, "vendor": "juniper", "model": "SRX345",       "role": "firewall",  "site": "US-NYC", "config": "junos/us-nyc-fw-01.txt",     "live": false, "os": "junos"},
-    {"hostname": "de-fra-mx-01",     "ip": "10.200.1.10", "port": null, "vendor": "juniper", "model": "MX204",        "role": "core",      "site": "DE-FRA", "config": "junos/de-fra-mx-01.txt",     "live": false, "os": "junos"},
-    {"hostname": "eu-cdg-mx-01",     "ip": "10.200.4.10", "port": null, "vendor": "juniper", "model": "MX960",        "role": "core",      "site": "EU-CDG", "config": "junos/eu-cdg-mx-01.txt",     "live": false, "os": "junos"},
-    {"hostname": "de-fra-ex-01",     "ip": "10.200.1.20", "port": null, "vendor": "juniper", "model": "EX4600",       "role": "dist",      "site": "DE-FRA", "config": "junos/de-fra-ex-01.txt",     "live": false, "os": "junos"},
-    {"hostname": "de-fra-ex-02",     "ip": "10.200.1.21", "port": null, "vendor": "juniper", "model": "EX4600",       "role": "access",    "site": "DE-FRA", "config": "junos/de-fra-ex-02.txt",     "live": false, "os": "junos"},
-    {"hostname": "uk-lon-ex-01",     "ip": "10.200.2.20", "port": null, "vendor": "juniper", "model": "EX4600",       "role": "dist",      "site": "UK-LON", "config": "junos/uk-lon-ex-01.txt",     "live": false, "os": "junos"},
-    {"hostname": "nl-ams-ex-01",     "ip": "10.200.3.20", "port": null, "vendor": "juniper", "model": "EX4600",       "role": "dist",      "site": "NL-AMS", "config": "junos/nl-ams-ex-01.txt",     "live": false, "os": "junos"},
-    {"hostname": "nl-ams-eos-rt-01", "ip": "10.200.3.11", "port": null, "vendor": "arista",  "model": "DCS-7280CR3K", "role": "edge",      "site": "NL-AMS", "config": "eos/nl-ams-eos-rt-01.txt",  "live": false, "os": "eos"},
-    {"hostname": "de-fra-eos-rt-01", "ip": "10.200.1.11", "port": null, "vendor": "arista",  "model": "DCS-7280CR3K", "role": "edge",      "site": "DE-FRA", "config": "eos/de-fra-eos-rt-01.txt",  "live": false, "os": "eos"},
-    {"hostname": "eu-cdg-eos-rt-01", "ip": "10.200.4.11", "port": null, "vendor": "arista",  "model": "DCS-7280CR3K", "role": "edge",      "site": "EU-CDG", "config": "eos/eu-cdg-eos-rt-01.txt",  "live": false, "os": "eos"},
-    {"hostname": "nl-ams-eos-sw-01", "ip": "10.200.3.21", "port": null, "vendor": "arista",  "model": "DCS-7050CX3",  "role": "leaf",      "site": "NL-AMS", "config": "eos/nl-ams-eos-sw-01.txt",  "live": false, "os": "eos"},
-    {"hostname": "de-fra-eos-sw-01", "ip": "10.200.1.22", "port": null, "vendor": "arista",  "model": "DCS-7050CX3",  "role": "leaf",      "site": "DE-FRA", "config": "eos/de-fra-eos-sw-01.txt",  "live": false, "os": "eos"},
-    {"hostname": "us-nyc-eos-rt-01", "ip": "10.200.5.11", "port": null, "vendor": "arista",  "model": "DCS-7280CR3K", "role": "edge",      "site": "US-NYC", "config": "eos/us-nyc-eos-rt-01.txt",  "live": false, "os": "eos"},
-    {"hostname": "de-fra-core-01", "ip": "10.200.0.11", "port": 2201, "vendor": "frr",     "model": "FRR-MX960",    "role": "core",      "site": "DE-FRA", "config": null,                      "live": true,  "os": "frr", "as": 65001},
-    {"hostname": "de-fra-core-02", "ip": "10.200.0.12", "port": 2202, "vendor": "frr",     "model": "FRR-MX480",    "role": "core",      "site": "DE-FRA", "config": null,                      "live": true,  "os": "frr", "as": 65002},
-    {"hostname": "uk-lon-core-01", "ip": "10.200.0.13", "port": 2203, "vendor": "frr",     "model": "FRR-MX204",    "role": "core",      "site": "UK-LON", "config": null,                      "live": true,  "os": "frr", "as": 65003},
-    {"hostname": "nl-ams-core-01", "ip": "10.200.0.14", "port": 2204, "vendor": "frr",     "model": "FRR-7280",     "role": "core",      "site": "NL-AMS", "config": null,                      "live": true,  "os": "frr", "as": 65004},
-    {"hostname": "us-nyc-core-01", "ip": "10.200.0.15", "port": 2207, "vendor": "frr",     "model": "FRR-7280",     "role": "core",      "site": "US-NYC", "config": null,                      "live": true,  "os": "frr", "as": 65005},
-    {"hostname": "de-fra-edge-01", "ip": "10.200.0.21", "port": 2205, "vendor": "frr",     "model": "FRR-SRX",      "role": "edge",      "site": "DE-FRA", "config": null,                      "live": true,  "os": "frr", "as": 65006},
-    {"hostname": "uk-lon-edge-01", "ip": "10.200.0.22", "port": 2208, "vendor": "frr",     "model": "FRR-EOS",      "role": "edge",      "site": "UK-LON", "config": null,                      "live": true,  "os": "frr", "as": 65007},
-    {"hostname": "nl-ams-edge-01", "ip": "10.200.0.23", "port": 2209, "vendor": "frr",     "model": "FRR-MX",       "role": "edge",      "site": "NL-AMS", "config": null,                      "live": true,  "os": "frr", "as": 65008},
-    {"hostname": "uk-lon-dist-01", "ip": "10.200.0.31", "port": 2206, "vendor": "frr",     "model": "FRR-EX",       "role": "dist",      "site": "UK-LON", "config": null,                      "live": true,  "os": "frr", "as": 65010},
-    {"hostname": "de-fra-dist-01", "ip": "10.200.0.33", "port": 2210, "vendor": "frr",     "model": "FRR-EX",       "role": "dist",      "site": "DE-FRA", "config": null,                      "live": true,  "os": "frr", "as": 65009}
+    {
+      "hostname": "de-fra-fw-01",
+      "ip": "10.200.1.1",
+      "port": null,
+      "vendor": "juniper",
+      "model": "SRX345",
+      "role": "firewall",
+      "site": "DE-FRA",
+      "config": "junos/de-fra-fw-01.txt",
+      "live": false,
+      "os": "junos"
+    },
+    {
+      "hostname": "uk-lon-fw-01",
+      "ip": "10.200.2.1",
+      "port": null,
+      "vendor": "juniper",
+      "model": "SRX345",
+      "role": "firewall",
+      "site": "UK-LON",
+      "config": "junos/uk-lon-fw-01.txt",
+      "live": false,
+      "os": "junos"
+    },
+    {
+      "hostname": "nl-ams-fw-01",
+      "ip": "10.200.3.1",
+      "port": null,
+      "vendor": "juniper",
+      "model": "SRX345",
+      "role": "firewall",
+      "site": "NL-AMS",
+      "config": "junos/nl-ams-fw-01.txt",
+      "live": false,
+      "os": "junos"
+    },
+    {
+      "hostname": "us-nyc-fw-01",
+      "ip": "10.200.5.1",
+      "port": null,
+      "vendor": "juniper",
+      "model": "SRX345",
+      "role": "firewall",
+      "site": "US-NYC",
+      "config": "junos/us-nyc-fw-01.txt",
+      "live": false,
+      "os": "junos"
+    },
+    {
+      "hostname": "de-fra-mx-01",
+      "ip": "10.200.1.10",
+      "port": null,
+      "vendor": "juniper",
+      "model": "MX204",
+      "role": "core",
+      "site": "DE-FRA",
+      "config": "junos/de-fra-mx-01.txt",
+      "live": false,
+      "os": "junos"
+    },
+    {
+      "hostname": "eu-cdg-mx-01",
+      "ip": "10.200.4.10",
+      "port": null,
+      "vendor": "juniper",
+      "model": "MX960",
+      "role": "core",
+      "site": "EU-CDG",
+      "config": "junos/eu-cdg-mx-01.txt",
+      "live": false,
+      "os": "junos"
+    },
+    {
+      "hostname": "de-fra-ex-01",
+      "ip": "10.200.1.20",
+      "port": null,
+      "vendor": "juniper",
+      "model": "EX4600",
+      "role": "dist",
+      "site": "DE-FRA",
+      "config": "junos/de-fra-ex-01.txt",
+      "live": false,
+      "os": "junos"
+    },
+    {
+      "hostname": "de-fra-ex-02",
+      "ip": "10.200.1.21",
+      "port": null,
+      "vendor": "juniper",
+      "model": "EX4600",
+      "role": "access",
+      "site": "DE-FRA",
+      "config": "junos/de-fra-ex-02.txt",
+      "live": false,
+      "os": "junos"
+    },
+    {
+      "hostname": "uk-lon-ex-01",
+      "ip": "10.200.2.20",
+      "port": null,
+      "vendor": "juniper",
+      "model": "EX4600",
+      "role": "dist",
+      "site": "UK-LON",
+      "config": "junos/uk-lon-ex-01.txt",
+      "live": false,
+      "os": "junos"
+    },
+    {
+      "hostname": "nl-ams-ex-01",
+      "ip": "10.200.3.20",
+      "port": null,
+      "vendor": "juniper",
+      "model": "EX4600",
+      "role": "dist",
+      "site": "NL-AMS",
+      "config": "junos/nl-ams-ex-01.txt",
+      "live": false,
+      "os": "junos"
+    },
+    {
+      "hostname": "nl-ams-eos-rt-01",
+      "ip": "10.200.3.11",
+      "port": null,
+      "vendor": "arista",
+      "model": "DCS-7280CR3K",
+      "role": "edge",
+      "site": "NL-AMS",
+      "config": "eos/nl-ams-eos-rt-01.txt",
+      "live": false,
+      "os": "eos"
+    },
+    {
+      "hostname": "de-fra-eos-rt-01",
+      "ip": "10.200.1.11",
+      "port": null,
+      "vendor": "arista",
+      "model": "DCS-7280CR3K",
+      "role": "edge",
+      "site": "DE-FRA",
+      "config": "eos/de-fra-eos-rt-01.txt",
+      "live": false,
+      "os": "eos"
+    },
+    {
+      "hostname": "eu-cdg-eos-rt-01",
+      "ip": "10.200.4.11",
+      "port": null,
+      "vendor": "arista",
+      "model": "DCS-7280CR3K",
+      "role": "edge",
+      "site": "EU-CDG",
+      "config": "eos/eu-cdg-eos-rt-01.txt",
+      "live": false,
+      "os": "eos"
+    },
+    {
+      "hostname": "nl-ams-eos-sw-01",
+      "ip": "10.200.3.21",
+      "port": null,
+      "vendor": "arista",
+      "model": "DCS-7050CX3",
+      "role": "leaf",
+      "site": "NL-AMS",
+      "config": "eos/nl-ams-eos-sw-01.txt",
+      "live": false,
+      "os": "eos"
+    },
+    {
+      "hostname": "de-fra-eos-sw-01",
+      "ip": "10.200.1.22",
+      "port": null,
+      "vendor": "arista",
+      "model": "DCS-7050CX3",
+      "role": "leaf",
+      "site": "DE-FRA",
+      "config": "eos/de-fra-eos-sw-01.txt",
+      "live": false,
+      "os": "eos"
+    },
+    {
+      "hostname": "us-nyc-eos-rt-01",
+      "ip": "10.200.5.11",
+      "port": null,
+      "vendor": "arista",
+      "model": "DCS-7280CR3K",
+      "role": "edge",
+      "site": "US-NYC",
+      "config": "eos/us-nyc-eos-rt-01.txt",
+      "live": false,
+      "os": "eos"
+    },
+    {
+      "hostname": "de-fra-core-01",
+      "ip": "10.200.0.11",
+      "port": 2201,
+      "vendor": "frr",
+      "model": "FRR-MX960",
+      "role": "core",
+      "site": "DE-FRA",
+      "config": null,
+      "live": true,
+      "os": "frr",
+      "as": 65001
+    },
+    {
+      "hostname": "de-fra-core-02",
+      "ip": "10.200.0.12",
+      "port": 2202,
+      "vendor": "frr",
+      "model": "FRR-MX480",
+      "role": "core",
+      "site": "DE-FRA",
+      "config": null,
+      "live": true,
+      "os": "frr",
+      "as": 65002
+    },
+    {
+      "hostname": "uk-lon-core-01",
+      "ip": "10.200.0.13",
+      "port": 2203,
+      "vendor": "frr",
+      "model": "FRR-MX204",
+      "role": "core",
+      "site": "UK-LON",
+      "config": null,
+      "live": true,
+      "os": "frr",
+      "as": 65003
+    },
+    {
+      "hostname": "nl-ams-core-01",
+      "ip": "10.200.0.14",
+      "port": 2204,
+      "vendor": "frr",
+      "model": "FRR-7280",
+      "role": "core",
+      "site": "NL-AMS",
+      "config": null,
+      "live": true,
+      "os": "frr",
+      "as": 65004
+    },
+    {
+      "hostname": "us-nyc-core-01",
+      "ip": "10.200.0.15",
+      "port": 2207,
+      "vendor": "frr",
+      "model": "FRR-7280",
+      "role": "core",
+      "site": "US-NYC",
+      "config": null,
+      "live": true,
+      "os": "frr",
+      "as": 65005
+    },
+    {
+      "hostname": "de-fra-edge-01",
+      "ip": "10.200.0.21",
+      "port": 2205,
+      "vendor": "frr",
+      "model": "FRR-SRX",
+      "role": "edge",
+      "site": "DE-FRA",
+      "config": null,
+      "live": true,
+      "os": "frr",
+      "as": 65006
+    },
+    {
+      "hostname": "uk-lon-edge-01",
+      "ip": "10.200.0.22",
+      "port": 2208,
+      "vendor": "frr",
+      "model": "FRR-EOS",
+      "role": "edge",
+      "site": "UK-LON",
+      "config": null,
+      "live": true,
+      "os": "frr",
+      "as": 65007
+    },
+    {
+      "hostname": "nl-ams-edge-01",
+      "ip": "10.200.0.23",
+      "port": 2209,
+      "vendor": "frr",
+      "model": "FRR-MX",
+      "role": "edge",
+      "site": "NL-AMS",
+      "config": null,
+      "live": true,
+      "os": "frr",
+      "as": 65008
+    },
+    {
+      "hostname": "uk-lon-dist-01",
+      "ip": "10.200.0.31",
+      "port": 2206,
+      "vendor": "frr",
+      "model": "FRR-EX",
+      "role": "dist",
+      "site": "UK-LON",
+      "config": null,
+      "live": true,
+      "os": "frr",
+      "as": 65010
+    },
+    {
+      "hostname": "de-fra-dist-01",
+      "ip": "10.200.0.33",
+      "port": 2210,
+      "vendor": "frr",
+      "model": "FRR-EX",
+      "role": "dist",
+      "site": "DE-FRA",
+      "config": null,
+      "live": true,
+      "os": "frr",
+      "as": 65009
+    },
+    {
+      "hostname": "spine1",
+      "ip": "172.20.20.11",
+      "port": 22,
+      "vendor": "nokia",
+      "model": "SR-Linux-IXR-D3L",
+      "role": "spine",
+      "site": "CLAB-DC1",
+      "config": null,
+      "live": true,
+      "os": "srl",
+      "as": 65100,
+      "fabric": "clos-evpn",
+      "tier": "spine",
+      "container": "clab-clos-evpn-spine1"
+    },
+    {
+      "hostname": "spine2",
+      "ip": "172.20.20.12",
+      "port": 22,
+      "vendor": "arista",
+      "model": "cEOS-4.33.1F",
+      "role": "spine",
+      "site": "CLAB-DC1",
+      "config": null,
+      "live": true,
+      "os": "eos",
+      "as": 65100,
+      "fabric": "clos-evpn",
+      "tier": "spine",
+      "container": "clab-clos-evpn-spine2"
+    },
+    {
+      "hostname": "spine3",
+      "ip": "172.20.20.13",
+      "port": 22,
+      "vendor": "frr",
+      "model": "FRR-v8.4",
+      "role": "spine",
+      "site": "CLAB-DC1",
+      "config": null,
+      "live": true,
+      "os": "frr",
+      "as": 65100,
+      "fabric": "clos-evpn",
+      "tier": "spine",
+      "container": "clab-clos-evpn-spine3"
+    },
+    {
+      "hostname": "leaf1",
+      "ip": "172.20.20.21",
+      "port": 22,
+      "vendor": "arista",
+      "model": "cEOS-4.33.1F",
+      "role": "leaf",
+      "site": "CLAB-DC1",
+      "config": null,
+      "live": true,
+      "os": "eos",
+      "as": 65001,
+      "fabric": "clos-evpn",
+      "tier": "leaf",
+      "rack": "rack-1",
+      "container": "clab-clos-evpn-leaf1"
+    },
+    {
+      "hostname": "leaf2",
+      "ip": "172.20.20.22",
+      "port": 22,
+      "vendor": "nokia",
+      "model": "SR-Linux-IXR-D3L",
+      "role": "leaf",
+      "site": "CLAB-DC1",
+      "config": null,
+      "live": true,
+      "os": "srl",
+      "as": 65002,
+      "fabric": "clos-evpn",
+      "tier": "leaf",
+      "rack": "rack-1",
+      "container": "clab-clos-evpn-leaf2"
+    },
+    {
+      "hostname": "leaf3",
+      "ip": "172.20.20.23",
+      "port": 22,
+      "vendor": "frr",
+      "model": "FRR-v8.4",
+      "role": "leaf",
+      "site": "CLAB-DC1",
+      "config": null,
+      "live": true,
+      "os": "frr",
+      "as": 65003,
+      "fabric": "clos-evpn",
+      "tier": "leaf",
+      "rack": "rack-2",
+      "container": "clab-clos-evpn-leaf3"
+    },
+    {
+      "hostname": "leaf4",
+      "ip": "172.20.20.24",
+      "port": 22,
+      "vendor": "arista",
+      "model": "cEOS-4.33.1F",
+      "role": "leaf",
+      "site": "CLAB-DC1",
+      "config": null,
+      "live": true,
+      "os": "eos",
+      "as": 65004,
+      "fabric": "clos-evpn",
+      "tier": "leaf",
+      "rack": "rack-2",
+      "container": "clab-clos-evpn-leaf4"
+    },
+    {
+      "hostname": "leaf5",
+      "ip": "172.20.20.25",
+      "port": 22,
+      "vendor": "nokia",
+      "model": "SR-Linux-IXR-D3L",
+      "role": "leaf",
+      "site": "CLAB-DC1",
+      "config": null,
+      "live": true,
+      "os": "srl",
+      "as": 65005,
+      "fabric": "clos-evpn",
+      "tier": "leaf",
+      "rack": "rack-3",
+      "container": "clab-clos-evpn-leaf5"
+    },
+    {
+      "hostname": "leaf6",
+      "ip": "172.20.20.26",
+      "port": 22,
+      "vendor": "frr",
+      "model": "FRR-v8.4",
+      "role": "leaf",
+      "site": "CLAB-DC1",
+      "config": null,
+      "live": true,
+      "os": "frr",
+      "as": 65006,
+      "fabric": "clos-evpn",
+      "tier": "leaf",
+      "rack": "rack-3",
+      "container": "clab-clos-evpn-leaf6"
+    },
+    {
+      "hostname": "host1",
+      "ip": "172.20.20.31",
+      "port": 22,
+      "vendor": "linux",
+      "model": "multitool",
+      "role": "host",
+      "site": "CLAB-DC1",
+      "config": null,
+      "live": true,
+      "os": "linux",
+      "fabric": "clos-evpn",
+      "tier": "host",
+      "rack": "rack-1",
+      "vlan": 10,
+      "connected_leaf": "leaf1",
+      "container": "clab-clos-evpn-host1"
+    },
+    {
+      "hostname": "host2",
+      "ip": "172.20.20.32",
+      "port": 22,
+      "vendor": "linux",
+      "model": "multitool",
+      "role": "host",
+      "site": "CLAB-DC1",
+      "config": null,
+      "live": true,
+      "os": "linux",
+      "fabric": "clos-evpn",
+      "tier": "host",
+      "rack": "rack-1",
+      "vlan": 10,
+      "connected_leaf": "leaf2",
+      "container": "clab-clos-evpn-host2"
+    },
+    {
+      "hostname": "host3",
+      "ip": "172.20.20.33",
+      "port": 22,
+      "vendor": "linux",
+      "model": "multitool",
+      "role": "host",
+      "site": "CLAB-DC1",
+      "config": null,
+      "live": true,
+      "os": "linux",
+      "fabric": "clos-evpn",
+      "tier": "host",
+      "rack": "rack-2",
+      "vlan": 20,
+      "connected_leaf": "leaf3",
+      "container": "clab-clos-evpn-host3"
+    },
+    {
+      "hostname": "host4",
+      "ip": "172.20.20.34",
+      "port": 22,
+      "vendor": "linux",
+      "model": "multitool",
+      "role": "host",
+      "site": "CLAB-DC1",
+      "config": null,
+      "live": true,
+      "os": "linux",
+      "fabric": "clos-evpn",
+      "tier": "host",
+      "rack": "rack-2",
+      "vlan": 20,
+      "connected_leaf": "leaf4",
+      "container": "clab-clos-evpn-host4"
+    },
+    {
+      "hostname": "host5",
+      "ip": "172.20.20.35",
+      "port": 22,
+      "vendor": "linux",
+      "model": "multitool",
+      "role": "host",
+      "site": "CLAB-DC1",
+      "config": null,
+      "live": true,
+      "os": "linux",
+      "fabric": "clos-evpn",
+      "tier": "host",
+      "rack": "rack-3",
+      "vlan": 30,
+      "connected_leaf": "leaf5",
+      "container": "clab-clos-evpn-host5"
+    },
+    {
+      "hostname": "host6",
+      "ip": "172.20.20.36",
+      "port": 22,
+      "vendor": "linux",
+      "model": "multitool",
+      "role": "host",
+      "site": "CLAB-DC1",
+      "config": null,
+      "live": true,
+      "os": "linux",
+      "fabric": "clos-evpn",
+      "tier": "host",
+      "rack": "rack-3",
+      "vlan": 30,
+      "connected_leaf": "leaf6",
+      "container": "clab-clos-evpn-host6"
+    }
   ],
   "bgp_sessions": [
-    {"a": "de-fra-core-01", "b": "de-fra-core-02",   "type": "iBGP"},
-    {"a": "de-fra-core-01", "b": "uk-lon-core-01",   "type": "eBGP"},
-    {"a": "de-fra-core-02", "b": "nl-ams-core-01",   "type": "eBGP"},
-    {"a": "de-fra-core-01", "b": "us-nyc-core-01",   "type": "eBGP"},
-    {"a": "de-fra-core-01", "b": "de-fra-edge-01",   "type": "eBGP"},
-    {"a": "de-fra-core-02", "b": "de-fra-edge-01",   "type": "eBGP"},
-    {"a": "uk-lon-core-01", "b": "uk-lon-edge-01",   "type": "eBGP"},
-    {"a": "nl-ams-core-01", "b": "nl-ams-edge-01",   "type": "eBGP"},
-    {"a": "uk-lon-core-01", "b": "uk-lon-dist-01",   "type": "eBGP"},
-    {"a": "de-fra-core-01", "b": "de-fra-dist-01",   "type": "eBGP"}
+    {
+      "a": "de-fra-core-01",
+      "b": "de-fra-core-02",
+      "type": "iBGP"
+    },
+    {
+      "a": "de-fra-core-01",
+      "b": "uk-lon-core-01",
+      "type": "eBGP"
+    },
+    {
+      "a": "de-fra-core-02",
+      "b": "nl-ams-core-01",
+      "type": "eBGP"
+    },
+    {
+      "a": "de-fra-core-01",
+      "b": "us-nyc-core-01",
+      "type": "eBGP"
+    },
+    {
+      "a": "de-fra-core-01",
+      "b": "de-fra-edge-01",
+      "type": "eBGP"
+    },
+    {
+      "a": "de-fra-core-02",
+      "b": "de-fra-edge-01",
+      "type": "eBGP"
+    },
+    {
+      "a": "uk-lon-core-01",
+      "b": "uk-lon-edge-01",
+      "type": "eBGP"
+    },
+    {
+      "a": "nl-ams-core-01",
+      "b": "nl-ams-edge-01",
+      "type": "eBGP"
+    },
+    {
+      "a": "uk-lon-core-01",
+      "b": "uk-lon-dist-01",
+      "type": "eBGP"
+    },
+    {
+      "a": "de-fra-core-01",
+      "b": "de-fra-dist-01",
+      "type": "eBGP"
+    },
+    {
+      "a": "spine1",
+      "b": "leaf1",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine1",
+      "b": "leaf2",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine1",
+      "b": "leaf3",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine1",
+      "b": "leaf4",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine1",
+      "b": "leaf5",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine1",
+      "b": "leaf6",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine2",
+      "b": "leaf1",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine2",
+      "b": "leaf2",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine2",
+      "b": "leaf3",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine2",
+      "b": "leaf4",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine2",
+      "b": "leaf5",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine2",
+      "b": "leaf6",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine3",
+      "b": "leaf1",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine3",
+      "b": "leaf2",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine3",
+      "b": "leaf3",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine3",
+      "b": "leaf4",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine3",
+      "b": "leaf5",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine3",
+      "b": "leaf6",
+      "type": "eBGP",
+      "fabric": "clos-evpn",
+      "af": "underlay"
+    },
+    {
+      "a": "spine1",
+      "b": "leaf1",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine1",
+      "b": "leaf2",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine1",
+      "b": "leaf3",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine1",
+      "b": "leaf4",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine1",
+      "b": "leaf5",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine1",
+      "b": "leaf6",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine2",
+      "b": "leaf1",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine2",
+      "b": "leaf2",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine2",
+      "b": "leaf3",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine2",
+      "b": "leaf4",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine2",
+      "b": "leaf5",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine2",
+      "b": "leaf6",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine3",
+      "b": "leaf1",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine3",
+      "b": "leaf2",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine3",
+      "b": "leaf3",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine3",
+      "b": "leaf4",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine3",
+      "b": "leaf5",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "spine3",
+      "b": "leaf6",
+      "type": "iBGP-EVPN",
+      "fabric": "clos-evpn",
+      "af": "l2vpn evpn"
+    },
+    {
+      "a": "host1",
+      "b": "leaf1",
+      "type": "access",
+      "fabric": "clos-evpn",
+      "af": "l2"
+    },
+    {
+      "a": "host2",
+      "b": "leaf2",
+      "type": "access",
+      "fabric": "clos-evpn",
+      "af": "l2"
+    },
+    {
+      "a": "host3",
+      "b": "leaf3",
+      "type": "access",
+      "fabric": "clos-evpn",
+      "af": "l2"
+    },
+    {
+      "a": "host4",
+      "b": "leaf4",
+      "type": "access",
+      "fabric": "clos-evpn",
+      "af": "l2"
+    },
+    {
+      "a": "host5",
+      "b": "leaf5",
+      "type": "access",
+      "fabric": "clos-evpn",
+      "af": "l2"
+    },
+    {
+      "a": "host6",
+      "b": "leaf6",
+      "type": "access",
+      "fabric": "clos-evpn",
+      "af": "l2"
+    }
   ]
 }

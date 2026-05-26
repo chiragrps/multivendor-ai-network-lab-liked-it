@@ -56,6 +56,38 @@ def bgp_status(hostname: str) -> dict:
 
 
 @mcp.tool()
+def run_command(hostname: str, command: str) -> dict:
+    """Run an arbitrary CLI command on any device (multivendor).
+
+    The Flask runner dispatches to the right transport per vendor — FRR
+    vtysh, Junos NETCONF, Arista EOS SSH, Nokia SRL sr_cli. Use this for
+    show-style read-only commands; for mutating changes, prefer
+    health_gate_apply which provides confirmed-commit with auto-revert.
+
+    Args:
+        hostname: target device (e.g. de-fra-core-01)
+        command:  CLI command in the device's native syntax
+    """
+    return T.run_command(hostname, command)
+
+
+@mcp.tool()
+def get_config(hostname: str, section: str | None = None) -> dict:
+    """Fetch a device's running config — multivendor dispatch.
+
+    Looks up the device's vendor and runs the right `show config` flavor:
+    Junos `show configuration | display set`, Arista EOS / FRR / Cisco
+    `show running-config`, Nokia SRL `info`. Optional `section` scopes the
+    output (e.g. `protocols bgp` on Junos, `interface eth0` on FRR).
+
+    Args:
+        hostname: target device (e.g. leaf2, de-fra-core-01)
+        section:  optional config subtree to scope the dump
+    """
+    return T.get_config(hostname, section=section)
+
+
+@mcp.tool()
 def topology_snapshot() -> dict:
     """Return the current BGP topology graph — nodes, edges, session colors."""
     return T.topology_snapshot()

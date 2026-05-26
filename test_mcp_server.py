@@ -96,6 +96,94 @@ class TestBgpStatus:
         assert out["output"] == "Established"
 
 
+class TestRunCommand:
+    def test_posts_to_run_endpoint(self):
+        sample = {"hostname": "leaf2", "output": "...", "rc": 0}
+        with patch("mcp_server.tools.requests.post",
+                   return_value=_mock_response(sample)) as p:
+            out = tools.run_command("leaf2", "show version")
+        args, kwargs = p.call_args
+        assert args[0].endswith("/api/run")
+        assert kwargs["json"] == {"hostname": "leaf2", "raw": "show version"}
+        assert out["rc"] == 0
+
+    def test_passes_command_verbatim(self):
+        with patch("mcp_server.tools.requests.post",
+                   return_value=_mock_response({})) as p:
+            tools.run_command("de-fra-core-01", "show ip ospf neighbor | json")
+        assert p.call_args.kwargs["json"]["raw"] == "show ip ospf neighbor | json"
+
+
+class TestGetConfig:
+    _devices = {"devices": [
+        {"hostname": "de-fra-core-01", "vendor": "frr",       "site": "DE-FRA"},
+        {"hostname": "leaf2",          "vendor": "nokia_srl", "site": "CLAB-DC1"},
+        {"hostname": "uk-lon-fw-01",   "vendor": "juniper",   "site": "UK-LON"},
+        {"hostname": "spine2",         "vendor": "arista_eos","site": "CLAB-DC1"},
+    ]}
+
+    def test_frr_uses_show_running_config(self):
+        with patch("mcp_server.tools.requests.get",
+                   return_value=_mock_response(self._devices)), \
+             patch("mcp_server.tools.requests.post",
+                   return_value=_mock_response({"output": "..."})) as p:
+            out = tools.get_config("de-fra-core-01")
+        body = p.call_args.kwargs["json"]
+        assert body["hostname"] == "de-fra-core-01"
+        assert body["raw"] == "show running-config"
+        assert out["vendor"] == "frr"
+        assert out["command"] == "show running-config"
+
+    def test_junos_uses_display_set(self):
+        with patch("mcp_server.tools.requests.get",
+                   return_value=_mock_response(self._devices)), \
+             patch("mcp_server.tools.requests.post",
+                   return_value=_mock_response({"output": "set …"})) as p:
+            tools.get_config("uk-lon-fw-01")
+        assert p.call_args.kwargs["json"]["raw"] == "show configuration | display set"
+
+    def test_nokia_srl_uses_info(self):
+        with patch("mcp_server.tools.requests.get",
+                   return_value=_mock_response(self._devices)), \
+             patch("mcp_server.tools.requests.post",
+                   return_value=_mock_response({"output": "+ network-instance default"})) as p:
+            tools.get_config("leaf2")
+        assert p.call_args.kwargs["json"]["raw"] == "info"
+
+    def test_arista_eos_uses_show_running_config(self):
+        with patch("mcp_server.tools.requests.get",
+                   return_value=_mock_response(self._devices)), \
+             patch("mcp_server.tools.requests.post",
+                   return_value=_mock_response({"output": "!"})) as p:
+            tools.get_config("spine2")
+        assert p.call_args.kwargs["json"]["raw"] == "show running-config"
+
+    def test_section_is_appended(self):
+        with patch("mcp_server.tools.requests.get",
+                   return_value=_mock_response(self._devices)), \
+             patch("mcp_server.tools.requests.post",
+                   return_value=_mock_response({"output": "…"})) as p:
+            tools.get_config("uk-lon-fw-01", section="protocols bgp")
+        assert p.call_args.kwargs["json"]["raw"] == \
+            "show configuration | display set protocols bgp"
+
+    def test_unknown_hostname_returns_error_without_posting(self):
+        with patch("mcp_server.tools.requests.get",
+                   return_value=_mock_response(self._devices)), \
+             patch("mcp_server.tools.requests.post") as p:
+            out = tools.get_config("ghost-host-99")
+        p.assert_not_called()
+        assert "unknown hostname" in out["error"].lower()
+
+    def test_hostname_lookup_is_case_insensitive(self):
+        with patch("mcp_server.tools.requests.get",
+                   return_value=_mock_response(self._devices)), \
+             patch("mcp_server.tools.requests.post",
+                   return_value=_mock_response({"output": "!"})):
+            out = tools.get_config("DE-FRA-CORE-01")
+        assert out["vendor"] == "frr"
+
+
 # ─── Tools — closed-loop tier ───────────────────────────────────────────────
 
 
@@ -182,11 +270,12 @@ class TestServerRegistry:
     def _await(self, coro):
         return asyncio.get_event_loop().run_until_complete(coro) if not asyncio.get_event_loop().is_running() else asyncio.run(coro)
 
-    def test_twelve_tools_registered(self):
+    def test_fourteen_tools_registered(self):
         tools_list = asyncio.run(mcp.list_tools())
         names = {t.name for t in tools_list}
         expected = {
-            "list_devices", "bgp_status", "topology_snapshot", "compliance_scan",
+            "list_devices", "bgp_status", "run_command", "get_config",
+            "topology_snapshot", "compliance_scan",
             "health_gate_apply", "health_gate_status", "netbox_sot_drift",
             "remediation_propose_for_drift", "remediation_approve",
             "gait_recent_actions", "postmortem_auto_detect", "postmortem_generate",

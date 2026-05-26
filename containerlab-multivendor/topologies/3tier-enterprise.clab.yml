@@ -1,0 +1,163 @@
+# ============================================================================
+#  GESH 3-Tier Enterprise Campus — 12 nodes
+#  Core → Distribution → Access with OSPF, STP, VRRP
+#  Vendors: Nokia SR Linux · Arista cEOS · FRR
+#  Protocols: OSPF, RSTP/MSTP, VRRP, HSRP, VLANs, DHCP relay
+#  RAM: ~10GB total
+# ============================================================================
+
+name: 3tier-enterprise
+
+prefix: clab
+
+mgmt:
+  network: enterprise-mgmt
+  ipv4-subnet: 172.20.40.0/24
+
+topology:
+  kinds:
+    srl:
+      image: ghcr.io/nokia/srlinux:24.10.3
+      type: ixrd3l
+    ceos:
+      image: ceosimage:4.33.1F
+      env:
+        INTFTYPE: et
+    linux:
+      image: ghcr.io/hellt/network-multitool:latest
+
+  nodes:
+    # ── CORE LAYER (2 nodes — redundant, OSPF Area 0) ──
+    core1:
+      kind: srl
+      mgmt-ipv4: 172.20.40.11
+      labels:
+        role: core
+        vendor: nokia
+        tier: core
+
+    core2:
+      kind: linux
+      image: frrouting/frr:latest
+      mgmt-ipv4: 172.20.40.12
+      binds:
+        - ../configs/spine/spine3-frr.conf:/etc/frr/frr.conf:rw
+        - ../configs/spine/spine3-daemons:/etc/frr/daemons:rw
+        - ../configs/spine/spine3-vtysh.conf:/etc/frr/vtysh.conf:rw
+      exec:
+        - bash -c "sysctl -w net.ipv4.ip_forward=1"
+        - bash -c "chown -R frr:frr /etc/frr && /usr/lib/frr/frrinit.sh start"
+      labels:
+        role: core
+        vendor: frr-cisco
+        tier: core
+
+    # ── DISTRIBUTION LAYER (4 nodes — VRRP pairs) ──
+    dist1:
+      kind: ceos
+      mgmt-ipv4: 172.20.40.21
+      labels:
+        role: distribution
+        vendor: arista
+        tier: distribution
+        vrrp-group: "1"
+
+    dist2:
+      kind: srl
+      mgmt-ipv4: 172.20.40.22
+      labels:
+        role: distribution
+        vendor: nokia
+        tier: distribution
+        vrrp-group: "1"
+
+    dist3:
+      kind: ceos
+      mgmt-ipv4: 172.20.40.23
+      labels:
+        role: distribution
+        vendor: arista
+        tier: distribution
+        vrrp-group: "2"
+
+    dist4:
+      kind: linux
+      image: frrouting/frr:latest
+      mgmt-ipv4: 172.20.40.24
+      binds:
+        - ../configs/leaf/leaf3-frr.conf:/etc/frr/frr.conf:rw
+        - ../configs/leaf/leaf3-daemons:/etc/frr/daemons:rw
+        - ../configs/leaf/leaf3-vtysh.conf:/etc/frr/vtysh.conf:rw
+      exec:
+        - bash -c "sysctl -w net.ipv4.ip_forward=1"
+        - bash -c "chown -R frr:frr /etc/frr && /usr/lib/frr/frrinit.sh start"
+      labels:
+        role: distribution
+        vendor: frr-juniper
+        tier: distribution
+        vrrp-group: "2"
+
+    # ── ACCESS LAYER (4 nodes — L2 switches, STP) ──
+    access1:
+      kind: ceos
+      mgmt-ipv4: 172.20.40.31
+      labels:
+        role: access
+        vendor: arista
+        tier: access
+
+    access2:
+      kind: srl
+      mgmt-ipv4: 172.20.40.32
+      labels:
+        role: access
+        vendor: nokia
+        tier: access
+
+    # ── HOSTS (2 end devices) ──
+    host1:
+      kind: linux
+      mgmt-ipv4: 172.20.40.41
+      exec:
+        - ip addr add 192.168.10.10/24 dev eth1
+        - ip route add default via 192.168.10.1
+      labels:
+        role: host
+        vlan: "10"
+
+    host2:
+      kind: linux
+      mgmt-ipv4: 172.20.40.42
+      exec:
+        - ip addr add 192.168.20.10/24 dev eth1
+        - ip route add default via 192.168.20.1
+      labels:
+        role: host
+        vlan: "20"
+
+  links:
+    # Core interconnect (redundant)
+    - endpoints: ["core1:e1-1", "core2:eth3"]
+
+    # Core to Distribution
+    - endpoints: ["core1:e1-2", "dist1:et1"]
+    - endpoints: ["core1:e1-3", "dist2:e1-1"]
+    - endpoints: ["core2:eth4", "dist3:et1"]
+    - endpoints: ["core2:eth5", "dist4:eth1"]
+
+    # Cross-links (distribution redundancy)
+    - endpoints: ["dist1:et2", "core2:eth6"]
+    - endpoints: ["dist3:et2", "core1:e1-4"]
+
+    # Distribution to Access
+    - endpoints: ["dist1:et3", "access1:et1"]
+    - endpoints: ["dist2:e1-2", "access1:et2"]
+    - endpoints: ["dist3:et3", "access2:e1-1"]
+    - endpoints: ["dist4:eth2", "access2:e1-2"]
+
+    # Access to Hosts
+    - endpoints: ["access1:et3", "host1:eth1"]
+    - endpoints: ["access2:e1-3", "host2:eth1"]
+
+    # STP loop link (intentional — for STP testing)
+    - endpoints: ["access1:et4", "access2:e1-4"]

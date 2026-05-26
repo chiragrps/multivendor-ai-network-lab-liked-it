@@ -1,0 +1,164 @@
+#!/usr/bin/env python3
+"""
+GESH Telemetry Collector — Pushes containerlab fabric metrics to InfluxDB
+for Grafana dashboards. Collects BGP state, interface counters, and EVPN
+metrics from all 9 network nodes every 10 seconds.
+
+Writes to the existing InfluxDB at localhost:8086 (dcn-lab org, network-telemetry bucket).
+"""
+
+import json
+import subprocess
+import sys
+import time
+import urllib.request
+from datetime import datetime, timezone
+
+INFLUXDB_URL = "http://localhost:8086"
+INFLUXDB_TOKEN = "dcn-lab-token-secret"
+INFLUXDB_ORG = "dcn-lab"
+INFLUXDB_BUCKET = "network-telemetry"
+POLL_INTERVAL = 10
+
+NODES = {
+    "spine1": {"vendor": "srl", "container": "clab-clos-evpn-spine1", "role": "spine"},
+    "spine2": {"vendor": "ceos", "container": "clab-clos-evpn-spine2", "role": "spine"},
+    "spine3": {"vendor": "frr", "container": "clab-clos-evpn-spine3", "role": "spine"},
+    "leaf1": {"vendor": "ceos", "container": "clab-clos-evpn-leaf1", "role": "leaf"},
+    "leaf2": {"vendor": "srl", "container": "clab-clos-evpn-leaf2", "role": "leaf"},
+    "leaf3": {"vendor": "frr", "container": "clab-clos-evpn-leaf3", "role": "leaf"},
+    "leaf4": {"vendor": "ceos", "container": "clab-clos-evpn-leaf4", "role": "leaf"},
+    "leaf5": {"vendor": "srl", "container": "clab-clos-evpn-leaf5", "role": "leaf"},
+    "leaf6": {"vendor": "frr", "container": "clab-clos-evpn-leaf6", "role": "leaf"},
+}
+
+
+def run_cmd(container: str, cmd: list[str], timeout: int = 8) -> str:
+    try:
+        result = subprocess.run(
+            ["docker", "exec", container] + cmd,
+            capture_output=True, text=True, timeout=timeout,
+        )
+        return result.stdout.strip()
+    except Exception:
+        return ""
+
+
+def collect_bgp_metrics(name: str, info: dict) -> list[str]:
+    lines = []
+    ts = int(time.time() * 1_000_000_000)
+    container = info["container"]
+    vendor = info["vendor"]
+    role = info["role"]
+
+    if vendor == "srl":
+        raw = run_cmd(container, ["sr_cli", "show", "network-instance", "default", "protocols", "bgp", "neighbor"])
+        established = raw.lower().count("established")
+        active = raw.lower().count("active")
+        lines.append(f'bgp_sessions,host={name},vendor={vendor},role={role},fabric=clos-evpn established={established}i,active={active}i {ts}')
+
+    elif vendor == "ceos":
+        raw = run_cmd(container, ["Cli", "-p", "15", "-c", "show bgp summary"])
+        established = raw.count("Estab")
+        lines.append(f'bgp_sessions,host={name},vendor={vendor},role={role},fabric=clos-evpn established={established}i {ts}')
+
+    elif vendor == "frr":
+        raw = run_cmd(container, ["vtysh", "-c", "show bgp summary json"])
+        try:
+            data = json.loads(raw)
+            ipv4 = data.get("ipv4Unicast", {})
+            total = ipv4.get("totalPeers", 0)
+            pfx = ipv4.get("totalPrefixesReceived", 0)
+            lines.append(f'bgp_sessions,host={name},vendor={vendor},role={role},fabric=clos-evpn established={total}i,prefixes_received={pfx}i {ts}')
+        except (json.JSONDecodeError, AttributeError):
+            established = raw.count("Estab") if raw else 0
+            lines.append(f'bgp_sessions,host={name},vendor={vendor},role={role},fabric=clos-evpn established={established}i {ts}')
+
+    return lines
+
+
+def collect_interface_metrics(name: str, info: dict) -> list[str]:
+    lines = []
+    ts = int(time.time() * 1_000_000_000)
+    container = info["container"]
+    vendor = info["vendor"]
+    role = info["role"]
+
+    if vendor == "frr":
+        raw = run_cmd(container, ["vtysh", "-c", "show interface json"])
+        try:
+            data = json.loads(raw)
+            for iface_name, iface_data in data.items():
+                if iface_name in ("lo", "eth0"):
+                    continue
+                status = 1 if iface_data.get("operstate", "").lower() == "up" else 0
+                rx_bytes = iface_data.get("rxBytes", 0)
+                tx_bytes = iface_data.get("txBytes", 0)
+                rx_pkts = iface_data.get("rxPackets", 0)
+                tx_pkts = iface_data.get("txPackets", 0)
+                lines.append(
+                    f'interface_counters,host={name},vendor={vendor},role={role},interface={iface_name},fabric=clos-evpn '
+                    f'status={status}i,rx_bytes={rx_bytes}i,tx_bytes={tx_bytes}i,rx_packets={rx_pkts}i,tx_packets={tx_pkts}i {ts}'
+                )
+        except (json.JSONDecodeError, AttributeError):
+            pass
+
+    return lines
+
+
+def write_to_influxdb(line_protocol_data: list[str]) -> bool:
+    if not line_protocol_data:
+        return True
+
+    payload = "\n".join(line_protocol_data).encode("utf-8")
+    url = f"{INFLUXDB_URL}/api/v2/write?org={INFLUXDB_ORG}&bucket={INFLUXDB_BUCKET}&precision=ns"
+
+    req = urllib.request.Request(url, data=payload, method="POST")
+    req.add_header("Authorization", f"Token {INFLUXDB_TOKEN}")
+    req.add_header("Content-Type", "text/plain")
+
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            return resp.status == 204
+    except Exception as e:
+        print(f"  InfluxDB write error: {e}", file=sys.stderr)
+        return False
+
+
+def main():
+    print("GESH Telemetry Collector — containerlab → InfluxDB")
+    print(f"  InfluxDB: {INFLUXDB_URL} org={INFLUXDB_ORG} bucket={INFLUXDB_BUCKET}")
+    print(f"  Nodes: {len(NODES)}")
+    print(f"  Interval: {POLL_INTERVAL}s")
+    print()
+
+    if "--once" in sys.argv:
+        all_lines = []
+        for name, info in NODES.items():
+            all_lines.extend(collect_bgp_metrics(name, info))
+            all_lines.extend(collect_interface_metrics(name, info))
+
+        if write_to_influxdb(all_lines):
+            print(f"Wrote {len(all_lines)} metrics to InfluxDB")
+        else:
+            print(f"Failed to write {len(all_lines)} metrics")
+            for line in all_lines[:5]:
+                print(f"  {line}")
+        return
+
+    print("Continuous mode — Ctrl+C to stop")
+    while True:
+        all_lines = []
+        for name, info in NODES.items():
+            all_lines.extend(collect_bgp_metrics(name, info))
+            all_lines.extend(collect_interface_metrics(name, info))
+
+        ok = write_to_influxdb(all_lines)
+        ts = datetime.now().strftime("%H:%M:%S")
+        status = "OK" if ok else "FAIL"
+        print(f"  [{ts}] {len(all_lines)} metrics → InfluxDB [{status}]")
+        time.sleep(POLL_INTERVAL)
+
+
+if __name__ == "__main__":
+    main()

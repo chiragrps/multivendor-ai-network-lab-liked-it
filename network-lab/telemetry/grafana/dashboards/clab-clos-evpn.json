@@ -1,0 +1,142 @@
+{
+  "uid": "clab-clos-evpn",
+  "title": "DCN Lab — clab Clos-EVPN Fabric (multi-vendor)",
+  "description": "BGP / OSPF / interface telemetry for the 9-node Clos fabric (3 spines + 6 leafs) across Nokia SR Linux, Arista cEOS, and FRR. Hosts (host1-6) emit no routing metrics.",
+  "refresh": "10s",
+  "time": { "from": "now-15m", "to": "now" },
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "tags": ["clab", "clos-evpn", "bgp", "vxlan", "multi-vendor"],
+  "templating": {
+    "list": [
+      {
+        "name": "role",
+        "type": "custom",
+        "current": { "text": "All", "value": "$__all" },
+        "options": [
+          { "text": "All",   "value": "$__all", "selected": true },
+          { "text": "spine", "value": "spine" },
+          { "text": "leaf",  "value": "leaf"  }
+        ],
+        "includeAll": true,
+        "allValue": ".*"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 10,
+      "type": "stat",
+      "title": "BGP Established (fabric total)",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red",    "value": null },
+            { "color": "yellow", "value": 30 },
+            { "color": "green",  "value": 50 }
+          ]},
+          "unit": "short"
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB-FRR}" },
+        "query": "from(bucket: \"network-telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r.fabric == \"clos-evpn\" and r._measurement == \"bgp_session_count\" and r._field == \"established\")\n  |> last()\n  |> group()\n  |> sum()",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 11,
+      "type": "stat",
+      "title": "Spines",
+      "gridPos": { "x": 6, "y": 0, "w": 3, "h": 4 },
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "blue" }] }, "unit": "short" } },
+      "targets": [{
+        "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB-FRR}" },
+        "query": "from(bucket: \"network-telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r.fabric == \"clos-evpn\" and r.role == \"spine\" and r._measurement == \"interface_count\" and r._field == \"total\")\n  |> group(columns: [\"host\"])\n  |> last()\n  |> count()",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 12,
+      "type": "stat",
+      "title": "Leafs",
+      "gridPos": { "x": 9, "y": 0, "w": 3, "h": 4 },
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "purple" }] }, "unit": "short" } },
+      "targets": [{
+        "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB-FRR}" },
+        "query": "from(bucket: \"network-telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r.fabric == \"clos-evpn\" and r.role == \"leaf\" and r._measurement == \"interface_count\" and r._field == \"total\")\n  |> group(columns: [\"host\"])\n  |> last()\n  |> count()",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 13,
+      "type": "stat",
+      "title": "Interfaces Up (fabric total)",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }] }, "unit": "short" } },
+      "targets": [{
+        "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB-FRR}" },
+        "query": "from(bucket: \"network-telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r.fabric == \"clos-evpn\" and r._measurement == \"interface_count\" and r._field == \"up\")\n  |> last()\n  |> group()\n  |> sum()",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 20,
+      "type": "timeseries",
+      "title": "BGP Sessions Established — per node",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "lineWidth": 2, "pointSize": 4 } } },
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull"] } },
+      "targets": [{
+        "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB-FRR}" },
+        "query": "from(bucket: \"network-telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r.fabric == \"clos-evpn\" and r._measurement == \"bgp_session_count\" and r._field == \"established\")\n  |> filter(fn: (r) => r.role =~ /${role:regex}/)\n  |> keep(columns: [\"_time\", \"_value\", \"host\", \"vendor\"])\n  |> group(columns: [\"host\", \"vendor\"])",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 21,
+      "type": "timeseries",
+      "title": "Interfaces Up — per node",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "lineWidth": 2, "pointSize": 4 } } },
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull"] } },
+      "targets": [{
+        "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB-FRR}" },
+        "query": "from(bucket: \"network-telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r.fabric == \"clos-evpn\" and r._measurement == \"interface_count\" and r._field == \"up\")\n  |> filter(fn: (r) => r.role =~ /${role:regex}/)\n  |> keep(columns: [\"_time\", \"_value\", \"host\", \"vendor\"])\n  |> group(columns: [\"host\", \"vendor\"])",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 30,
+      "type": "table",
+      "title": "Per-Node Snapshot (last value)",
+      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 10 },
+      "options": { "showHeader": true, "sortBy": [{ "displayName": "host", "desc": false }] },
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "left" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "vendor" }, "properties": [{ "id": "custom.width", "value": 120 }] },
+          { "matcher": { "id": "byName", "options": "role"   }, "properties": [{ "id": "custom.width", "value": 90  }] }
+        ]
+      },
+      "targets": [{
+        "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB-FRR}" },
+        "query": "import \"strings\"\nfrom(bucket: \"network-telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r.fabric == \"clos-evpn\")\n  |> filter(fn: (r) => (r._measurement == \"bgp_session_count\" and r._field == \"established\") or (r._measurement == \"interface_count\" and r._field == \"up\") or (r._measurement == \"interface_count\" and r._field == \"total\"))\n  |> last()\n  |> map(fn: (r) => ({ r with _field: r._measurement + \"_\" + r._field }))\n  |> drop(columns: [\"_measurement\", \"_start\", \"_stop\", \"site\", \"fabric\"])\n  |> pivot(rowKey: [\"host\", \"vendor\", \"role\"], columnKey: [\"_field\"], valueColumn: \"_value\")",
+        "refId": "A"
+      }],
+      "transformations": [
+        { "id": "organize", "options": { "renameByName": {
+          "host": "Host", "vendor": "Vendor", "role": "Role",
+          "bgp_session_count_established": "BGP Established",
+          "interface_count_up": "Interfaces Up",
+          "interface_count_total": "Interfaces Total"
+        }}}
+      ]
+    }
+  ]
+}

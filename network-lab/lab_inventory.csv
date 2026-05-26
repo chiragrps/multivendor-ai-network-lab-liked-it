@@ -9,3 +9,12 @@ uk-lon-edge-01,localhost,2208,frr,UK-LON,edge,Cisco,IOS-XE,65007
 nl-ams-edge-01,localhost,2209,frr,NL-AMS,edge,Juniper,MX204,65008
 uk-lon-dist-01,localhost,2206,frr,UK-LON,dist,Arista,EOS,65010
 de-fra-dist-01,localhost,2210,frr,DE-FRA,dist,Arista,EOS,65009
+spine1,172.20.20.11,22,frr,CLAB-DC1,spine,Nokia,SRL-IXR-D3L,65100
+spine2,172.20.20.12,22,frr,CLAB-DC1,spine,Arista,cEOS-4.33.1F,65100
+spine3,172.20.20.13,22,frr,CLAB-DC1,spine,FRR,FRR-v8.4,65100
+leaf1,172.20.20.21,22,frr,CLAB-DC1,leaf,Arista,cEOS-4.33.1F,65001
+leaf2,172.20.20.22,22,frr,CLAB-DC1,leaf,Nokia,SRL-IXR-D3L,65002
+leaf3,172.20.20.23,22,frr,CLAB-DC1,leaf,FRR,FRR-v8.4,65003
+leaf4,172.20.20.24,22,frr,CLAB-DC1,leaf,Arista,cEOS-4.33.1F,65004
+leaf5,172.20.20.25,22,frr,CLAB-DC1,leaf,Nokia,SRL-IXR-D3L,65005
+leaf6,172.20.20.26,22,frr,CLAB-DC1,leaf,FRR,FRR-v8.4,65006

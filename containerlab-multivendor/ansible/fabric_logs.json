@@ -1,0 +1,2676 @@
+[
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:11.717579466Z   Found supportd: PID 1330",
+    "collected_at": "2026-05-24T04:21:30.646856+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:11.717587257Z   Application supportd is running: PID 1330",
+    "collected_at": "2026-05-24T04:21:30.647055+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:11.896189632Z   Started dev_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_device_mgr\" >>/var/log/srlinux/stdout/dev_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647057+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.099125341Z   Application dev_mgr is running: PID 1871",
+    "collected_at": "2026-05-24T04:21:30.647058+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.110757299Z   Started idb_server: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_idb_server\" >>/var/log/srlinux/stdout/idb_server.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647059+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.313606633Z   Application idb_server is running: PID 1932",
+    "collected_at": "2026-05-24T04:21:30.647060+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.326400758Z   Started aaa_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_aaa_mgr\" >>/var/log/srlinux/stdout/aaa_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647061+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.336210008Z   Started acl_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_acl_mgr\" >>/var/log/srlinux/stdout/acl_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647062+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.349027883Z   Started arp_nd_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_arp_nd_mgr\" >>/var/log/srlinux/stdout/arp_nd_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647064+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.383310633Z   Started bfd_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_bfd_mgr\" >>/var/log/srlinux/stdout/bfd_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647065+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.403442633Z   Started chassis_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_chassis_mgr\" >>/var/log/srlinux/stdout/chassis_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647066+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.423480799Z   Started dhcp_client_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_dhcp_client_mgr\" >>/var/log/srlinux/stdout/dhcp_client_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647067+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.461570883Z   Started evpn_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_evpn_mgr\" >>/var/log/srlinux/stdout/evpn_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647068+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.486312424Z   Started fib_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_fib_mgr\" >>/var/log/srlinux/stdout/fib_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647069+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.498840799Z   Started l2_mac_learn_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_l2_mac_learn_mgr\" >>/var/log/srlinux/stdout/l2_mac_learn_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647069+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.525769008Z   Started l2_mac_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_l2_mac_mgr\" >>/var/log/srlinux/stdout/l2_mac_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647070+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.580589424Z   Started lag_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_lag_mgr\" >>/var/log/srlinux/stdout/lag_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647071+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.606358674Z   Started license_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_license_mgr\" >>/var/log/srlinux/stdout/license_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647072+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.635583133Z   Started linux_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_linux_mgr\" >>/var/log/srlinux/stdout/linux_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647072+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.705681299Z   Started log_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_log_mgr\" >>/var/log/srlinux/stdout/log_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647073+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.744634883Z   Started mcid_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_mcid_mgr\" >>/var/log/srlinux/stdout/mcid_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647074+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.799975008Z   Started mfib_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_mfib_mgr\" >>/var/log/srlinux/stdout/mfib_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647075+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.817863466Z   Started mgmt_server: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_mgmt_server\" >>/var/log/srlinux/stdout/mgmt_server.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647076+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.854287591Z   Started net_inst_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_net_inst_mgr\" >>/var/log/srlinux/stdout/net_inst_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647077+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:12.937621924Z   Started radius_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_radius_mgr\" >>/var/log/srlinux/stdout/radius_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647077+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.003561425Z   Started sdk_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_sdk_mgr\" >>/var/log/srlinux/stdout/sdk_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647078+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.023788591Z   Started sflow_sample_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_sflow_sample_mgr\" >>/var/log/srlinux/stdout/sflow_sample_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647079+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.046249383Z   Started xdp_lc_1: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"exec -a sr_xdp_lc_1 ./sr_xdp_lc  --slot_num 1 --complex_num 2\" >>/var/log/srlinux/stdout/xdp_lc_1.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.647080+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.152919008Z   Application aaa_mgr is running: PID 1969",
+    "collected_at": "2026-05-24T04:21:30.647080+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.152929591Z   Application acl_mgr is running: PID 1993",
+    "collected_at": "2026-05-24T04:21:30.647081+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.152930550Z   Application arp_nd_mgr is running: PID 2031",
+    "collected_at": "2026-05-24T04:21:30.647082+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.152931216Z   Application bfd_mgr is running: PID 2062",
+    "collected_at": "2026-05-24T04:21:30.647082+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.152931841Z   Application chassis_mgr is running: PID 2086",
+    "collected_at": "2026-05-24T04:21:30.647083+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.152954591Z   Application dhcp_client_mgr is running: PID 2132",
+    "collected_at": "2026-05-24T04:21:30.647084+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.152967591Z   Application evpn_mgr is running: PID 2189",
+    "collected_at": "2026-05-24T04:21:30.647085+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.154606175Z   Application fib_mgr is running: PID 2207",
+    "collected_at": "2026-05-24T04:21:30.647085+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.154611258Z   Application l2_mac_learn_mgr is running: PID 2224",
+    "collected_at": "2026-05-24T04:21:30.647086+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.154611966Z   Application l2_mac_mgr is running: PID 2279",
+    "collected_at": "2026-05-24T04:21:30.647087+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.154612550Z   Application lag_mgr is running: PID 2324",
+    "collected_at": "2026-05-24T04:21:30.647087+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.154613133Z   Application license_mgr is running: PID 2345",
+    "collected_at": "2026-05-24T04:21:30.647088+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.154613716Z   Application linux_mgr is running: PID 2364",
+    "collected_at": "2026-05-24T04:21:30.647089+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.154614300Z   Application log_mgr is running: PID 2450",
+    "collected_at": "2026-05-24T04:21:30.647090+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.154614925Z   Application mcid_mgr is running: PID 2513",
+    "collected_at": "2026-05-24T04:21:30.647091+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.154615800Z   Application mfib_mgr is running: PID 2552",
+    "collected_at": "2026-05-24T04:21:30.647092+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.154616383Z   Application mgmt_server is running: PID 2567",
+    "collected_at": "2026-05-24T04:21:30.647092+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.154617008Z   Application net_inst_mgr is running: PID 2613",
+    "collected_at": "2026-05-24T04:21:30.647093+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.154617591Z   Application radius_mgr is running: PID 2657",
+    "collected_at": "2026-05-24T04:21:30.647094+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.154618216Z   Application sdk_mgr is running: PID 2701",
+    "collected_at": "2026-05-24T04:21:30.647094+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.154618800Z   Application sflow_sample_mgr is running: PID 2744",
+    "collected_at": "2026-05-24T04:21:30.647095+00:00"
+  },
+  {
+    "source": "spine1",
+    "vendor": "srl",
+    "role": "spine",
+    "message": "2026-05-24T04:05:13.154619383Z   Application xdp_lc_1 is running: PID 2776",
+    "collected_at": "2026-05-24T04:21:30.647096+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:06:45.612634551Z May 24 04:06:45 spine2 SystemInitMonitor: %SYS-5-SYSTEM_INITIALIZED: System is initialized",
+    "collected_at": "2026-05-24T04:21:30.664940+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:06:45.622148426Z May 24 04:06:45 spine2 SuperServer: %SYS-5-CLI_SCHEDULER_ENABLED: CliScheduler is enabled, continuing its execution of scheduled CLI jobs.",
+    "collected_at": "2026-05-24T04:21:30.664961+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:06:45.623424926Z May 24 04:06:45 spine2 Launcher: %LAUNCHER-6-PROCESS_STOP: Configuring process 'SystemInitMonitor' to stop in role 'ActiveSupervisor'",
+    "collected_at": "2026-05-24T04:21:30.664963+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:06:45.737206176Z May 24 04:06:45 spine2 ProcMgr: %PROCMGR-6-COMMAND_RECEIVED: ProcMgr has received 'warm start' command",
+    "collected_at": "2026-05-24T04:21:30.664965+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:06:45.737238467Z May 24 04:06:45 spine2 ProcMgr: %PROCMGR-6-WORKER_WARMSTART: ProcMgr worker warm start. (PID=739)",
+    "collected_at": "2026-05-24T04:21:30.664966+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:06:45.803920009Z May 24 04:06:45 spine2 ProcMgr: %PROCMGR-6-TERMINATE_RUNNING_PROCESS: Terminating deconfigured/reconfigured process 'SystemInitMonitor' (PID=1030)",
+    "collected_at": "2026-05-24T04:21:30.664967+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:06:45.858982509Z May 24 04:06:45 spine2 ProcMgr: %PROCMGR-6-PROCESS_TERMINATED: 'SystemInitMonitor' (PID=1030, status=9) has terminated.",
+    "collected_at": "2026-05-24T04:21:30.664968+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:06:53.492388096Z May 24 04:06:53 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.3 (VRF default) due to bad AS 65003",
+    "collected_at": "2026-05-24T04:21:30.664968+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:06:54.505414805Z May 24 04:06:54 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.6 (VRF default) due to bad AS 65006",
+    "collected_at": "2026-05-24T04:21:30.664969+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:07:20.186874136Z May 24 04:07:20 spine2 Bgp: %BGP-5-VRF_AFI_SAFI_RIB_READY: BGP in VRF default has converged and all routes for address family IPv4 Unicast have been processed",
+    "collected_at": "2026-05-24T04:21:30.664970+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:07:20.186909053Z May 24 04:07:20 spine2 Bgp: %BGP-5-VRF_AFI_SAFI_RIB_READY: BGP in VRF default has converged and all routes for address family EVPN have been processed",
+    "collected_at": "2026-05-24T04:21:30.664971+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:07:54.316710055Z May 24 04:07:54 spine2 SuperServer: %SYS-5-SYSTEM_RESTARTED: System restarted",
+    "collected_at": "2026-05-24T04:21:30.664972+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:07:54.319871430Z May 24 04:07:54 spine2 SuperServer: %SYS-6-SYSTEM_INFO: Software image version: 4.33.1F-39879738.4331F (engineering build)",
+    "collected_at": "2026-05-24T04:21:30.664972+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:07:54.319970347Z May 24 04:07:54 spine2 SuperServer: %SYS-6-SYSTEM_INFO: Model: cEOSLab",
+    "collected_at": "2026-05-24T04:21:30.664973+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:07:54.320024013Z May 24 04:07:54 spine2 SuperServer: %SYS-6-SYSTEM_INFO: Serial number: 7440B639E8EBDA97349D6DC514F1558B",
+    "collected_at": "2026-05-24T04:21:30.664974+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:07:57.504225834Z May 24 04:07:57 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.3 (VRF default) due to bad AS 65003",
+    "collected_at": "2026-05-24T04:21:30.664975+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:07:58.514024334Z May 24 04:07:58 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.6 (VRF default) due to bad AS 65006",
+    "collected_at": "2026-05-24T04:21:30.664975+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:09:03.089859711Z May 24 04:09:03 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.6 (VRF default) due to bad AS 65006",
+    "collected_at": "2026-05-24T04:21:30.664976+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:09:18.595764594Z May 24 04:09:18 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.3 (VRF default) due to bad AS 65003",
+    "collected_at": "2026-05-24T04:21:30.664977+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:09:52.025907845Z May 24 04:09:52 spine2 Arp: %ARP-4-DUPLICATE_ADDRESS_WITH_INTF: A host on interface Management0 with MAC address fe:ed:0b:fe:1b:35 and IP address 172.20.20.12 is using an IP address configured on an interface in VRF default",
+    "collected_at": "2026-05-24T04:21:30.664978+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:09:57.516741792Z May 24 04:09:57 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.3 (VRF default) due to bad AS 65003",
+    "collected_at": "2026-05-24T04:21:30.664978+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:09:58.528801709Z May 24 04:09:58 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.6 (VRF default) due to bad AS 65006",
+    "collected_at": "2026-05-24T04:21:30.664986+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:11:11.938063424Z May 24 04:11:11 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.6 (VRF default) due to bad AS 65006",
+    "collected_at": "2026-05-24T04:21:30.664986+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:11:18.415846094Z May 24 04:11:18 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.3 (VRF default) due to bad AS 65003",
+    "collected_at": "2026-05-24T04:21:30.664987+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:11:58.534694334Z May 24 04:11:57 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.3 (VRF default) due to bad AS 65003",
+    "collected_at": "2026-05-24T04:21:30.664988+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:11:58.534754959Z May 24 04:11:58 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.6 (VRF default) due to bad AS 65006",
+    "collected_at": "2026-05-24T04:21:30.664989+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:13:12.576847633Z May 24 04:13:12 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.3 (VRF default) due to bad AS 65003",
+    "collected_at": "2026-05-24T04:21:30.664989+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:13:19.048951552Z May 24 04:13:19 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.6 (VRF default) due to bad AS 65006",
+    "collected_at": "2026-05-24T04:21:30.664990+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:13:57.628554167Z May 24 04:13:57 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.3 (VRF default) due to bad AS 65003",
+    "collected_at": "2026-05-24T04:21:30.664991+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:13:58.536296043Z May 24 04:13:58 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.6 (VRF default) due to bad AS 65006",
+    "collected_at": "2026-05-24T04:21:30.664992+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:14:26.526881833Z May 24 04:14:26 spine2 Arp: %ARP-4-DUPLICATE_ADDRESS_WITH_INTF: A host on interface Management0 with MAC address fe:ed:0b:fe:1b:35 and IP address 172.20.20.12 is using an IP address configured on an interface in VRF default",
+    "collected_at": "2026-05-24T04:21:30.664993+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:15:40.807420132Z May 24 04:15:40 spine2 ReloadCauseAgent: %SYS-6-SYSTEM_INFO: Reload Cause 1: Unknown",
+    "collected_at": "2026-05-24T04:21:30.664993+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:15:57.629715667Z May 24 04:15:57 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.3 (VRF default) due to bad AS 65003",
+    "collected_at": "2026-05-24T04:21:30.664994+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:15:58.541191209Z May 24 04:15:58 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.6 (VRF default) due to bad AS 65006",
+    "collected_at": "2026-05-24T04:21:30.664995+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:16:13.451808675Z May 24 04:16:13 spine2 Lldp: %LLDP-5-NEIGHBOR_NEW: LLDP neighbor with chassisId 1a0a.07ff.0000 and portId \"ethernet-1/2\" added on interface Ethernet2",
+    "collected_at": "2026-05-24T04:21:30.664996+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:16:19.449563886Z May 24 04:16:19 spine2 Lldp: %LLDP-5-NEIGHBOR_NEW: LLDP neighbor with chassisId 1a4d.0aff.0000 and portId \"ethernet-1/2\" added on interface Ethernet5",
+    "collected_at": "2026-05-24T04:21:30.664996+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:16:19.876392386Z May 24 04:16:19 spine2 Bgp: %BGP-5-ADJCHANGE: peer 10.0.2.3 (VRF default AS 65002) old state OpenConfirm event Established new state Established",
+    "collected_at": "2026-05-24T04:21:30.664997+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:16:25.886583208Z May 24 04:16:25 spine2 Bgp: %BGP-5-ADJCHANGE: peer 10.0.2.9 (VRF default AS 65005) old state OpenConfirm event Established new state Established",
+    "collected_at": "2026-05-24T04:21:30.664998+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:17:57.640711834Z May 24 04:17:57 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.3 (VRF default) due to bad AS 65003",
+    "collected_at": "2026-05-24T04:21:30.664998+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:17:58.552714626Z May 24 04:17:58 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.6 (VRF default) due to bad AS 65006",
+    "collected_at": "2026-05-24T04:21:30.664999+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:19:00.009461085Z May 24 04:19:00 spine2 Bgp: %BGP-3-NOTIFICATION: received from neighbor 10.0.2.3 (VRF default AS 65002) 6/6 (Cease/other configuration change) 0 bytes",
+    "collected_at": "2026-05-24T04:21:30.665000+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:19:00.009505502Z May 24 04:19:00 spine2 Bgp: %BGP-5-ADJCHANGE: peer 10.0.2.3 (VRF default AS 65002) old state Established event RecvNotify new state Idle",
+    "collected_at": "2026-05-24T04:21:30.665000+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:19:00.158269377Z May 24 04:19:00 spine2 Bgp: %BGP-5-ADJCHANGE: peer 10.0.2.3 (VRF default AS 65002) old state OpenConfirm event Established new state Established",
+    "collected_at": "2026-05-24T04:21:30.665001+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:19:00.430030668Z May 24 04:19:00 spine2 Bgp: %BGP-3-NOTIFICATION: received from neighbor 10.0.2.9 (VRF default AS 65005) 6/6 (Cease/other configuration change) 0 bytes",
+    "collected_at": "2026-05-24T04:21:30.665002+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:19:00.430045210Z May 24 04:19:00 spine2 Bgp: %BGP-5-ADJCHANGE: peer 10.0.2.9 (VRF default AS 65005) old state Established event RecvNotify new state Idle",
+    "collected_at": "2026-05-24T04:21:30.665003+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:19:00.587889044Z May 24 04:19:00 spine2 Bgp: %BGP-5-ADJCHANGE: peer 10.0.2.9 (VRF default AS 65005) old state OpenConfirm event Established new state Established",
+    "collected_at": "2026-05-24T04:21:30.665004+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:19:04.691609504Z May 24 04:19:04 spine2 Bgp: %BGP-5-ADJCHANGE: peer 10.255.1.2 (VRF default AS 65199) old state OpenConfirm event Established new state Established",
+    "collected_at": "2026-05-24T04:21:30.665004+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:19:05.675494338Z May 24 04:19:05 spine2 Bgp: %BGP-5-ADJCHANGE: peer 10.255.1.5 (VRF default AS 65199) old state OpenConfirm event Established new state Established",
+    "collected_at": "2026-05-24T04:21:30.665005+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:19:57.660220334Z May 24 04:19:57 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.3 (VRF default) due to bad AS 65003",
+    "collected_at": "2026-05-24T04:21:30.665006+00:00"
+  },
+  {
+    "source": "spine2",
+    "vendor": "ceos",
+    "role": "spine",
+    "message": "2026-05-24T04:19:58.564260293Z May 24 04:19:58 spine2 Bgp: %BGP-3-BAD_AS_NUMBER: Connection rejected from peer 10.255.1.6 (VRF default) due to bad AS 65006",
+    "collected_at": "2026-05-24T04:21:30.665006+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.217597673Z 2026/05/24 04:05:09 WATCHFRR: [T83RR-8SM5G] watchfrr 8.4_git starting: vty@0",
+    "collected_at": "2026-05-24T04:21:30.683024+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.218647006Z 2026/05/24 04:05:09 WATCHFRR: [ZCJ3S-SPH5S] zebra state -> down : initial connection attempt failed",
+    "collected_at": "2026-05-24T04:21:30.683044+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.218655131Z 2026/05/24 04:05:09 WATCHFRR: [ZCJ3S-SPH5S] bgpd state -> down : initial connection attempt failed",
+    "collected_at": "2026-05-24T04:21:30.683046+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.218656214Z 2026/05/24 04:05:09 WATCHFRR: [ZCJ3S-SPH5S] staticd state -> down : initial connection attempt failed",
+    "collected_at": "2026-05-24T04:21:30.683047+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.218657048Z 2026/05/24 04:05:09 WATCHFRR: [ZCJ3S-SPH5S] bfdd state -> down : initial connection attempt failed",
+    "collected_at": "2026-05-24T04:21:30.683048+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.218657839Z 2026/05/24 04:05:09 WATCHFRR: [YFT0P-5Q5YX] Forked background command [pid 12]: /usr/lib/frr/watchfrr.sh restart all",
+    "collected_at": "2026-05-24T04:21:30.683049+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.290681131Z /usr/lib/frr/frrcommon.sh: line 211: kill: `': not a pid or valid job spec",
+    "collected_at": "2026-05-24T04:21:30.683049+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.292574548Z /usr/lib/frr/frrcommon.sh: line 211: kill: `': not a pid or valid job spec",
+    "collected_at": "2026-05-24T04:21:30.683051+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.292583214Z /usr/lib/frr/frrcommon.sh: line 211: kill: `': not a pid or valid job spec",
+    "collected_at": "2026-05-24T04:21:30.683051+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.299104131Z Cannot stop zebra: pid file not found",
+    "collected_at": "2026-05-24T04:21:30.683054+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.638703965Z 2026/05/24 04:05:09 BFD: [ZKB8W-3S2Q4][EC 100663330] unneeded 'destroy' callback for '/frr-bfdd:bfdd/bfd/profile/minimum-ttl'",
+    "collected_at": "2026-05-24T04:21:30.683055+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.638713506Z 2026/05/24 04:05:09 BFD: [ZKB8W-3S2Q4][EC 100663330] unneeded 'destroy' callback for '/frr-bfdd:bfdd/bfd/sessions/multi-hop/minimum-ttl'",
+    "collected_at": "2026-05-24T04:21:30.683056+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.759362798Z The route-map 'EXPORT_LO' does not exist.",
+    "collected_at": "2026-05-24T04:21:30.683057+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.760194298Z % AS specified for local as is the same as the remote as and this is not allowed.",
+    "collected_at": "2026-05-24T04:21:30.683057+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.760203006Z line 72: Failure to communicate[13] to bgpd, line:  neighbor OVERLAY local-as 65199 no-prepend replace-as",
+    "collected_at": "2026-05-24T04:21:30.683058+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.760204215Z",
+    "collected_at": "2026-05-24T04:21:30.683059+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.763501840Z % Invalid command. Not an internal neighbor",
+    "collected_at": "2026-05-24T04:21:30.683060+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.763538923Z line 92: Failure to communicate[13] to bgpd, line:   neighbor OVERLAY route-reflector-client",
+    "collected_at": "2026-05-24T04:21:30.683061+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.763541423Z",
+    "collected_at": "2026-05-24T04:21:30.683062+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.787070048Z Configuration file[/etc/frr/frr.conf] processing failure: 13",
+    "collected_at": "2026-05-24T04:21:30.683062+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:09.792485840Z 2026/05/24 04:05:09 WATCHFRR: [ZJW5C-1EHNT] restart all process 12 exited with non-zero status 13",
+    "collected_at": "2026-05-24T04:21:30.683063+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:14.221922467Z 2026/05/24 04:05:14 WATCHFRR: [QDG3Y-BY5TN] bfdd state -> up : connect succeeded",
+    "collected_at": "2026-05-24T04:21:30.683064+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:14.235576383Z 2026/05/24 04:05:14 WATCHFRR: [QDG3Y-BY5TN] bgpd state -> up : connect succeeded",
+    "collected_at": "2026-05-24T04:21:30.683071+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:14.242702300Z 2026/05/24 04:05:14 WATCHFRR: [QDG3Y-BY5TN] zebra state -> up : connect succeeded",
+    "collected_at": "2026-05-24T04:21:30.683072+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:14.345575008Z 2026/05/24 04:05:14 WATCHFRR: [QDG3Y-BY5TN] staticd state -> up : connect succeeded",
+    "collected_at": "2026-05-24T04:21:30.683073+00:00"
+  },
+  {
+    "source": "spine3",
+    "vendor": "frr",
+    "role": "spine",
+    "message": "2026-05-24T04:05:14.345597842Z 2026/05/24 04:05:14 WATCHFRR: [KWE5Q-QNGFC] all daemons up, doing startup-complete notify",
+    "collected_at": "2026-05-24T04:21:30.683074+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:22.679806221Z [\u001b[0;32m  OK  \u001b[0m] Finished \u001b[0;1;39mEos system stage2\u2026s after ProcMgr, before POST)\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.706207+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:22.692410012Z          Starting \u001b[0;1;39mEOS Warmup Service\u001b[0m...",
+    "collected_at": "2026-05-24T04:21:30.706224+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:22.695334554Z          Starting \u001b[0;1;39mPlatform Arch ser\u2026upported OS Arch is booted)\u001b[0m...",
+    "collected_at": "2026-05-24T04:21:30.706225+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:22.697058221Z          Starting \u001b[0;1;39mPower-On Self Test\u001b[0m...",
+    "collected_at": "2026-05-24T04:21:30.706228+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:22.971644054Z [\u001b[0;32m  OK  \u001b[0m] Finished \u001b[0;1;39mPlatform Arch ser\u2026nsupported OS Arch is booted)\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.706230+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:32.362647086Z [\u001b[0;32m  OK  \u001b[0m] Finished \u001b[0;1;39mPower-On Self Test\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.706231+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:32.363350628Z [\u001b[0;32m  OK  \u001b[0m] Reached target \u001b[0;1;39mEOS regular mode\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.706233+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:32.367620961Z [\u001b[0;32m  OK  \u001b[0m] Finished \u001b[0;1;39mEOS Diagnostic Mode\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.706233+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:54.250175263Z          Stopping \u001b[0;1;39mSystem Logging Service\u001b[0m...",
+    "collected_at": "2026-05-24T04:21:30.706234+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:54.260085180Z [\u001b[0;32m  OK  \u001b[0m] Stopped \u001b[0;1;39mSystem Logging Service\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.706235+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:54.261901555Z          Starting \u001b[0;1;39mSystem Logging Service\u001b[0m...",
+    "collected_at": "2026-05-24T04:21:30.706236+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:54.314182597Z [\u001b[0;32m  OK  \u001b[0m] Started \u001b[0;1;39mSystem Logging Service\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.706237+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:57.236788042Z [ 1712.245484] Aaa.sh[820]: Completing EOS initialization: [  OK  ]",
+    "collected_at": "2026-05-24T04:21:30.706237+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:57.237198459Z [\u001b[0;32m  OK  \u001b[0m] Finished \u001b[0;1;39mEOS Warmup Service\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.706238+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:57.257303042Z          Starting \u001b[0;1;39mThis init script \u2026em and hardware properties.\u001b[0m...",
+    "collected_at": "2026-05-24T04:21:30.706239+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:57.538070417Z [ 1712.547436] EosStage3[1698]: Model and Serial Number: unknown",
+    "collected_at": "2026-05-24T04:21:30.706239+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:57.538110875Z [ 1712.547529] EosStage3[1698]: System RAM: 28692052 kB",
+    "collected_at": "2026-05-24T04:21:30.706241+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:57.538155667Z [ 1712.547596] EosStage3[1698]: Flash Memory size:  927G",
+    "collected_at": "2026-05-24T04:21:30.706242+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:58.581130918Z [\u001b[0;32m  OK  \u001b[0m] Finished \u001b[0;1;39mThis init script \u2026stem and hardware properties.\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.706243+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:58.581781084Z [\u001b[0;32m  OK  \u001b[0m] Reached target \u001b[0;1;39mMulti-User System\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.706243+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:58.582025876Z [\u001b[0;32m  OK  \u001b[0m] Reached target \u001b[0;1;39mGraphical Interface\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.706244+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:58.596414334Z [\u001b[0;32m  OK  \u001b[0m] Started \u001b[0;1;39mService to capture\u2026ot of systemd journal at boot\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.706245+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:58.597995834Z          Starting \u001b[0;1;39mRecord Runlevel Change in UTMP\u001b[0m...",
+    "collected_at": "2026-05-24T04:21:30.706245+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:58.634936084Z [\u001b[0;32m  OK  \u001b[0m] Finished \u001b[0;1;39mRecord Runlevel Change in UTMP\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.706248+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:06.742716172Z May 24 04:06:06 leaf1 Stp: %SPANTREE-6-INTERFACE_STATE: Interface Ethernet4 instance MST0 moving from discarding to learning",
+    "collected_at": "2026-05-24T04:21:30.706249+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:06.742738630Z May 24 04:06:06 leaf1 Stp: %SPANTREE-6-INTERFACE_STATE: Interface Ethernet4 instance MST0 moving from learning to forwarding",
+    "collected_at": "2026-05-24T04:21:30.706249+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:19.997406178Z May 24 04:06:19 leaf1 Bgp: %BGP-5-VRF_AFI_SAFI_RIB_READY: BGP in VRF TENANT-A has converged and all routes for address family IPv4 Unicast have been processed",
+    "collected_at": "2026-05-24T04:21:30.706250+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:19.997431220Z May 24 04:06:19 leaf1 Bgp: %BGP-5-VRF_AFI_SAFI_RIB_READY: BGP in VRF TENANT-A has converged and all routes for address family IPv6 Unicast have been processed",
+    "collected_at": "2026-05-24T04:21:30.706251+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:36.789107630Z May 24 04:06:36 leaf1 Stp: %SPANTREE-6-STABLE_CHANGE: Stp state is now stable",
+    "collected_at": "2026-05-24T04:21:30.706252+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:46.278177009Z May 24 04:06:46 leaf1 SystemInitMonitor: %SYS-5-SYSTEM_INITIALIZED: System is initialized",
+    "collected_at": "2026-05-24T04:21:30.706252+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:46.284998843Z May 24 04:06:46 leaf1 SuperServer: %SYS-5-CLI_SCHEDULER_ENABLED: CliScheduler is enabled, continuing its execution of scheduled CLI jobs.",
+    "collected_at": "2026-05-24T04:21:30.706253+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:46.286948634Z May 24 04:06:46 leaf1 Launcher: %LAUNCHER-6-PROCESS_STOP: Configuring process 'SystemInitMonitor' to stop in role 'ActiveSupervisor'",
+    "collected_at": "2026-05-24T04:21:30.706254+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:46.393062843Z May 24 04:06:46 leaf1 ProcMgr: %PROCMGR-6-COMMAND_RECEIVED: ProcMgr has received 'warm start' command",
+    "collected_at": "2026-05-24T04:21:30.706255+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:46.393252343Z May 24 04:06:46 leaf1 ProcMgr: %PROCMGR-6-WORKER_WARMSTART: ProcMgr worker warm start. (PID=758)",
+    "collected_at": "2026-05-24T04:21:30.706255+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:46.422216718Z May 24 04:06:46 leaf1 ProcMgr: %PROCMGR-6-TERMINATE_RUNNING_PROCESS: Terminating deconfigured/reconfigured process 'SystemInitMonitor' (PID=1066)",
+    "collected_at": "2026-05-24T04:21:30.706256+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:46.438360093Z May 24 04:06:46 leaf1 ProcMgr: %PROCMGR-6-PROCESS_TERMINATED: 'SystemInitMonitor' (PID=1066, status=9) has terminated.",
+    "collected_at": "2026-05-24T04:21:30.706257+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:07:21.899882220Z May 24 04:07:21 leaf1 Bgp: %BGP-5-VRF_AFI_SAFI_RIB_READY: BGP in VRF default has converged and all routes for address family IPv4 Unicast have been processed",
+    "collected_at": "2026-05-24T04:21:30.706258+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:07:21.899996054Z May 24 04:07:21 leaf1 Bgp: %BGP-5-VRF_AFI_SAFI_RIB_READY: BGP in VRF default has converged and all routes for address family EVPN have been processed",
+    "collected_at": "2026-05-24T04:21:30.706258+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:07:54.320402222Z May 24 04:07:54 leaf1 SuperServer: %SYS-5-SYSTEM_RESTARTED: System restarted",
+    "collected_at": "2026-05-24T04:21:30.706259+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:07:54.322770055Z May 24 04:07:54 leaf1 SuperServer: %SYS-6-SYSTEM_INFO: Software image version: 4.33.1F-39879738.4331F (engineering build)",
+    "collected_at": "2026-05-24T04:21:30.706260+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:07:54.322780347Z May 24 04:07:54 leaf1 SuperServer: %SYS-6-SYSTEM_INFO: Model: cEOSLab",
+    "collected_at": "2026-05-24T04:21:30.706260+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:07:54.322782638Z May 24 04:07:54 leaf1 SuperServer: %SYS-6-SYSTEM_INFO: Serial number: AA104F476EC0E3066D7E428C8A7AB8AB",
+    "collected_at": "2026-05-24T04:21:30.706261+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:09:53.984233971Z May 24 04:09:53 leaf1 Arp: %ARP-4-DUPLICATE_ADDRESS_WITH_INTF: A host on interface Management0 with MAC address 42:a0:5b:1d:09:23 and IP address 172.20.20.21 is using an IP address configured on an interface in VRF default",
+    "collected_at": "2026-05-24T04:21:30.706262+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:12:53.681767138Z May 24 04:12:53 leaf1 Lldp: %LLDP-5-NEIGHBOR_NEW: LLDP neighbor with chassisId 1aa3.0cff.0000 and portId \"ethernet-1/1\" added on interface Ethernet1",
+    "collected_at": "2026-05-24T04:21:30.706263+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:14:09.526556048Z May 24 04:14:09 leaf1 Bgp: %BGP-5-ADJCHANGE: peer 10.0.1.0 (VRF default AS 65100) old state OpenConfirm event Established new state Established",
+    "collected_at": "2026-05-24T04:21:30.706263+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:15:41.630201007Z May 24 04:15:41 leaf1 ReloadCauseAgent: %SYS-6-SYSTEM_INFO: Reload Cause 1: Unknown",
+    "collected_at": "2026-05-24T04:21:30.706264+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:18:11.170391049Z May 24 04:18:11 leaf1 Bgp: %BGP-3-NOTIFICATION: received from neighbor 10.0.1.0 (VRF default AS 65100) 6/6 (Cease/other configuration change) 0 bytes",
+    "collected_at": "2026-05-24T04:21:30.706265+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:18:11.170461549Z May 24 04:18:11 leaf1 Bgp: %BGP-5-ADJCHANGE: peer 10.0.1.0 (VRF default AS 65100) old state Established event RecvNotify new state Idle",
+    "collected_at": "2026-05-24T04:21:30.706267+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:18:11.393467549Z May 24 04:18:11 leaf1 Bgp: %BGP-5-ADJCHANGE: peer 10.0.1.0 (VRF default AS 65100) old state OpenConfirm event Established new state Established",
+    "collected_at": "2026-05-24T04:21:30.706267+00:00"
+  },
+  {
+    "source": "leaf1",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:18:16.483244718Z May 24 04:18:16 leaf1 Bgp: %BGP-5-ADJCHANGE: peer 10.255.0.1 (VRF default AS 65199) old state OpenConfirm event Established new state Established",
+    "collected_at": "2026-05-24T04:21:30.706268+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:11.624708007Z   Found supportd: PID 1330",
+    "collected_at": "2026-05-24T04:21:30.724690+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:11.624709632Z   Application supportd is running: PID 1330",
+    "collected_at": "2026-05-24T04:21:30.724715+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:11.763694799Z   Started dev_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_device_mgr\" >>/var/log/srlinux/stdout/dev_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724717+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.066927466Z   Application dev_mgr is running: PID 1869",
+    "collected_at": "2026-05-24T04:21:30.724719+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.076338549Z   Started idb_server: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_idb_server\" >>/var/log/srlinux/stdout/idb_server.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724720+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.277914341Z   Application idb_server is running: PID 1934",
+    "collected_at": "2026-05-24T04:21:30.724721+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.283456382Z   Started aaa_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_aaa_mgr\" >>/var/log/srlinux/stdout/aaa_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724722+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.288847132Z   Started acl_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_acl_mgr\" >>/var/log/srlinux/stdout/acl_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724723+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.294029841Z   Started arp_nd_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_arp_nd_mgr\" >>/var/log/srlinux/stdout/arp_nd_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724724+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.299750966Z   Started bfd_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_bfd_mgr\" >>/var/log/srlinux/stdout/bfd_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724725+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.307092716Z   Started chassis_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_chassis_mgr\" >>/var/log/srlinux/stdout/chassis_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724726+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.316853341Z   Started dhcp_client_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_dhcp_client_mgr\" >>/var/log/srlinux/stdout/dhcp_client_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724728+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.329820674Z   Started evpn_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_evpn_mgr\" >>/var/log/srlinux/stdout/evpn_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724729+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.350085966Z   Started fib_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_fib_mgr\" >>/var/log/srlinux/stdout/fib_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724729+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.413758883Z   Started l2_mac_learn_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_l2_mac_learn_mgr\" >>/var/log/srlinux/stdout/l2_mac_learn_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724730+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.439548591Z   Started l2_mac_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_l2_mac_mgr\" >>/var/log/srlinux/stdout/l2_mac_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724732+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.456031216Z   Started lag_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_lag_mgr\" >>/var/log/srlinux/stdout/lag_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724733+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.481053466Z   Started license_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_license_mgr\" >>/var/log/srlinux/stdout/license_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724734+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.512099674Z   Started linux_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_linux_mgr\" >>/var/log/srlinux/stdout/linux_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724734+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.529710383Z   Started log_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_log_mgr\" >>/var/log/srlinux/stdout/log_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724735+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.605607799Z   Started mcid_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_mcid_mgr\" >>/var/log/srlinux/stdout/mcid_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724736+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.650762008Z   Started mfib_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_mfib_mgr\" >>/var/log/srlinux/stdout/mfib_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724737+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.673947466Z   Started mgmt_server: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_mgmt_server\" >>/var/log/srlinux/stdout/mgmt_server.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724738+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.702606549Z   Started net_inst_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_net_inst_mgr\" >>/var/log/srlinux/stdout/net_inst_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724739+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.729621549Z   Started radius_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_radius_mgr\" >>/var/log/srlinux/stdout/radius_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724740+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.779655383Z   Started sdk_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_sdk_mgr\" >>/var/log/srlinux/stdout/sdk_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724743+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.813578549Z   Started sflow_sample_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_sflow_sample_mgr\" >>/var/log/srlinux/stdout/sflow_sample_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724744+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.821290883Z   Started xdp_lc_1: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"exec -a sr_xdp_lc_1 ./sr_xdp_lc  --slot_num 1 --complex_num 2\" >>/var/log/srlinux/stdout/xdp_lc_1.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.724745+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922640758Z   Application aaa_mgr is running: PID 1971",
+    "collected_at": "2026-05-24T04:21:30.724746+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922659674Z   Application acl_mgr is running: PID 1990",
+    "collected_at": "2026-05-24T04:21:30.724747+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922661758Z   Application arp_nd_mgr is running: PID 2026",
+    "collected_at": "2026-05-24T04:21:30.724749+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922663091Z   Application bfd_mgr is running: PID 2063",
+    "collected_at": "2026-05-24T04:21:30.724751+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922664383Z   Application chassis_mgr is running: PID 2102",
+    "collected_at": "2026-05-24T04:21:30.724751+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922665633Z   Application dhcp_client_mgr is running: PID 2137",
+    "collected_at": "2026-05-24T04:21:30.724753+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922666758Z   Application evpn_mgr is running: PID 2169",
+    "collected_at": "2026-05-24T04:21:30.724754+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922667883Z   Application fib_mgr is running: PID 2217",
+    "collected_at": "2026-05-24T04:21:30.724754+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922669091Z   Application l2_mac_learn_mgr is running: PID 2261",
+    "collected_at": "2026-05-24T04:21:30.724755+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922670424Z   Application l2_mac_mgr is running: PID 2288",
+    "collected_at": "2026-05-24T04:21:30.724756+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922671549Z   Application lag_mgr is running: PID 2324",
+    "collected_at": "2026-05-24T04:21:30.724757+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922672633Z   Application license_mgr is running: PID 2356",
+    "collected_at": "2026-05-24T04:21:30.724758+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922673758Z   Application linux_mgr is running: PID 2397",
+    "collected_at": "2026-05-24T04:21:30.724761+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922674883Z   Application log_mgr is running: PID 2426",
+    "collected_at": "2026-05-24T04:21:30.724762+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922675966Z   Application mcid_mgr is running: PID 2509",
+    "collected_at": "2026-05-24T04:21:30.724763+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922677091Z   Application mfib_mgr is running: PID 2563",
+    "collected_at": "2026-05-24T04:21:30.724763+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922678133Z   Application mgmt_server is running: PID 2578",
+    "collected_at": "2026-05-24T04:21:30.724764+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922679299Z   Application net_inst_mgr is running: PID 2631",
+    "collected_at": "2026-05-24T04:21:30.724765+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922680383Z   Application radius_mgr is running: PID 2660",
+    "collected_at": "2026-05-24T04:21:30.724766+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922681466Z   Application sdk_mgr is running: PID 2687",
+    "collected_at": "2026-05-24T04:21:30.724766+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922682591Z   Application sflow_sample_mgr is running: PID 2735",
+    "collected_at": "2026-05-24T04:21:30.724767+00:00"
+  },
+  {
+    "source": "leaf2",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.922683716Z   Application xdp_lc_1 is running: PID 2752",
+    "collected_at": "2026-05-24T04:21:30.724768+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.124404173Z 2026/05/24 04:05:09 WATCHFRR: [T83RR-8SM5G] watchfrr 8.4_git starting: vty@0",
+    "collected_at": "2026-05-24T04:21:30.745093+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.124827214Z 2026/05/24 04:05:09 WATCHFRR: [ZCJ3S-SPH5S] zebra state -> down : initial connection attempt failed",
+    "collected_at": "2026-05-24T04:21:30.745128+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.124834506Z 2026/05/24 04:05:09 WATCHFRR: [ZCJ3S-SPH5S] bgpd state -> down : initial connection attempt failed",
+    "collected_at": "2026-05-24T04:21:30.745129+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.124836214Z 2026/05/24 04:05:09 WATCHFRR: [ZCJ3S-SPH5S] staticd state -> down : initial connection attempt failed",
+    "collected_at": "2026-05-24T04:21:30.745132+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.124837006Z 2026/05/24 04:05:09 WATCHFRR: [ZCJ3S-SPH5S] bfdd state -> down : initial connection attempt failed",
+    "collected_at": "2026-05-24T04:21:30.745133+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.124837714Z 2026/05/24 04:05:09 WATCHFRR: [YFT0P-5Q5YX] Forked background command [pid 12]: /usr/lib/frr/watchfrr.sh restart all",
+    "collected_at": "2026-05-24T04:21:30.745134+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.200658381Z /usr/lib/frr/frrcommon.sh: line 211: kill: `': not a pid or valid job spec",
+    "collected_at": "2026-05-24T04:21:30.745135+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.200669423Z /usr/lib/frr/frrcommon.sh: line 211: kill: `': not a pid or valid job spec",
+    "collected_at": "2026-05-24T04:21:30.745138+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.202542256Z /usr/lib/frr/frrcommon.sh: line 211: kill: `': not a pid or valid job spec",
+    "collected_at": "2026-05-24T04:21:30.745139+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.211760381Z Cannot stop zebra: pid file not found",
+    "collected_at": "2026-05-24T04:21:30.745141+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.595891298Z 2026/05/24 04:05:09 BFD: [ZKB8W-3S2Q4][EC 100663330] unneeded 'destroy' callback for '/frr-bfdd:bfdd/bfd/profile/minimum-ttl'",
+    "collected_at": "2026-05-24T04:21:30.745143+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.595907465Z 2026/05/24 04:05:09 BFD: [ZKB8W-3S2Q4][EC 100663330] unneeded 'destroy' callback for '/frr-bfdd:bfdd/bfd/sessions/multi-hop/minimum-ttl'",
+    "collected_at": "2026-05-24T04:21:30.745144+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.708752840Z line 30: % Unknown command[17]:  vxlan local-tunnelip 10.255.1.3",
+    "collected_at": "2026-05-24T04:21:30.745145+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.708773298Z line 31: % Unknown command[17]:  vxlan vni 10010",
+    "collected_at": "2026-05-24T04:21:30.745145+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.708775465Z line 32: % Unknown command[17]:  vxlan vni 10020",
+    "collected_at": "2026-05-24T04:21:30.745146+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.708777215Z line 33: % Unknown command[17]:  vxlan vni 10030",
+    "collected_at": "2026-05-24T04:21:30.745147+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.708778715Z line 34: % Unknown command[17]:  vxlan vni 50001",
+    "collected_at": "2026-05-24T04:21:30.745148+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.726626423Z The route-map 'EXPORT_LO' does not exist.",
+    "collected_at": "2026-05-24T04:21:30.745149+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.729580298Z % AS specified for local as is the same as the remote as and this is not allowed.",
+    "collected_at": "2026-05-24T04:21:30.745149+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.729591756Z line 68: Failure to communicate[13] to bgpd, line:  neighbor EVPN local-as 65199 no-prepend replace-as",
+    "collected_at": "2026-05-24T04:21:30.745150+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.729593256Z",
+    "collected_at": "2026-05-24T04:21:30.745151+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.766715506Z Configuration file[/etc/frr/frr.conf] processing failure: 13",
+    "collected_at": "2026-05-24T04:21:30.745152+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.769000381Z 2026/05/24 04:05:09 WATCHFRR: [ZJW5C-1EHNT] restart all process 12 exited with non-zero status 13",
+    "collected_at": "2026-05-24T04:21:30.745153+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:14.128725133Z 2026/05/24 04:05:14 WATCHFRR: [QDG3Y-BY5TN] bfdd state -> up : connect succeeded",
+    "collected_at": "2026-05-24T04:21:30.745154+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:14.140651258Z 2026/05/24 04:05:14 WATCHFRR: [QDG3Y-BY5TN] bgpd state -> up : connect succeeded",
+    "collected_at": "2026-05-24T04:21:30.745154+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:14.149952008Z 2026/05/24 04:05:14 WATCHFRR: [QDG3Y-BY5TN] zebra state -> up : connect succeeded",
+    "collected_at": "2026-05-24T04:21:30.745155+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:14.248847467Z 2026/05/24 04:05:14 WATCHFRR: [QDG3Y-BY5TN] staticd state -> up : connect succeeded",
+    "collected_at": "2026-05-24T04:21:30.745156+00:00"
+  },
+  {
+    "source": "leaf3",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:14.248887467Z 2026/05/24 04:05:14 WATCHFRR: [KWE5Q-QNGFC] all daemons up, doing startup-complete notify",
+    "collected_at": "2026-05-24T04:21:30.745156+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:21.858133262Z [ 1676.867493] sh[780]: Starting EOS initialization stage 2",
+    "collected_at": "2026-05-24T04:21:30.764799+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:23.148965263Z [\u001b[0;32m  OK  \u001b[0m] Finished \u001b[0;1;39mEos system stage2\u2026s after ProcMgr, before POST)\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.764827+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:23.164215554Z          Starting \u001b[0;1;39mEOS Warmup Service\u001b[0m...",
+    "collected_at": "2026-05-24T04:21:30.764829+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:23.165558221Z          Starting \u001b[0;1;39mPlatform Arch ser\u2026upported OS Arch is booted)\u001b[0m...",
+    "collected_at": "2026-05-24T04:21:30.764831+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:23.168565638Z          Starting \u001b[0;1;39mPower-On Self Test\u001b[0m...",
+    "collected_at": "2026-05-24T04:21:30.764832+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:23.498754305Z [\u001b[0;32m  OK  \u001b[0m] Finished \u001b[0;1;39mPlatform Arch ser\u2026nsupported OS Arch is booted)\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.764833+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:32.060439378Z [\u001b[0;32m  OK  \u001b[0m] Finished \u001b[0;1;39mPower-On Self Test\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.764834+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:32.061268794Z [\u001b[0;32m  OK  \u001b[0m] Reached target \u001b[0;1;39mEOS regular mode\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.764836+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:32.065952544Z [\u001b[0;32m  OK  \u001b[0m] Finished \u001b[0;1;39mEOS Diagnostic Mode\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.764837+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:54.495773138Z          Stopping \u001b[0;1;39mSystem Logging Service\u001b[0m...",
+    "collected_at": "2026-05-24T04:21:30.764838+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:54.505936388Z [\u001b[0;32m  OK  \u001b[0m] Stopped \u001b[0;1;39mSystem Logging Service\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.764839+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:54.521200638Z          Starting \u001b[0;1;39mSystem Logging Service\u001b[0m...",
+    "collected_at": "2026-05-24T04:21:30.764840+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:54.568005347Z [\u001b[0;32m  OK  \u001b[0m] Started \u001b[0;1;39mSystem Logging Service\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.764841+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:57.650926292Z [ 1712.660257] Aaa.sh[801]: Completing EOS initialization: [  OK  ]",
+    "collected_at": "2026-05-24T04:21:30.764843+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:57.652071459Z [\u001b[0;32m  OK  \u001b[0m] Finished \u001b[0;1;39mEOS Warmup Service\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.764844+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:57.664286334Z          Starting \u001b[0;1;39mThis init script \u2026em and hardware properties.\u001b[0m...",
+    "collected_at": "2026-05-24T04:21:30.764846+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:57.946770959Z [ 1712.955143] EosStage3[1631]: Model and Serial Number: unknown",
+    "collected_at": "2026-05-24T04:21:30.764847+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:57.946793334Z [ 1712.955230] EosStage3[1631]: System RAM: 28692052 kB",
+    "collected_at": "2026-05-24T04:21:30.764848+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:57.946795376Z [ 1712.955248] EosStage3[1631]: Flash Memory size:  927G",
+    "collected_at": "2026-05-24T04:21:30.764849+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:58.990118918Z [\u001b[0;32m  OK  \u001b[0m] Finished \u001b[0;1;39mThis init script \u2026stem and hardware properties.\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.764850+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:58.990845126Z [\u001b[0;32m  OK  \u001b[0m] Reached target \u001b[0;1;39mMulti-User System\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.764852+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:58.990989834Z [\u001b[0;32m  OK  \u001b[0m] Reached target \u001b[0;1;39mGraphical Interface\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.764853+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:59.007458418Z [\u001b[0;32m  OK  \u001b[0m] Started \u001b[0;1;39mService to capture\u2026ot of systemd journal at boot\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.764854+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:59.009243084Z          Starting \u001b[0;1;39mRecord Runlevel Change in UTMP\u001b[0m...",
+    "collected_at": "2026-05-24T04:21:30.764855+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:59.042791835Z [\u001b[0;32m  OK  \u001b[0m] Finished \u001b[0;1;39mRecord Runlevel Change in UTMP\u001b[0m.",
+    "collected_at": "2026-05-24T04:21:30.764856+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:07.856363547Z May 24 04:06:07 leaf4 Stp: %SPANTREE-6-INTERFACE_STATE: Interface Ethernet5 instance MST0 moving from discarding to learning",
+    "collected_at": "2026-05-24T04:21:30.764858+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:07.856410797Z May 24 04:06:07 leaf4 Stp: %SPANTREE-6-INTERFACE_STATE: Interface Ethernet5 instance MST0 moving from learning to forwarding",
+    "collected_at": "2026-05-24T04:21:30.764859+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:21.268712928Z May 24 04:06:21 leaf4 Bgp: %BGP-5-VRF_AFI_SAFI_RIB_READY: BGP in VRF TENANT-A has converged and all routes for address family IPv4 Unicast have been processed",
+    "collected_at": "2026-05-24T04:21:30.764860+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:21.268781512Z May 24 04:06:21 leaf4 Bgp: %BGP-5-VRF_AFI_SAFI_RIB_READY: BGP in VRF TENANT-A has converged and all routes for address family IPv6 Unicast have been processed",
+    "collected_at": "2026-05-24T04:21:30.764861+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:37.908978922Z May 24 04:06:37 leaf4 Stp: %SPANTREE-6-STABLE_CHANGE: Stp state is now stable",
+    "collected_at": "2026-05-24T04:21:30.764862+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:47.142518968Z May 24 04:06:47 leaf4 SystemInitMonitor: %SYS-5-SYSTEM_INITIALIZED: System is initialized",
+    "collected_at": "2026-05-24T04:21:30.764863+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:47.153741051Z May 24 04:06:47 leaf4 SuperServer: %SYS-5-CLI_SCHEDULER_ENABLED: CliScheduler is enabled, continuing its execution of scheduled CLI jobs.",
+    "collected_at": "2026-05-24T04:21:30.764864+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:47.158683510Z May 24 04:06:47 leaf4 Launcher: %LAUNCHER-6-PROCESS_STOP: Configuring process 'SystemInitMonitor' to stop in role 'ActiveSupervisor'",
+    "collected_at": "2026-05-24T04:21:30.764865+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:47.270236802Z May 24 04:06:47 leaf4 ProcMgr: %PROCMGR-6-COMMAND_RECEIVED: ProcMgr has received 'warm start' command",
+    "collected_at": "2026-05-24T04:21:30.764866+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:47.270515635Z May 24 04:06:47 leaf4 ProcMgr: %PROCMGR-6-WORKER_WARMSTART: ProcMgr worker warm start. (PID=739)",
+    "collected_at": "2026-05-24T04:21:30.764867+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:47.325746218Z May 24 04:06:47 leaf4 ProcMgr: %PROCMGR-6-TERMINATE_RUNNING_PROCESS: Terminating deconfigured/reconfigured process 'SystemInitMonitor' (PID=1035)",
+    "collected_at": "2026-05-24T04:21:30.764868+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:06:47.343624302Z May 24 04:06:47 leaf4 ProcMgr: %PROCMGR-6-PROCESS_TERMINATED: 'SystemInitMonitor' (PID=1035, status=9) has terminated.",
+    "collected_at": "2026-05-24T04:21:30.764869+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:07:22.812087221Z May 24 04:07:22 leaf4 Bgp: %BGP-5-VRF_AFI_SAFI_RIB_READY: BGP in VRF default has converged and all routes for address family IPv4 Unicast have been processed",
+    "collected_at": "2026-05-24T04:21:30.764870+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:07:22.812162721Z May 24 04:07:22 leaf4 Bgp: %BGP-5-VRF_AFI_SAFI_RIB_READY: BGP in VRF default has converged and all routes for address family EVPN have been processed",
+    "collected_at": "2026-05-24T04:21:30.764871+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:07:54.575759430Z May 24 04:07:54 leaf4 SuperServer: %SYS-5-SYSTEM_RESTARTED: System restarted",
+    "collected_at": "2026-05-24T04:21:30.764872+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:07:54.578955513Z May 24 04:07:54 leaf4 SuperServer: %SYS-6-SYSTEM_INFO: Software image version: 4.33.1F-39879738.4331F (engineering build)",
+    "collected_at": "2026-05-24T04:21:30.764873+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:07:54.579140347Z May 24 04:07:54 leaf4 SuperServer: %SYS-6-SYSTEM_INFO: Model: cEOSLab",
+    "collected_at": "2026-05-24T04:21:30.764874+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:07:54.579162388Z May 24 04:07:54 leaf4 SuperServer: %SYS-6-SYSTEM_INFO: Serial number: FF917CA5BEBF56C4EDE0A3F605D3A3D8",
+    "collected_at": "2026-05-24T04:21:30.764875+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:12:53.681692888Z May 24 04:12:53 leaf4 Lldp: %LLDP-5-NEIGHBOR_NEW: LLDP neighbor with chassisId 1aa3.0cff.0000 and portId \"ethernet-1/4\" added on interface Ethernet2",
+    "collected_at": "2026-05-24T04:21:30.764876+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:14:09.627103090Z May 24 04:14:09 leaf4 Bgp: %BGP-5-ADJCHANGE: peer 10.0.1.6 (VRF default AS 65100) old state OpenConfirm event Established new state Established",
+    "collected_at": "2026-05-24T04:21:30.764877+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:15:42.052857466Z May 24 04:15:42 leaf4 ReloadCauseAgent: %SYS-6-SYSTEM_INFO: Reload Cause 1: Unknown",
+    "collected_at": "2026-05-24T04:21:30.764878+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:18:11.057477090Z May 24 04:18:11 leaf4 Bgp: %BGP-3-NOTIFICATION: received from neighbor 10.0.1.6 (VRF default AS 65100) 6/6 (Cease/other configuration change) 0 bytes",
+    "collected_at": "2026-05-24T04:21:30.764879+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:18:11.057543382Z May 24 04:18:11 leaf4 Bgp: %BGP-5-ADJCHANGE: peer 10.0.1.6 (VRF default AS 65100) old state Established event RecvNotify new state Idle",
+    "collected_at": "2026-05-24T04:21:30.764880+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:18:11.393561382Z May 24 04:18:11 leaf4 Bgp: %BGP-5-ADJCHANGE: peer 10.0.1.6 (VRF default AS 65100) old state OpenConfirm event Established new state Established",
+    "collected_at": "2026-05-24T04:21:30.764881+00:00"
+  },
+  {
+    "source": "leaf4",
+    "vendor": "ceos",
+    "role": "leaf",
+    "message": "2026-05-24T04:18:16.392366509Z May 24 04:18:16 leaf4 Bgp: %BGP-5-ADJCHANGE: peer 10.255.0.1 (VRF default AS 65199) old state OpenConfirm event Established new state Established",
+    "collected_at": "2026-05-24T04:21:30.764882+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:11.590009174Z   Found supportd: PID 1331",
+    "collected_at": "2026-05-24T04:21:30.784499+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:11.590011090Z   Application supportd is running: PID 1331",
+    "collected_at": "2026-05-24T04:21:30.784521+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:11.784668466Z   Started dev_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_device_mgr\" >>/var/log/srlinux/stdout/dev_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784522+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.093655382Z   Application dev_mgr is running: PID 1873",
+    "collected_at": "2026-05-24T04:21:30.784523+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.106469132Z   Started idb_server: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_idb_server\" >>/var/log/srlinux/stdout/idb_server.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784524+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.308164466Z   Application idb_server is running: PID 1934",
+    "collected_at": "2026-05-24T04:21:30.784528+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.316849299Z   Started aaa_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_aaa_mgr\" >>/var/log/srlinux/stdout/aaa_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784529+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.329582591Z   Started acl_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_acl_mgr\" >>/var/log/srlinux/stdout/acl_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784529+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.346714591Z   Started arp_nd_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_arp_nd_mgr\" >>/var/log/srlinux/stdout/arp_nd_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784530+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.380598924Z   Started bfd_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_bfd_mgr\" >>/var/log/srlinux/stdout/bfd_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784531+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.415234716Z   Started chassis_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_chassis_mgr\" >>/var/log/srlinux/stdout/chassis_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784532+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.437496966Z   Started dhcp_client_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_dhcp_client_mgr\" >>/var/log/srlinux/stdout/dhcp_client_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784532+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.456677633Z   Started evpn_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_evpn_mgr\" >>/var/log/srlinux/stdout/evpn_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784533+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.516743633Z   Started fib_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_fib_mgr\" >>/var/log/srlinux/stdout/fib_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784534+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.538749716Z   Started l2_mac_learn_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_l2_mac_learn_mgr\" >>/var/log/srlinux/stdout/l2_mac_learn_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784535+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.580619966Z   Started l2_mac_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_l2_mac_mgr\" >>/var/log/srlinux/stdout/l2_mac_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784536+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.614577841Z   Started lag_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_lag_mgr\" >>/var/log/srlinux/stdout/lag_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784536+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.682118841Z   Started license_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_license_mgr\" >>/var/log/srlinux/stdout/license_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784537+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.708817924Z   Started linux_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_linux_mgr\" >>/var/log/srlinux/stdout/linux_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784538+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.739551799Z   Started log_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_log_mgr\" >>/var/log/srlinux/stdout/log_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784539+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.829960299Z   Started mcid_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_mcid_mgr\" >>/var/log/srlinux/stdout/mcid_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784540+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.863804508Z   Started mfib_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_mfib_mgr\" >>/var/log/srlinux/stdout/mfib_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784543+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.890563008Z   Started mgmt_server: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_mgmt_server\" >>/var/log/srlinux/stdout/mgmt_server.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784544+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.907766924Z   Started net_inst_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_net_inst_mgr\" >>/var/log/srlinux/stdout/net_inst_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784544+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:12.957370716Z   Started radius_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_radius_mgr\" >>/var/log/srlinux/stdout/radius_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784545+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.004007591Z   Started sdk_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_sdk_mgr\" >>/var/log/srlinux/stdout/sdk_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784546+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.021199758Z   Started sflow_sample_mgr: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"./sr_sflow_sample_mgr\" >>/var/log/srlinux/stdout/sflow_sample_mgr.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784547+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.048644216Z   Started xdp_lc_1: source /etc/profile.d/sr_app_env.sh &>/dev/null; /usr/bin/bash -lc \"exec -a sr_xdp_lc_1 ./sr_xdp_lc  --slot_num 1 --complex_num 2\" >>/var/log/srlinux/stdout/xdp_lc_1.log 2>&1 &",
+    "collected_at": "2026-05-24T04:21:30.784549+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155622716Z   Application aaa_mgr is running: PID 1971",
+    "collected_at": "2026-05-24T04:21:30.784549+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155632050Z   Application acl_mgr is running: PID 1986",
+    "collected_at": "2026-05-24T04:21:30.784551+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155633341Z   Application arp_nd_mgr is running: PID 2035",
+    "collected_at": "2026-05-24T04:21:30.784551+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155634008Z   Application bfd_mgr is running: PID 2065",
+    "collected_at": "2026-05-24T04:21:30.784552+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155634591Z   Application chassis_mgr is running: PID 2111",
+    "collected_at": "2026-05-24T04:21:30.784553+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155635300Z   Application dhcp_client_mgr is running: PID 2148",
+    "collected_at": "2026-05-24T04:21:30.784554+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155636008Z   Application evpn_mgr is running: PID 2170",
+    "collected_at": "2026-05-24T04:21:30.784554+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155636633Z   Application fib_mgr is running: PID 2224",
+    "collected_at": "2026-05-24T04:21:30.784555+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155637258Z   Application l2_mac_learn_mgr is running: PID 2244",
+    "collected_at": "2026-05-24T04:21:30.784556+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155637841Z   Application l2_mac_mgr is running: PID 2286",
+    "collected_at": "2026-05-24T04:21:30.784557+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155638425Z   Application lag_mgr is running: PID 2328",
+    "collected_at": "2026-05-24T04:21:30.784557+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155639008Z   Application license_mgr is running: PID 2380",
+    "collected_at": "2026-05-24T04:21:30.784558+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155639550Z   Application linux_mgr is running: PID 2399",
+    "collected_at": "2026-05-24T04:21:30.784559+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155640175Z   Application log_mgr is running: PID 2440",
+    "collected_at": "2026-05-24T04:21:30.784559+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155640758Z   Application mcid_mgr is running: PID 2528",
+    "collected_at": "2026-05-24T04:21:30.784560+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155641341Z   Application mfib_mgr is running: PID 2555",
+    "collected_at": "2026-05-24T04:21:30.784561+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155641925Z   Application mgmt_server is running: PID 2587",
+    "collected_at": "2026-05-24T04:21:30.784561+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155642508Z   Application net_inst_mgr is running: PID 2622",
+    "collected_at": "2026-05-24T04:21:30.784562+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155643050Z   Application radius_mgr is running: PID 2655",
+    "collected_at": "2026-05-24T04:21:30.784563+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155643675Z   Application sdk_mgr is running: PID 2699",
+    "collected_at": "2026-05-24T04:21:30.784564+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155644216Z   Application sflow_sample_mgr is running: PID 2721",
+    "collected_at": "2026-05-24T04:21:30.784564+00:00"
+  },
+  {
+    "source": "leaf5",
+    "vendor": "srl",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.155644883Z   Application xdp_lc_1 is running: PID 2760",
+    "collected_at": "2026-05-24T04:21:30.784566+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:08.923908298Z 2026/05/24 04:05:08 WATCHFRR: [T83RR-8SM5G] watchfrr 8.4_git starting: vty@0",
+    "collected_at": "2026-05-24T04:21:30.804334+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:08.925108048Z 2026/05/24 04:05:08 WATCHFRR: [ZCJ3S-SPH5S] zebra state -> down : initial connection attempt failed",
+    "collected_at": "2026-05-24T04:21:30.804355+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:08.925116839Z 2026/05/24 04:05:08 WATCHFRR: [ZCJ3S-SPH5S] bgpd state -> down : initial connection attempt failed",
+    "collected_at": "2026-05-24T04:21:30.804356+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:08.925118048Z 2026/05/24 04:05:08 WATCHFRR: [ZCJ3S-SPH5S] staticd state -> down : initial connection attempt failed",
+    "collected_at": "2026-05-24T04:21:30.804357+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:08.925118881Z 2026/05/24 04:05:08 WATCHFRR: [ZCJ3S-SPH5S] bfdd state -> down : initial connection attempt failed",
+    "collected_at": "2026-05-24T04:21:30.804358+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:08.925119548Z 2026/05/24 04:05:08 WATCHFRR: [YFT0P-5Q5YX] Forked background command [pid 12]: /usr/lib/frr/watchfrr.sh restart all",
+    "collected_at": "2026-05-24T04:21:30.804359+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.032604923Z /usr/lib/frr/frrcommon.sh: line 211: kill: `': not a pid or valid job spec",
+    "collected_at": "2026-05-24T04:21:30.804360+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.034386548Z /usr/lib/frr/frrcommon.sh: line 211: kill: `': not a pid or valid job spec",
+    "collected_at": "2026-05-24T04:21:30.804361+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.036320798Z /usr/lib/frr/frrcommon.sh: line 211: kill: `': not a pid or valid job spec",
+    "collected_at": "2026-05-24T04:21:30.804361+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.050674464Z Cannot stop zebra: pid file not found",
+    "collected_at": "2026-05-24T04:21:30.804362+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.374667923Z 2026/05/24 04:05:09 BFD: [ZKB8W-3S2Q4][EC 100663330] unneeded 'destroy' callback for '/frr-bfdd:bfdd/bfd/profile/minimum-ttl'",
+    "collected_at": "2026-05-24T04:21:30.804363+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.374682089Z 2026/05/24 04:05:09 BFD: [ZKB8W-3S2Q4][EC 100663330] unneeded 'destroy' callback for '/frr-bfdd:bfdd/bfd/sessions/multi-hop/minimum-ttl'",
+    "collected_at": "2026-05-24T04:21:30.804363+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.465960631Z line 30: % Unknown command[17]:  vxlan local-tunnelip 10.255.1.6",
+    "collected_at": "2026-05-24T04:21:30.804364+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.465975298Z line 31: % Unknown command[17]:  vxlan vni 10010",
+    "collected_at": "2026-05-24T04:21:30.804365+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.465976798Z line 32: % Unknown command[17]:  vxlan vni 10020",
+    "collected_at": "2026-05-24T04:21:30.804366+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.465977881Z line 33: % Unknown command[17]:  vxlan vni 10030",
+    "collected_at": "2026-05-24T04:21:30.804367+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.465978756Z line 34: % Unknown command[17]:  vxlan vni 50001",
+    "collected_at": "2026-05-24T04:21:30.804367+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.481021464Z The route-map 'EXPORT_LO' does not exist.",
+    "collected_at": "2026-05-24T04:21:30.804369+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.482733839Z % AS specified for local as is the same as the remote as and this is not allowed.",
+    "collected_at": "2026-05-24T04:21:30.804369+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.482743589Z line 68: Failure to communicate[13] to bgpd, line:  neighbor EVPN local-as 65199 no-prepend replace-as",
+    "collected_at": "2026-05-24T04:21:30.804370+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.482745006Z",
+    "collected_at": "2026-05-24T04:21:30.804371+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.551868298Z Configuration file[/etc/frr/frr.conf] processing failure: 13",
+    "collected_at": "2026-05-24T04:21:30.804372+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:09.554847673Z 2026/05/24 04:05:09 WATCHFRR: [ZJW5C-1EHNT] restart all process 12 exited with non-zero status 13",
+    "collected_at": "2026-05-24T04:21:30.804372+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.804592467Z 2026/05/24 04:05:13 WATCHFRR: [QDG3Y-BY5TN] zebra state -> up : connect succeeded",
+    "collected_at": "2026-05-24T04:21:30.804373+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.907020133Z 2026/05/24 04:05:13 WATCHFRR: [QDG3Y-BY5TN] bgpd state -> up : connect succeeded",
+    "collected_at": "2026-05-24T04:21:30.804374+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:13.988576675Z 2026/05/24 04:05:13 WATCHFRR: [QDG3Y-BY5TN] bfdd state -> up : connect succeeded",
+    "collected_at": "2026-05-24T04:21:30.804375+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:14.016040175Z 2026/05/24 04:05:14 WATCHFRR: [QDG3Y-BY5TN] staticd state -> up : connect succeeded",
+    "collected_at": "2026-05-24T04:21:30.804375+00:00"
+  },
+  {
+    "source": "leaf6",
+    "vendor": "frr",
+    "role": "leaf",
+    "message": "2026-05-24T04:05:14.016113967Z 2026/05/24 04:05:14 WATCHFRR: [KWE5Q-QNGFC] all daemons up, doing startup-complete notify",
+    "collected_at": "2026-05-24T04:21:30.804376+00:00"
+  }
+]

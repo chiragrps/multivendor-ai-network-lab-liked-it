@@ -376,5 +376,112 @@ def mv_gait_recent(limit: int = 50, actor: str = "") -> str:
     return _get("/api/mv/gait/recent", {"limit": str(limit), "actor": actor})
 
 
+# ════════════════════════════════════════════════════════════════════════
+# Phase-5 additions (2026-05-25) — closed-loop pipeline, ADTK detector,
+# predictive forecast, clab fabric status, knowledge layer, gnmic
+# ════════════════════════════════════════════════════════════════════════
+#
+# These wrap the new Phase-5 endpoints shipped during the audit hardening
+# pass + roadmap #3/#4/#5 deliveries. They let Claude Code drive the
+# full remediation loop directly — observe (clab-status, anomaly), reason
+# (correlate, knowledge), act (closed-loop), forecast (run-fleet).
+
+@mcp.tool()
+def mv_clab_status() -> str:
+    """Live BGP / interface / OSPF state of every clab Clos-EVPN routing node (9 hosts), refreshed every 15 s by the launchd-supervised collector. Returns per-host counters + a stale flag if the collector hasn't ticked in >60 s."""
+    return _get("/api/mv/clab-status")
+
+
+@mcp.tool()
+def mv_fabric_topology(fabric: str = "clos-evpn") -> str:
+    """Return the device-level topology of a fabric. fabric=clos-evpn (15 nodes, 24 physical links), fabric=dcn (10 FRR nodes, 10 BGP sessions), or fabric=all (merged)."""
+    return _get("/api/mv/fabric-topology", {"fabric": fabric})
+
+
+@mcp.tool()
+def mv_gnmic_status() -> str:
+    """Health of the gnmic streaming-telemetry sidecar — target count, per-host freshness, and a green flag when all SRL targets are <30 s old."""
+    return _get("/api/telemetry/gnmic-status")
+
+
+@mcp.tool()
+def mv_knowledge_correlate(site: str = "") -> str:
+    """Correlate live InfluxDB alerts + ADTK anomalies + predictive forecast alerts into incidents, enriched with netlog-ai compliance findings. Returns incident list with root_cause from the LLM correlator. Optional site filter."""
+    return json.dumps(_post("/api/keep/correlate", {"site": site} if site else {}))
+
+
+@mcp.tool()
+def mv_anomaly_detect(window_min: int = 30) -> str:
+    """Run the ADTK-style anomaly detector (Z-score + flap-count) over the last `window_min` minutes of BGP + interface time series. Returns structured anomalies before binary up<total rules trip — typically 5-30 min earlier."""
+    return json.dumps(_post("/api/anomaly/detect", {"window_min": window_min}))
+
+
+@mcp.tool()
+def mv_forecast_fleet(window_min: int = 60, horizon: int = 32) -> str:
+    """Run forecast against every routing node's BGP + interface counters and emit predictive alerts when P95 upper bound crosses threshold within the horizon. Returns ETA-bearing alerts ('in ~X seconds, host Y metric Z will breach')."""
+    return json.dumps(_post("/api/mv/forecast/run-fleet",
+                            {"window_min": window_min, "horizon": horizon}))
+
+
+@mcp.tool()
+def mv_forecast_status() -> str:
+    """Recent fleet-forecast summary: last run timestamp, total alerts emitted, per-host alert counts."""
+    return _get("/api/mv/forecast/fleet-status")
+
+
+@mcp.tool()
+def mv_change_closed_loop(hostname: str, proposed_change: str,
+                          timeout_s: int = 30, dry_run: bool = False,
+                          skip_predict: bool = False,
+                          skip_batfish: bool = False) -> str:
+    """Run the 6-stage closed-loop change pipeline: Predict → Batfish → Apply (Health Gate) → Watch → POST snapshot diff → Intent verify. Returns a change_id you can poll. Auto-rollback on regression. Use dry_run=true to stop after Predict+Batfish (no apply)."""
+    body = {
+        "hostname": hostname, "proposed_change": proposed_change,
+        "timeout_s": timeout_s, "dry_run": dry_run,
+        "skip_predict": skip_predict, "skip_batfish": skip_batfish,
+    }
+    return json.dumps(_post("/api/change/closed-loop", body))
+
+
+@mcp.tool()
+def mv_change_status(change_id: str) -> str:
+    """Poll the status of a closed-loop change run. Returns phase (queued|predict|batfish|applying|watching|post_snapshot|verify_intent|done), verdict (APPROVED|REJECTED|ROLLED_BACK|FAILED), elapsed_s, and per-stage detail."""
+    return _get(f"/api/change/closed-loop/{change_id}")
+
+
+@mcp.tool()
+def mv_change_recent() -> str:
+    """List the most recent closed-loop change runs and any in-flight jobs."""
+    return _get("/api/change/closed-loop")
+
+
+@mcp.tool()
+def mv_chaos_bgp(action: str, fabric: str = "dcn", target: str = "") -> str:
+    """BGP Chaos Monkey — stress-test the auto-remediation loop. action in {status, break, fix, chaos}; fabric in {dcn, clab}. target optional (single hostname). Live docker exec on clab; sim_bgp_failure.sh on DCN."""
+    return json.dumps(_post("/api/chaos/bgp",
+                            {"action": action, "fabric": fabric, "target": target}))
+
+
+@mcp.tool()
+def mv_napalm_bgp(site: str = "", hostname: str = "") -> str:
+    """Vendor-aware NAPALM-equivalent BGP collection — works for Juniper, Arista EOS, Nokia SR Linux, and FRR via docker exec. Returns per-device peers with state, AS, prefix counts. Async; returns job_id."""
+    body = {}
+    if site:     body["site"] = site
+    if hostname: body["hostname"] = hostname
+    return json.dumps(_post("/api/napalm/bgp-status", body))
+
+
+@mcp.tool()
+def mv_napalm_job(job_id: str) -> str:
+    """Poll a NAPALM job by id (returned by mv_napalm_bgp and friends)."""
+    return _get(f"/api/napalm/jobs/{job_id}")
+
+
+@mcp.tool()
+def mv_shadow_audit(site: str = "all", check: str = "all") -> str:
+    """Shadow Config Auditor — compares NetBox SoT to live running-config (via docker exec) for every device. Returns drift findings tagged P1/WARNING. site in {all, clab-dc1, de-fra, uk-lon, nl-ams, us-nyc}. check in {all, bgp, ospf}."""
+    return json.dumps(_post("/api/shadow/audit", {"site": site, "check": check}))
+
+
 if __name__ == "__main__":
     mcp.run()

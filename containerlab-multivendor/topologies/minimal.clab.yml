@@ -1,0 +1,97 @@
+# ============================================================================
+#  GESH Minimal Lab — 6 nodes, no cEOS required
+#  Quick-start topology: 2 spines + 2 leafs + 2 hosts
+#  Vendors: Nokia SR Linux + FRR
+#  RAM: ~5GB total
+# ============================================================================
+
+name: minimal
+
+prefix: clab
+
+mgmt:
+  network: minimal-mgmt
+  ipv4-subnet: 172.20.30.0/24
+
+topology:
+  kinds:
+    srl:
+      image: ghcr.io/nokia/srlinux:24.10.3
+      type: ixrd3l
+    linux:
+      image: ghcr.io/hellt/network-multitool:latest
+
+  nodes:
+    # Spines
+    spine1:
+      kind: srl
+      mgmt-ipv4: 172.20.30.11
+      labels:
+        role: spine
+        vendor: nokia
+
+    spine2:
+      kind: linux
+      image: frrouting/frr:latest
+      mgmt-ipv4: 172.20.30.12
+      binds:
+        - ../configs/spine/spine3-frr.conf:/etc/frr/frr.conf:rw
+        - ../configs/spine/spine3-daemons:/etc/frr/daemons:rw
+        - ../configs/spine/spine3-vtysh.conf:/etc/frr/vtysh.conf:rw
+      exec:
+        - bash -c "sysctl -w net.ipv4.ip_forward=1"
+        - bash -c "chown -R frr:frr /etc/frr && /usr/lib/frr/frrinit.sh start"
+      labels:
+        role: spine
+        vendor: frr
+
+    # Leafs
+    leaf1:
+      kind: srl
+      mgmt-ipv4: 172.20.30.21
+      labels:
+        role: leaf
+        vendor: nokia
+
+    leaf2:
+      kind: linux
+      image: frrouting/frr:latest
+      mgmt-ipv4: 172.20.30.22
+      binds:
+        - ../configs/leaf/leaf3-frr.conf:/etc/frr/frr.conf:rw
+        - ../configs/leaf/leaf3-daemons:/etc/frr/daemons:rw
+        - ../configs/leaf/leaf3-vtysh.conf:/etc/frr/vtysh.conf:rw
+      exec:
+        - bash -c "sysctl -w net.ipv4.ip_forward=1"
+        - bash -c "chown -R frr:frr /etc/frr && /usr/lib/frr/frrinit.sh start"
+      labels:
+        role: leaf
+        vendor: frr
+
+    # Hosts
+    host1:
+      kind: linux
+      mgmt-ipv4: 172.20.30.31
+      exec:
+        - ip addr add 10.10.10.1/24 dev eth1
+      labels:
+        role: host
+
+    host2:
+      kind: linux
+      mgmt-ipv4: 172.20.30.32
+      exec:
+        - ip addr add 10.10.20.1/24 dev eth1
+      labels:
+        role: host
+
+  links:
+    # Spine-Leaf full mesh
+    - endpoints: ["spine1:e1-1", "leaf1:e1-1"]
+    - endpoints: ["spine1:e1-2", "leaf2:eth1"]
+    - endpoints: ["spine2:eth3", "leaf1:e1-2"]
+    - endpoints: ["spine2:eth4", "leaf2:eth2"]
+
+    # Hosts
+    - endpoints: ["host1:eth1", "leaf1:e1-3"]
+    - endpoints: ["host2:eth1", "leaf2:eth3"]

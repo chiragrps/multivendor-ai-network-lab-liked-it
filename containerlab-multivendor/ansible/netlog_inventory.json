@@ -1,0 +1,78 @@
+{
+  "lab": "containerlab-multivendor",
+  "devices": [
+    {
+      "name": "evpn-leaf1",
+      "host": "172.20.20.21",
+      "vendor": "arista",
+      "role": "leaf",
+      "container": "clab-clos-evpn-leaf1",
+      "log_source": "docker logs clab-clos-evpn-leaf1"
+    },
+    {
+      "name": "evpn-leaf2",
+      "host": "172.20.20.22",
+      "vendor": "nokia",
+      "role": "leaf",
+      "container": "clab-clos-evpn-leaf2",
+      "log_source": "docker logs clab-clos-evpn-leaf2"
+    },
+    {
+      "name": "evpn-leaf3",
+      "host": "172.20.20.23",
+      "vendor": "frr",
+      "role": "leaf",
+      "container": "clab-clos-evpn-leaf3",
+      "log_source": "docker logs clab-clos-evpn-leaf3"
+    },
+    {
+      "name": "evpn-leaf4",
+      "host": "172.20.20.24",
+      "vendor": "arista",
+      "role": "leaf",
+      "container": "clab-clos-evpn-leaf4",
+      "log_source": "docker logs clab-clos-evpn-leaf4"
+    },
+    {
+      "name": "evpn-leaf5",
+      "host": "172.20.20.25",
+      "vendor": "nokia",
+      "role": "leaf",
+      "container": "clab-clos-evpn-leaf5",
+      "log_source": "docker logs clab-clos-evpn-leaf5"
+    },
+    {
+      "name": "evpn-leaf6",
+      "host": "172.20.20.26",
+      "vendor": "frr",
+      "role": "leaf",
+      "container": "clab-clos-evpn-leaf6",
+      "log_source": "docker logs clab-clos-evpn-leaf6"
+    },
+    {
+      "name": "evpn-spine1",
+      "host": "172.20.20.11",
+      "vendor": "nokia",
+      "role": "spine",
+      "container": "clab-clos-evpn-spine1",
+      "log_source": "docker logs clab-clos-evpn-spine1"
+    },
+    {
+      "name": "evpn-spine2",
+      "host": "172.20.20.12",
+      "vendor": "arista",
+      "role": "spine",
+      "container": "clab-clos-evpn-spine2",
+      "log_source": "docker logs clab-clos-evpn-spine2"
+    },
+    {
+      "name": "evpn-spine3",
+      "host": "172.20.20.13",
+      "vendor": "frr",
+      "role": "spine",
+      "container": "clab-clos-evpn-spine3",
+      "log_source": "docker logs clab-clos-evpn-spine3"
+    }
+  ],
+  "log_collection_method": "docker_logs"
+}

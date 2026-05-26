@@ -21,7 +21,7 @@ Register in app.py with:
     app.register_blueprint(mv_bp)
 """
 
-import os, sys, json, re, time, threading, socket, struct, logging
+import os, sys, json, re, time, threading, socket, struct, logging, shutil, subprocess
 from datetime import datetime, timezone
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -135,13 +135,189 @@ def mv_topology():
         "devices": _ALL_DEVICES,
         "bgp_sessions": _BGP_SESSIONS,
         "sites": [
-            {"name": "DE-FRA", "label": "Frankfurt",  "x": 400, "y": 200},
-            {"name": "UK-LON", "label": "London",     "x": 200, "y": 120},
-            {"name": "NL-AMS", "label": "Amsterdam",  "x": 350, "y": 120},
-            {"name": "EU-CDG", "label": "Paris",      "x": 200, "y": 270},
-            {"name": "US-NYC", "label": "New York",   "x": 650, "y": 180},
+            {"name": "DE-FRA",   "label": "Frankfurt",     "x": 400, "y": 200},
+            {"name": "UK-LON",   "label": "London",        "x": 200, "y": 120},
+            {"name": "NL-AMS",   "label": "Amsterdam",     "x": 350, "y": 120},
+            {"name": "EU-CDG",   "label": "Paris",         "x": 200, "y": 270},
+            {"name": "US-NYC",   "label": "New York",      "x": 650, "y": 180},
+            {"name": "CLAB-DC1", "label": "clab Clos-EVPN", "x": 500, "y": 380},
         ],
     })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ── GET /api/mv/fabric-topology — Real device-level topology from clab.yml ──
+# ══════════════════════════════════════════════════════════════════════════════
+
+_FABRIC_TOPOLOGY_CACHE: dict[str, dict] | None = None
+
+
+def _load_fabric_topology() -> dict:
+    """Parse the clab YAML and return nodes + physical links for the Clos fabric.
+
+    Falls back to a hard-coded link list (matching topologies/clos-evpn.clab.yml)
+    when PyYAML is unavailable, so the endpoint always works.
+    """
+    global _FABRIC_TOPOLOGY_CACHE
+    if _FABRIC_TOPOLOGY_CACHE is not None:
+        return _FABRIC_TOPOLOGY_CACHE
+
+    clab_yml = os.path.normpath(os.path.join(
+        _HERE, "..", "containerlab-multivendor", "topologies", "clos-evpn.clab.yml"
+    ))
+
+    nodes = [d for d in _ALL_DEVICES if d.get("fabric") == "clos-evpn"]
+
+    # Try PyYAML first; otherwise use the known link list.
+    links: list[dict] = []
+    try:
+        import yaml  # type: ignore
+        with open(clab_yml) as f:
+            doc = yaml.safe_load(f)
+        for link in (doc.get("topology", {}).get("links") or []):
+            eps = link.get("endpoints", [])
+            if len(eps) == 2:
+                a_host, a_port = eps[0].split(":", 1)
+                b_host, b_port = eps[1].split(":", 1)
+                links.append({"a": a_host, "a_port": a_port, "b": b_host, "b_port": b_port,
+                              "kind": "p2p" if "host" not in (a_host + b_host) else "access"})
+    except Exception:
+        spine_leaf = [
+            ("spine1","e1-1","leaf1","et1"), ("spine1","e1-2","leaf2","e1-1"), ("spine1","e1-3","leaf3","eth1"),
+            ("spine1","e1-4","leaf4","et2"), ("spine1","e1-5","leaf5","e1-1"), ("spine1","e1-6","leaf6","eth1"),
+            ("spine2","et1","leaf1","et2"),  ("spine2","et2","leaf2","e1-2"), ("spine2","et3","leaf3","eth2"),
+            ("spine2","et4","leaf4","et3"),  ("spine2","et5","leaf5","e1-2"), ("spine2","et6","leaf6","eth2"),
+            ("spine3","eth3","leaf1","et3"), ("spine3","eth4","leaf2","e1-3"), ("spine3","eth5","leaf3","eth3"),
+            ("spine3","eth6","leaf4","et4"), ("spine3","eth7","leaf5","e1-3"), ("spine3","eth8","leaf6","eth3"),
+        ]
+        host_leaf = [
+            ("host1","eth1","leaf1","et4"), ("host2","eth1","leaf2","e1-4"), ("host3","eth1","leaf3","eth4"),
+            ("host4","eth1","leaf4","et5"), ("host5","eth1","leaf5","e1-4"), ("host6","eth1","leaf6","eth4"),
+        ]
+        for a, ap, b, bp in spine_leaf:
+            links.append({"a": a, "a_port": ap, "b": b, "b_port": bp, "kind": "p2p"})
+        for a, ap, b, bp in host_leaf:
+            links.append({"a": a, "a_port": ap, "b": b, "b_port": bp, "kind": "access"})
+
+    overlay = [s for s in _BGP_SESSIONS if s.get("fabric") == "clos-evpn"]
+    _FABRIC_TOPOLOGY_CACHE = {
+        "fabric": "clos-evpn",
+        "site": "CLAB-DC1",
+        "vendor_mix": "Nokia SR Linux + Arista cEOS + FRR",
+        "nodes": nodes,
+        "links": links,
+        "overlay_sessions": overlay,
+        "stats": {
+            "nodes": len(nodes),
+            "spines": sum(1 for n in nodes if n.get("role") == "spine"),
+            "leafs":  sum(1 for n in nodes if n.get("role") == "leaf"),
+            "hosts":  sum(1 for n in nodes if n.get("role") == "host"),
+            "physical_links": len(links),
+            "overlay_sessions": len(overlay),
+        },
+    }
+    return _FABRIC_TOPOLOGY_CACHE
+
+
+def _load_dcn_topology() -> dict:
+    """Build the DCN (10-node FRR site-to-site) topology from inventory + BGP sessions.
+
+    Only counts *live* deployed nodes — static-config entries (de-fra-fw-01,
+    de-fra-mx-01, etc.) are inventory-only and not running, so they would lie
+    if reported as part of the live topology.
+    """
+    nodes = [d for d in _ALL_DEVICES
+             if d.get("fabric") == "dcn" or
+                (d.get("live") and d.get("fabric") != "clos-evpn")]
+    sessions = [s for s in _BGP_SESSIONS if s.get("fabric") != "clos-evpn"]
+    links = [{"a": s.get("a") or s.get("from"),
+              "a_port": s.get("a_port", "-"),
+              "b": s.get("b") or s.get("to"),
+              "b_port": s.get("b_port", "-"),
+              "kind": s.get("type", "ebgp")}
+             for s in sessions if (s.get("a") or s.get("from")) and (s.get("b") or s.get("to"))]
+    by_site: dict[str, int] = {}
+    for n in nodes:
+        site = n.get("site") or "unknown"
+        by_site[site] = by_site.get(site, 0) + 1
+    return {
+        "fabric": "dcn",
+        "site": "multi-site (DE-FRA, UK-LON, NL-AMS, US-NYC)",
+        "vendor_mix": "FRR (10 nodes)",
+        "nodes": nodes,
+        "links": links,
+        "overlay_sessions": sessions,
+        "stats": {
+            "nodes": len(nodes),
+            "ebgp_sessions": len(sessions),
+            "sites": len(by_site),
+            "per_site": by_site,
+        },
+    }
+
+
+@mv_bp.route("/api/mv/fabric-topology", methods=["GET"])
+def mv_fabric_topology():
+    """Return the real device-level topology.
+
+    Query params:
+      ?fabric=clos-evpn  (default) — Nokia/Arista/FRR Clos fabric, 24 physical links
+      ?fabric=dcn                  — 10-node FRR site-to-site DCN lab
+      ?fabric=all                  — both fabrics merged
+    """
+    fabric = (request.args.get("fabric") or "clos-evpn").lower().strip()
+    if fabric == "dcn":
+        return jsonify(_load_dcn_topology())
+    if fabric == "all":
+        clos = _load_fabric_topology()
+        dcn = _load_dcn_topology()
+        merged = {
+            "fabric": "all",
+            "nodes": clos["nodes"] + dcn["nodes"],
+            "links": clos["links"] + dcn["links"],
+            "fabrics": {"clos-evpn": clos, "dcn": dcn},
+            "stats": {
+                "total_nodes": len(clos["nodes"]) + len(dcn["nodes"]),
+                "total_links": len(clos["links"]) + len(dcn["links"]),
+            },
+        }
+        return jsonify(merged)
+    return jsonify(_load_fabric_topology())
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ── GET /api/mv/clab-status — live per-node BGP/intf state from collector ───
+# ══════════════════════════════════════════════════════════════════════════════
+
+_CLAB_STATUS_FILE = os.environ.get("CLAB_STATUS_FILE", "/tmp/clab_status.json")
+
+
+@mv_bp.route("/api/mv/clab-status", methods=["GET"])
+def mv_clab_status():
+    """Latest per-node clab status snapshot, written by clab_collector.py every 15s.
+
+    Returns 503 with a hint if the status file is missing — that means the
+    collector isn't running, and the UI should show a yellow 'collector offline'
+    banner rather than silently faking green.
+    """
+    try:
+        with open(_CLAB_STATUS_FILE) as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        return jsonify({
+            "error": "clab_collector not running",
+            "hint": f"start it: python3 network-lab/telemetry/clab_collector.py (writes to {_CLAB_STATUS_FILE})",
+            "status_file": _CLAB_STATUS_FILE,
+        }), 503
+    except (OSError, json.JSONDecodeError) as exc:
+        return jsonify({"error": "status file unreadable", "detail": str(exc)}), 500
+
+    # Age the snapshot so the UI can grey out stale data.
+    updated_ns = data.get("updated_ns", 0)
+    age_sec = max(0, (time.time_ns() - updated_ns) / 1e9) if updated_ns else None
+    data["age_sec"] = age_sec
+    data["stale"] = bool(age_sec is not None and age_sec > 60)
+    return jsonify(data)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # ── POST /api/mv/batfish/fleet — Batfish-style fleet config analysis ──────────
@@ -494,8 +670,73 @@ _GNMI_PATH_MAP = {
     "memory":                                "show memory",
 }
 
+def _gnmi_vendor_cmd(vendor: str, vtysh_cmd: str) -> list[str] | None:
+    """Map the generic vtysh command into a per-vendor CLI argv list run via
+    ``docker exec``. Returns None if the vendor isn't a known clab vendor."""
+    v = (vendor or "").lower()
+    cmd = (vtysh_cmd or "").lower()
+    if v in ("frr",):
+        return ["vtysh", "-c", vtysh_cmd]
+    if v in ("arista-eos", "arista", "eos"):
+        # Arista takes the same verbs verbatim.
+        return ["Cli", "-p", "15", "-c", vtysh_cmd]
+    if v in ("nokia-srl", "nokia", "srl"):
+        # SR Linux doesn't grok "show ip ...". Translate by intent.
+        srl = vtysh_cmd
+        if "bgp" in cmd:
+            srl = "show network-instance default protocols bgp neighbor"
+        elif "ospf" in cmd:
+            srl = "show network-instance default protocols ospf neighbor"
+        elif "interface" in cmd:
+            srl = "show interface"
+        elif "version" in cmd:
+            srl = "show platform"
+        elif "route" in cmd:
+            srl = "show network-instance default route-table"
+        elif "memory" in cmd or "cpu" in cmd:
+            srl = "show platform resource"
+        return ["sr_cli", "-d", srl]
+    if v == "linux":
+        return ["ip", "-br", "a"]
+    return None
+
+
 def _gnmi_worker(dev: dict, vtysh_cmd: str) -> dict:
-    """Execute vtysh command on FRR container via SSH and return structured response."""
+    """Execute the gNMI-equivalent CLI command for one device. clab fabric
+    nodes (any vendor) go through ``docker exec``; the legacy 10-device FRR
+    lab continues to use SSH to localhost:2201+. Result envelope is the same."""
+    container = dev.get("container")
+    # ── clab fabric: docker exec, multi-vendor ────────────────────────────
+    if container and shutil.which("docker"):
+        argv = _gnmi_vendor_cmd(dev.get("vendor", ""), vtysh_cmd)
+        if argv is None:
+            return _gnmi_error_envelope(dev, RuntimeError(f"unsupported vendor {dev.get('vendor')!r}"))
+        try:
+            proc = subprocess.run(
+                ["docker", "exec", container, *argv],
+                capture_output=True, text=True, timeout=8,
+            )
+        except subprocess.TimeoutExpired as exc:
+            return _gnmi_error_envelope(dev, exc)
+        except Exception as exc:  # noqa: BLE001
+            log.exception("gnmi_worker docker-exec failed on %s", dev.get("hostname"))
+            return _gnmi_error_envelope(dev, exc)
+        out = (proc.stdout or "").strip()
+        err = (proc.stderr or "").strip()
+        return {
+            "hostname":  dev["hostname"],
+            "site":      dev["site"],
+            "vendor":    dev["vendor"],
+            "ip":        dev["ip"],
+            "port":      dev.get("port"),
+            "container": container,
+            "via":       "docker-exec",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "output":    out or err,
+            "success":   proc.returncode == 0 and bool(out),
+        }
+
+    # ── legacy DCN FRR lab: SSH to localhost:port → vtysh ────────────────
     try:
         import paramiko as _pm
         _LAB_KEY = os.path.normpath(os.path.join(_LAB_DIR, "ssh-keys/lab_key"))
@@ -520,6 +761,7 @@ def _gnmi_worker(dev: dict, vtysh_cmd: str) -> dict:
             "vendor":    dev["vendor"],
             "ip":        dev["ip"],
             "port":      dev["port"],
+            "via":       "ssh",
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "output":    output or err,
             "success":   bool(output),
@@ -1683,6 +1925,712 @@ def mv_toon():
     text = toon.to_toon(rows)
     stats = toon.size_savings(rows)
     return jsonify({"target": target, "toon": text, "rows": len(rows), **stats})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ── Phase 5-A: Traffic / metric forecasting (forecast_engine) ──────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Endpoints expose the pluggable forecaster (statistical default, Cisco TimesFM
+# opt-in via DCN_FORECAST_PROVIDER). Returns 128-step forecasts with quantile
+# bands and structured anomaly alerts.
+
+# In-memory ring buffer of recent forecasts (per device+metric) — used by the
+# /api/mv/forecast/anomalies endpoint to surface fleet-wide alerts.
+_FORECAST_LOCK = threading.RLock()
+_FORECAST_RECENT: deque = deque(maxlen=200)
+
+
+def _record_forecast(result_dict: dict) -> None:
+    with _FORECAST_LOCK:
+        _FORECAST_RECENT.append({
+            "ts": time.time(),
+            "device": result_dict.get("device"),
+            "metric": result_dict.get("metric"),
+            "model": result_dict.get("model"),
+            "ms": result_dict.get("ms"),
+            "anomaly_alerts": result_dict.get("anomaly_alerts", []),
+        })
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Roadmap #5 — Fleet-wide predictive alerts (2026-05-25)
+# ────────────────────────────────────────────────────────────────────────────
+# `/api/mv/forecast/predict` already produces a 128-step horizon with 95% CI
+# and structured anomaly alerts. To turn that into an actual "predictive
+# alerting" feature, two pieces were missing:
+#
+#   1. A way to run forecast across the WHOLE fleet without a human click —
+#      so anomalies surface autonomously.
+#   2. A pipe from forecast results into `/api/keep/correlate` so the LLM
+#      correlator sees forecast signals alongside rule-based + ADTK anomalies.
+#
+# `run_fleet_forecast()` does (1); the correlate-side merge is in app.py.
+# Both run on demand (no background thread by default — opt-in via the
+# DCN_FORECAST_LOOP_S env var if you want continuous prediction).
+
+_FLEET_FORECAST_LOCK = threading.RLock()
+_FLEET_FORECAST_LAST: dict = {"ts": 0.0, "summary": {}, "alerts": []}
+
+
+def _fetch_metric_history(host: str, measurement: str, field: str,
+                          window_min: int = 60) -> list[float]:
+    """Pull recent time-series values for one (host, measurement, field) from
+    the same InfluxDB the collectors write to. Returns chronological floats."""
+    import urllib.request, urllib.error
+    influx_url = os.environ.get("INFLUXDB_URL",   "http://localhost:8086")
+    influx_org = os.environ.get("INFLUXDB_ORG",   "dcn-lab")
+    influx_tok = os.environ.get("INFLUXDB_TOKEN", "dcn-lab-token-secret")
+    flux = (
+        f'from(bucket:"network-telemetry") '
+        f'|> range(start:-{int(window_min)}m) '
+        f'|> filter(fn:(r) => r._measurement == "{measurement}" '
+        f'and r._field == "{field}" and r.host == "{host}") '
+        f'|> keep(columns:["_time","_value"])'
+    )
+    req = urllib.request.Request(
+        f"{influx_url}/api/v2/query?org={influx_org}",
+        data=flux.encode("utf-8"),
+        headers={
+            "Authorization":  f"Token {influx_tok}",
+            "Content-Type":   "application/vnd.flux",
+            "Accept":         "application/csv",
+        },
+    )
+    values: list[float] = []
+    try:
+        with urllib.request.urlopen(req, timeout=8) as r:
+            body_text = r.read().decode()
+        # Flux CSV: an optional leading "" column, then result, table, _start,
+        # _stop, _time, _value, _field, _measurement, host. Header order can
+        # vary so we parse the header line and find the _value index instead
+        # of hard-coding it.
+        value_idx = -1
+        for line in body_text.splitlines():
+            if not line:
+                continue
+            parts = line.split(",")
+            # Header row starts with "" or "result"
+            if value_idx == -1 and "_value" in parts:
+                value_idx = parts.index("_value")
+                continue
+            if value_idx < 0 or len(parts) <= value_idx:
+                continue
+            try:
+                values.append(float(parts[value_idx]))
+            except ValueError:
+                continue
+    except Exception as exc:
+        log.warning("forecast history fetch %s/%s/%s failed: %s",
+                    host, measurement, field, exc)
+    return values
+
+
+def run_fleet_forecast(metrics: list[tuple[str, str, str]] | None = None,
+                       window_min: int = 60,
+                       horizon: int = 32) -> dict:
+    """Run forecast across every device-with-a-container in inventory.
+
+    Returns a summary dict + the unified list of anomaly alerts produced.
+    Each alert has device, metric, model, severity, eta_s — the "in ~X
+    seconds, this metric will breach threshold" signal the user can act on.
+
+    metrics defaults to a sensible set:
+      - bgp_session_count.established  (BGP underlay churn)
+      - interface_count.up              (link-flap predictor)
+      - bgp_neighbor.uptime_ms          (graceful-restart precursor)
+    """
+    try:
+        from forecast_engine import predict
+    except Exception as exc:
+        return {"error": f"forecast_engine unavailable: {exc}",
+                "summary": {}, "alerts": []}
+
+    if metrics is None:
+        metrics = [
+            ("bgp_session_count", "established", "bgp_established"),
+            ("interface_count",   "up",          "interface_up"),
+        ]
+
+    # Run only on devices that have a container (= live in docker) AND have
+    # a network role (skip Linux hosts).
+    targets = [d for d in _ALL_DEVICES
+               if d.get("container") and d.get("role","").lower() != "host"]
+
+    all_alerts: list[dict] = []
+    per_host_counts: dict[str, int] = {}
+    runs, errors = 0, 0
+    t0 = time.time()
+    for dev in targets:
+        host = dev["hostname"]
+        for measurement, field, metric_label in metrics:
+            history = _fetch_metric_history(host, measurement, field, window_min)
+            if len(history) < 8:
+                continue
+            try:
+                result = predict(host, metric_label, history, horizon=horizon)
+                _record_forecast({
+                    "device": host, "metric": metric_label,
+                    "model": result.model, "ms": result.ms,
+                    "anomaly_alerts": [a.__dict__ if hasattr(a, "__dict__") else a
+                                       for a in result.anomaly_alerts],
+                })
+                runs += 1
+                for a in result.anomaly_alerts:
+                    obj = a.__dict__ if hasattr(a, "__dict__") else a
+                    obj.update({"device": host, "metric": metric_label,
+                                "model": result.model})
+                    all_alerts.append(obj)
+                    per_host_counts[host] = per_host_counts.get(host, 0) + 1
+            except Exception as exc:
+                errors += 1
+                log.debug("predict %s/%s failed: %s", host, metric_label, exc)
+
+    summary = {
+        "elapsed_s":  round(time.time() - t0, 2),
+        "runs":       runs,
+        "errors":     errors,
+        "targets":    len(targets),
+        "alerts":     len(all_alerts),
+        "per_host":   per_host_counts,
+        "ts":         time.time(),
+    }
+    with _FLEET_FORECAST_LOCK:
+        _FLEET_FORECAST_LAST.update({"ts": summary["ts"],
+                                     "summary": summary, "alerts": all_alerts})
+    return {"summary": summary, "alerts": all_alerts}
+
+
+def get_recent_predictive_alerts(max_age_s: float = 1800) -> list[dict]:
+    """Return alerts from the last fleet forecast if it's fresh enough.
+    Used by `/api/keep/correlate` to merge predictive signals."""
+    with _FLEET_FORECAST_LOCK:
+        last = dict(_FLEET_FORECAST_LAST)
+    if not last.get("ts") or (time.time() - last["ts"]) > max_age_s:
+        return []
+    return list(last.get("alerts", []))
+
+
+@mv_bp.route("/api/mv/forecast/run-fleet", methods=["POST"])
+def mv_forecast_run_fleet():
+    """Trigger a fleet-wide forecast pass — predict every host's BGP +
+    interface counters and emit anomaly alerts where the P95 band crosses
+    threshold. Synchronous (~5-15s depending on backend + history size)."""
+    body = request.get_json(silent=True) or {}
+    win = int(body.get("window_min") or 60)
+    horizon = int(body.get("horizon") or 32)
+    out = run_fleet_forecast(window_min=win, horizon=horizon)
+    return jsonify(out)
+
+
+@mv_bp.route("/api/mv/forecast/fleet-status", methods=["GET"])
+def mv_forecast_fleet_status():
+    """Return the result of the most recent fleet forecast pass."""
+    with _FLEET_FORECAST_LOCK:
+        return jsonify(dict(_FLEET_FORECAST_LAST))
+
+
+# Opt-in background loop: set DCN_FORECAST_LOOP_S=900 to forecast every 15 min.
+_FORECAST_LOOP_THREAD: threading.Thread | None = None
+
+
+def _forecast_loop_worker(interval_s: int) -> None:
+    log.info("predictive forecast loop started (every %ds)", interval_s)
+    while True:
+        try:
+            run_fleet_forecast()
+        except Exception as exc:  # noqa: BLE001
+            log.warning("forecast loop iteration failed: %s", exc)
+        time.sleep(interval_s)
+
+
+def _maybe_start_forecast_loop() -> None:
+    global _FORECAST_LOOP_THREAD
+    if _FORECAST_LOOP_THREAD is not None:
+        return
+    try:
+        interval = int(os.environ.get("DCN_FORECAST_LOOP_S", "0"))
+    except ValueError:
+        interval = 0
+    if interval < 60:
+        return
+    t = threading.Thread(target=_forecast_loop_worker, args=(interval,),
+                         daemon=True, name="forecast-loop")
+    t.start()
+    _FORECAST_LOOP_THREAD = t
+
+
+_maybe_start_forecast_loop()
+
+
+@mv_bp.route("/api/mv/forecast/predict", methods=["POST"])
+def mv_forecast_predict():
+    """Generate a forecast for a device metric.
+
+    Body: {
+        device:   string  required,
+        metric:   string  required  (cpu_pct | mem_pct | iface_in_pct | bgp_route_count | error_rate),
+        horizon:  int     optional  (default 128, max 128),
+        context:  list[float] optional (explicit history; else synth fallback),
+        synth:    string  optional  (cpu|memory|bgp_routes|traffic|anomaly — generate synthetic history)
+    }
+    Returns the full ForecastResult JSON.
+    """
+    try:
+        from forecast_engine import predict, synth_series
+    except ImportError as e:
+        return jsonify({"error": "forecast_engine not available", "detail": str(e)}), 503
+
+    body = request.get_json(silent=True) or {}
+    # Accept `hostname`, `device`, `host`, or `target_device` — different UI
+    # tabs send different names. Standardising would require sweeping every
+    # caller; accepting aliases is the pragmatic path.
+    device = (body.get("hostname") or body.get("device") or
+              body.get("host") or body.get("target_device") or "").strip()
+    metric = (body.get("metric") or "").strip()
+    if not device or not metric:
+        return jsonify({
+            "error": "device and metric are required",
+            "accepted_device_keys": ["hostname", "device", "host", "target_device"],
+            "got_keys": list(body.keys()),
+        }), 400
+
+    horizon = int(body.get("horizon", 128))
+    horizon = max(1, min(horizon, 128))
+
+    context = body.get("context")
+    if not context:
+        synth_kind = body.get("synth", "cpu")
+        context = synth_series(kind=synth_kind, length=128)
+
+    try:
+        result = predict(device, metric, list(context), horizon=horizon)
+    except ValueError as e:
+        return jsonify({"error": "invalid input", "detail": str(e)}), 400
+    except Exception as e:
+        log.exception("forecast failed")
+        return jsonify({"error": "forecast_failed", "detail": str(e)}), 500
+
+    payload = {
+        "device": result.device,
+        "metric": result.metric,
+        "history": result.history,
+        "forecast": result.forecast,
+        "quantiles": result.quantiles,
+        "anomaly_alerts": result.anomaly_alerts,
+        "ms": result.ms,
+        "model": result.model,
+        "horizon": result.horizon,
+        "note": result.note,
+    }
+    _record_forecast(payload)
+    return jsonify(payload)
+
+
+@mv_bp.route("/api/mv/forecast/anomalies", methods=["GET"])
+def mv_forecast_anomalies():
+    """Recent forecast-driven anomaly alerts across the fleet.
+
+    Query params:
+        since_seconds:  int  optional  (default 600 = 10 minutes)
+        severity:       string  optional  (high | critical)
+    """
+    try:
+        since = int(request.args.get("since_seconds", "600"))
+    except ValueError:
+        since = 600
+    sev_filter = (request.args.get("severity") or "").strip().lower()
+    cutoff = time.time() - since
+
+    with _FORECAST_LOCK:
+        rows = list(_FORECAST_RECENT)
+
+    alerts: list[dict] = []
+    for r in rows:
+        if r["ts"] < cutoff:
+            continue
+        for a in r.get("anomaly_alerts", []):
+            if sev_filter and a.get("severity", "").lower() != sev_filter:
+                continue
+            alerts.append({
+                "device": r["device"],
+                "metric": r["metric"],
+                "model": r["model"],
+                "forecast_at": r["ts"],
+                **a,
+            })
+
+    return jsonify({
+        "count": len(alerts),
+        "since_seconds": since,
+        "severity_filter": sev_filter or None,
+        "alerts": alerts,
+    })
+
+
+@mv_bp.route("/api/mv/forecast/status", methods=["GET"])
+def mv_forecast_status():
+    """Backend identity, recent throughput, and latency stats."""
+    try:
+        from forecast_engine import get_forecaster, ANOMALY_THRESHOLDS
+    except ImportError as e:
+        return jsonify({"available": False, "error": str(e)}), 503
+
+    try:
+        f = get_forecaster()
+        backend = f.name
+    except Exception as e:
+        return jsonify({"available": False, "error": str(e)}), 503
+
+    with _FORECAST_LOCK:
+        rows = list(_FORECAST_RECENT)
+    latencies = [r["ms"] for r in rows if r.get("ms") is not None]
+    latencies.sort()
+    p50 = latencies[len(latencies) // 2] if latencies else None
+    p95 = latencies[int(len(latencies) * 0.95)] if latencies else None
+
+    return jsonify({
+        "available": True,
+        "backend": backend,
+        "recent_count": len(rows),
+        "latency_p50_ms": p50,
+        "latency_p95_ms": p95,
+        "supported_metrics": list(ANOMALY_THRESHOLDS.keys()),
+        "thresholds": ANOMALY_THRESHOLDS,
+    })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ── Phase 5-B: Predict Mode (digital-twin what-if · predict_engine) ────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Takes a proposed config change, simulates impact against the in-memory
+# topology (BGP sessions + device inventory), returns structured before/after
+# diff plus a verdict (APPROVE | WARN | REJECT). Designed to be a Health Gate
+# pre-flight check.
+
+_PREDICT_LOCK = threading.RLock()
+_PREDICT_HISTORY: deque = deque(maxlen=100)
+_PREDICT_APPROVALS: dict[str, dict] = {}
+
+
+def _build_topology() -> dict:
+    """Snapshot the current topology in the shape predict_engine expects.
+
+    Normalizes session field names: inventory.json uses ``a``/``b``; the
+    predict_engine expects ``peer_a``/``peer_b``. We pass both for safety
+    so legacy callers still work.
+    """
+    sessions = []
+    for s in _BGP_SESSIONS:
+        sessions.append({
+            **s,
+            "peer_a":     s.get("peer_a", s.get("a", "")),
+            "peer_b":     s.get("peer_b", s.get("b", "")),
+            "peer_a_ip":  s.get("peer_a_ip", s.get("a_ip", "")),
+            "peer_b_ip":  s.get("peer_b_ip", s.get("b_ip", "")),
+        })
+    return {
+        "devices":      list(_ALL_DEVICES),
+        "bgp_sessions": sessions,
+    }
+
+
+@mv_bp.route("/api/mv/predict/run", methods=["POST"])
+def mv_predict_run():
+    """Predict the impact of a proposed config change.
+
+    Body: {
+        target_device:   string   required,
+        proposed_change: string   required  (vendor-agnostic config snippet)
+    }
+    Returns the PredictResult JSON (verdict, reasons, diff, parsed_op, …).
+    """
+    try:
+        from predict_engine import predict as _predict
+    except ImportError as e:
+        return jsonify({"error": "predict_engine not available", "detail": str(e)}), 503
+
+    body = request.get_json(silent=True) or {}
+    target_device = (body.get("target_device") or body.get("hostname") or
+                     body.get("device") or body.get("host") or "").strip()
+    proposed_change = body.get("proposed_change") or ""
+    if not target_device:
+        return jsonify({
+            "error": "target_device is required",
+            "accepted_device_keys": ["target_device", "hostname", "device", "host"],
+            "got_keys": list(body.keys()),
+        }), 400
+    if not proposed_change.strip():
+        return jsonify({"error": "proposed_change is required",
+                        "hint": "non-empty string describing the intended change"}), 400
+
+    try:
+        topo = _build_topology()
+        result = _predict(target_device, proposed_change, topo)
+    except ValueError as e:
+        return jsonify({"error": "invalid input", "detail": str(e)}), 400
+    except Exception as e:
+        log.exception("predict failed")
+        return jsonify({"error": "predict_failed", "detail": str(e)}), 500
+
+    # Build a stable predict-id for follow-up approval / history reference
+    predict_id = f"pred-{int(time.time()*1000):x}-{abs(hash(proposed_change)) & 0xffff:04x}"
+
+    payload = {
+        "predict_id":      predict_id,
+        "target_device":   result.target_device,
+        "proposed_change": result.proposed_change,
+        "parsed_op": {
+            "kind":          result.parsed_op.kind,
+            "target_device": result.parsed_op.target_device,
+            "target_object": result.parsed_op.target_object,
+            "detail":        result.parsed_op.detail,
+        },
+        "verdict":   result.verdict,      # APPROVE | WARN | REJECT
+        "reasons":   result.reasons,
+        "notes":     result.notes,
+        "diff":      result.diff,
+        "before_state": {
+            "bgp_session_count":      result.before_state["bgp_session_count"],
+            "target_session_count":   result.before_state["target_session_count"],
+            "target_sessions":        result.before_state["target_sessions"],
+        },
+        "after_state": {
+            "bgp_session_count":      result.after_state["bgp_session_count"],
+            "target_session_count":   result.after_state["target_session_count"],
+            "target_sessions":        result.after_state["target_sessions"],
+        },
+        "ms":        result.ms,
+        "backend":   result.backend,
+        "ts":        time.time(),
+        "approval_status": "pending" if result.verdict in ("WARN", "REJECT") else "auto-approved",
+    }
+
+    with _PREDICT_LOCK:
+        _PREDICT_HISTORY.append({k: payload[k] for k in
+            ("predict_id", "target_device", "verdict", "ms", "backend", "ts", "parsed_op")})
+
+    return jsonify(payload)
+
+
+@mv_bp.route("/api/mv/predict/history", methods=["GET"])
+def mv_predict_history():
+    """Return recent predict runs (id, device, verdict, parsed op)."""
+    try:
+        limit = max(1, min(int(request.args.get("limit", "20")), 100))
+    except ValueError:
+        limit = 20
+    with _PREDICT_LOCK:
+        rows = list(_PREDICT_HISTORY)[-limit:][::-1]
+    return jsonify({"count": len(rows), "history": rows})
+
+
+@mv_bp.route("/api/mv/predict/approve/<predict_id>", methods=["POST"])
+def mv_predict_approve(predict_id: str):
+    """Operator-approves a WARN or REJECT predict result. Stores an
+    approval token that Health Gate can consume as a precondition.
+    """
+    body = request.get_json(silent=True) or {}
+    operator = (body.get("operator") or "operator").strip()
+    note = (body.get("note") or "").strip()
+    with _PREDICT_LOCK:
+        _PREDICT_APPROVALS[predict_id] = {
+            "predict_id": predict_id,
+            "approved_by": operator,
+            "approved_at": time.time(),
+            "note": note,
+        }
+        approval = _PREDICT_APPROVALS[predict_id].copy()
+    return jsonify({"ok": True, "approval": approval})
+
+
+@mv_bp.route("/api/mv/predict/status", methods=["GET"])
+def mv_predict_status():
+    """Backend identity and recent throughput stats."""
+    try:
+        from predict_engine import get_predictor, CHANGE_KINDS
+    except ImportError as e:
+        return jsonify({"available": False, "error": str(e)}), 503
+
+    try:
+        p = get_predictor()
+        backend = p.name
+    except Exception as e:
+        return jsonify({"available": False, "error": str(e)}), 503
+
+    with _PREDICT_LOCK:
+        history = list(_PREDICT_HISTORY)
+        approvals = len(_PREDICT_APPROVALS)
+    latencies = [r["ms"] for r in history if r.get("ms") is not None]
+    latencies.sort()
+    p50 = latencies[len(latencies) // 2] if latencies else None
+    p95 = latencies[int(len(latencies) * 0.95)] if latencies else None
+
+    by_verdict = {"APPROVE": 0, "WARN": 0, "REJECT": 0}
+    for r in history:
+        v = r.get("verdict", "")
+        if v in by_verdict:
+            by_verdict[v] += 1
+
+    return jsonify({
+        "available": True,
+        "backend": backend,
+        "recent_count": len(history),
+        "approvals_count": approvals,
+        "by_verdict": by_verdict,
+        "latency_p50_ms": p50,
+        "latency_p95_ms": p95,
+        "supported_change_kinds": list(CHANGE_KINDS),
+    })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ── Phase 5-C: Blast Radius Guard (blast_radius module) ────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Pre-Health-Gate check that enumerates every downstream device affected by a
+# proposed action and emits a risk-scored verdict. Health Gate consumes the
+# approval_id when approval_required is true.
+
+_BR_LOCK = threading.RLock()
+_BR_HISTORY: deque = deque(maxlen=200)
+_BR_APPROVALS: dict[str, dict] = {}
+
+
+@mv_bp.route("/api/mv/blast-radius/compute", methods=["POST"])
+def mv_blast_compute():
+    """Compute blast radius for a proposed action.
+
+    Body: {
+        action:         string  required  (shutdown_interface | drop_bgp_peer | remove_bgp_process | modify_acl | revoke_route),
+        target_device:  string  required,
+        target_object:  string  optional,
+        depth:          int     optional  (default 3, max 6)
+    }
+    Returns the BlastRadius JSON with risk_score, affected_devices, sites,
+    explanation, and an approval_id if approval is required.
+    """
+    try:
+        from blast_radius import compute_blast_radius, ACTIONS
+    except ImportError as e:
+        return jsonify({"error": "blast_radius not available", "detail": str(e)}), 503
+
+    body = request.get_json(silent=True) or {}
+    action = (body.get("action") or "").strip()
+    target_device = (body.get("target_device") or body.get("hostname") or
+                     body.get("device") or body.get("host") or "").strip()
+    target_object = (body.get("target_object") or "").strip()
+    try:
+        depth = max(1, min(int(body.get("depth", 3)), 6))
+    except (TypeError, ValueError):
+        depth = 3
+
+    if action not in ACTIONS:
+        return jsonify({"error": f"unknown action: {action!r}",
+                        "supported": list(ACTIONS)}), 400
+    if not target_device:
+        return jsonify({
+            "error": "target_device is required",
+            "accepted_device_keys": ["target_device", "hostname", "device", "host"],
+            "got_keys": list(body.keys()),
+        }), 400
+
+    try:
+        topo = _build_topology()
+        result = compute_blast_radius(action, target_device, target_object, topo, depth=depth)
+    except ValueError as e:
+        return jsonify({"error": "invalid input", "detail": str(e)}), 400
+    except Exception as e:
+        log.exception("blast-radius failed")
+        return jsonify({"error": "blast_radius_failed", "detail": str(e)}), 500
+
+    approval_id = (
+        f"br-{int(time.time()*1000):x}-{abs(hash(action + target_device + target_object)) & 0xffff:04x}"
+        if result.approval_required else None
+    )
+
+    payload = {
+        "approval_id":           approval_id,
+        "action":                result.action,
+        "target_device":         result.target_device,
+        "target_object":         result.target_object,
+        "depth":                 result.depth,
+        "affected_devices":      result.affected_devices,
+        "devices_by_hop":        result.devices_by_hop,
+        "affected_sessions":     result.affected_sessions,
+        "affected_sites":        result.affected_sites,
+        "affected_services":     result.affected_services,
+        "isolation_risk":        result.isolation_risk,
+        "redundancy_lost":       result.redundancy_lost,
+        "risk_score":            result.risk_score,
+        "approval_required":     result.approval_required,
+        "explanation":           result.explanation,
+        "ms":                    result.ms,
+        "ts":                    time.time(),
+    }
+
+    with _BR_LOCK:
+        _BR_HISTORY.append({
+            "approval_id": approval_id,
+            "action": action, "target_device": target_device, "target_object": target_object,
+            "risk_score": result.risk_score, "approval_required": result.approval_required,
+            "affected_count": len(result.affected_devices),
+            "sites_count": len(result.affected_sites),
+            "ms": result.ms, "ts": payload["ts"],
+        })
+
+    return jsonify(payload)
+
+
+@mv_bp.route("/api/mv/blast-radius/history", methods=["GET"])
+def mv_blast_history():
+    """Recent blast-radius computations."""
+    try:
+        limit = max(1, min(int(request.args.get("limit", "20")), 100))
+    except ValueError:
+        limit = 20
+    with _BR_LOCK:
+        rows = list(_BR_HISTORY)[-limit:][::-1]
+    return jsonify({"count": len(rows), "history": rows})
+
+
+@mv_bp.route("/api/mv/blast-radius/approve/<approval_id>", methods=["POST"])
+def mv_blast_approve(approval_id: str):
+    """Operator approves a HIGH/CRIT blast radius. Health Gate uses the
+    stored approval as a precondition to apply the underlying change.
+    """
+    body = request.get_json(silent=True) or {}
+    operator = (body.get("operator") or "operator").strip()
+    note = (body.get("note") or "").strip()
+    with _BR_LOCK:
+        _BR_APPROVALS[approval_id] = {
+            "approval_id": approval_id,
+            "approved_by": operator,
+            "approved_at": time.time(),
+            "note": note,
+        }
+        return jsonify({"ok": True, "approval": _BR_APPROVALS[approval_id].copy()})
+
+
+@mv_bp.route("/api/mv/blast-radius/approval/<approval_id>", methods=["GET"])
+def mv_blast_approval_status(approval_id: str):
+    """Look up an approval record (used by Health Gate as the precondition)."""
+    with _BR_LOCK:
+        rec = _BR_APPROVALS.get(approval_id)
+    if not rec:
+        return jsonify({"approval_id": approval_id, "approved": False}), 404
+    # Approval is valid for up to 5 minutes after creation
+    age = time.time() - rec.get("approved_at", 0)
+    return jsonify({
+        "approval_id": approval_id,
+        "approved": True,
+        "approved_by": rec["approved_by"],
+        "approved_at": rec["approved_at"],
+        "age_seconds": age,
+        "expired": age > 300,
+        "note": rec["note"],
+    })
 
 
 # ══════════════════════════════════════════════════════════════════════════════

@@ -45,6 +45,7 @@ import csv
 import json
 import math
 import re
+import shutil
 import subprocess
 import threading
 import time
@@ -446,7 +447,43 @@ _FRR_LAB_DEVICES = [
     {"site": "NL-AMS", "ip": "10.200.0.14", "hostname": "nl-ams-core-01", "type": "frr", "role": "core", "port": 2204},
     {"site": "NL-AMS", "ip": "10.200.0.23", "hostname": "nl-ams-edge-01", "type": "frr", "role": "edge", "port": 2209},
     {"site": "US-NYC", "ip": "10.200.0.15", "hostname": "us-nyc-core-01", "type": "frr", "role": "core", "port": 2207},
+    # ── Containerlab Clos EVPN Fabric (clab-clos-evpn-*) ──────────────────
+    {"site": "CLAB-DC1", "ip": "172.20.20.11", "hostname": "spine1", "type": "frr", "role": "spine", "port": 22, "vendor": "Nokia", "model": "SRL-IXR-D3L", "as_number": 65100, "fabric": "clos-evpn"},
+    {"site": "CLAB-DC1", "ip": "172.20.20.12", "hostname": "spine2", "type": "frr", "role": "spine", "port": 22, "vendor": "Arista", "model": "cEOS-4.33.1F", "as_number": 65100, "fabric": "clos-evpn"},
+    {"site": "CLAB-DC1", "ip": "172.20.20.13", "hostname": "spine3", "type": "frr", "role": "spine", "port": 22, "vendor": "FRR", "model": "FRR-v8.4", "as_number": 65100, "fabric": "clos-evpn"},
+    {"site": "CLAB-DC1", "ip": "172.20.20.21", "hostname": "leaf1", "type": "frr", "role": "leaf", "port": 22, "vendor": "Arista", "model": "cEOS-4.33.1F", "as_number": 65001, "fabric": "clos-evpn"},
+    {"site": "CLAB-DC1", "ip": "172.20.20.22", "hostname": "leaf2", "type": "frr", "role": "leaf", "port": 22, "vendor": "Nokia", "model": "SRL-IXR-D3L", "as_number": 65002, "fabric": "clos-evpn"},
+    {"site": "CLAB-DC1", "ip": "172.20.20.23", "hostname": "leaf3", "type": "frr", "role": "leaf", "port": 22, "vendor": "FRR", "model": "FRR-v8.4", "as_number": 65003, "fabric": "clos-evpn"},
+    {"site": "CLAB-DC1", "ip": "172.20.20.24", "hostname": "leaf4", "type": "frr", "role": "leaf", "port": 22, "vendor": "Arista", "model": "cEOS-4.33.1F", "as_number": 65004, "fabric": "clos-evpn"},
+    {"site": "CLAB-DC1", "ip": "172.20.20.25", "hostname": "leaf5", "type": "frr", "role": "leaf", "port": 22, "vendor": "Nokia", "model": "SRL-IXR-D3L", "as_number": 65005, "fabric": "clos-evpn"},
+    {"site": "CLAB-DC1", "ip": "172.20.20.26", "hostname": "leaf6", "type": "frr", "role": "leaf", "port": 22, "vendor": "FRR", "model": "FRR-v8.4", "as_number": 65006, "fabric": "clos-evpn"},
+    # ── Containerlab Clos EVPN Hosts (test endpoints, no CLI) ─────────────
+    {"site": "CLAB-DC1", "ip": "172.20.20.31", "hostname": "host1", "type": "linux", "role": "host", "port": 22, "vendor": "Linux", "model": "network-multitool", "vlan": 10, "rack": "rack-1", "fabric": "clos-evpn", "connected_leaf": "leaf1"},
+    {"site": "CLAB-DC1", "ip": "172.20.20.32", "hostname": "host2", "type": "linux", "role": "host", "port": 22, "vendor": "Linux", "model": "network-multitool", "vlan": 10, "rack": "rack-1", "fabric": "clos-evpn", "connected_leaf": "leaf2"},
+    {"site": "CLAB-DC1", "ip": "172.20.20.33", "hostname": "host3", "type": "linux", "role": "host", "port": 22, "vendor": "Linux", "model": "network-multitool", "vlan": 20, "rack": "rack-2", "fabric": "clos-evpn", "connected_leaf": "leaf3"},
+    {"site": "CLAB-DC1", "ip": "172.20.20.34", "hostname": "host4", "type": "linux", "role": "host", "port": 22, "vendor": "Linux", "model": "network-multitool", "vlan": 20, "rack": "rack-2", "fabric": "clos-evpn", "connected_leaf": "leaf4"},
+    {"site": "CLAB-DC1", "ip": "172.20.20.35", "hostname": "host5", "type": "linux", "role": "host", "port": 22, "vendor": "Linux", "model": "network-multitool", "vlan": 30, "rack": "rack-3", "fabric": "clos-evpn", "connected_leaf": "leaf5"},
+    {"site": "CLAB-DC1", "ip": "172.20.20.36", "hostname": "host6", "type": "linux", "role": "host", "port": 22, "vendor": "Linux", "model": "network-multitool", "vlan": 30, "rack": "rack-3", "fabric": "clos-evpn", "connected_leaf": "leaf6"},
 ]
+# Derive container names + normalized vendor for the clab fabric — health-all,
+# AI command, and any other docker-exec aware endpoint discover clab nodes by
+# the presence of d["container"].
+_VENDOR_NORMAL = {
+    "Nokia": "nokia-srl", "Arista": "arista-eos", "FRR": "frr", "Linux": "linux",
+}
+for _d in _FRR_LAB_DEVICES:
+    if _d.get("fabric") == "clos-evpn":
+        _d.setdefault("container", f"clab-clos-evpn-{_d['hostname']}")
+        _norm = _VENDOR_NORMAL.get(_d.get("vendor", ""))
+        if _norm:
+            _d.setdefault("vendor_canonical", _norm)
+            _d["vendor"] = _norm  # endpoints branch on lower-case canonical name
+    elif _d.get("type") == "frr" and _d.get("hostname"):
+        # DCN-lab FRR routers run as docker containers with the hostname as name.
+        # Populating .container lets NAPALM use docker exec vtysh rather than
+        # SSHing on port 2201+ (which the .frr fallback path doesn't use right).
+        _d.setdefault("container", _d["hostname"])
+
 # Prepend so FRR devices are matched first (production CSV may have collisions)
 _lab_hostnames = {d["hostname"] for d in _FRR_LAB_DEVICES}
 DEVICES = _FRR_LAB_DEVICES + [d for d in DEVICES if d["hostname"] not in _lab_hostnames]
@@ -483,14 +520,77 @@ _EOS_IFACE_NAME_RE = re.compile(r"^(Ethernet\S+|Et\S+)\s*$")
 _EOS_IFACE_MTU_RE  = re.compile(r"^(Ethernet\S+|Et\S+|Vlan\S+|Port-Channel\S+).*MTU\s+(\d+)", re.I)
 
 # ── Auto-populate NAPALM_SITES from inventory ─────────────────────────────────
+# Driver selection rules:
+#   - .type == "eos"   → eos driver (paramiko SSH eAPI fallback)
+#   - .type == "frr"   → frr driver (docker exec vtysh — see _frr_collect)
+#   - .type == "linux" → SKIPPED (hosts have no network CLI)
+#   - .vendor_canonical in {nokia-srl, arista-eos} on a clab fabric node
+#                      → corresponding clab-* driver routed through docker exec
+#   - default          → junos driver
+# This is what makes NAPALM endpoints work against the FRR DCN lab + clab fabric.
+# Previously every non-EOS device got driver=junos, so NAPALM SSH+NETCONF hung.
 for _d in DEVICES:
     _site = _d["site"].lower()
     _host = _d["hostname"].split(".")[0]
-    _driver = "eos" if _d["type"] == "eos" else "junos"
+    _t = _d.get("type", "")
+    _vc = (_d.get("vendor_canonical") or _d.get("vendor") or "").lower()
+    if _t == "linux":
+        continue   # test hosts — no network CLI to collect from
+    # IMPORTANT: clab inventory tags every node with type=frr as a shorthand
+    # for "lab container". Vendor-specific drivers (SRL via sr_cli · cEOS
+    # via Cli) must be checked FIRST — otherwise every clab node falls into
+    # the vtysh-only branch and NAPALM returns empty data for SRL/cEOS.
+    if _vc == "nokia-srl" and _d.get("container"):
+        _driver = "clab-srl"
+    elif _vc == "arista-eos" and _d.get("container"):
+        _driver = "clab-eos"
+    elif _t == "frr":
+        _driver = "frr"
+    elif _t == "eos":
+        _driver = "eos"
+    else:
+        _driver = "junos"
     if _site not in NAPALM_SITES:
         NAPALM_SITES[_site] = {}
-    NAPALM_SITES[_site][_host] = {"ip": _d["ip"], "driver": _driver}
-print(f"NAPALM sites: {len(NAPALM_SITES)} sites, {sum(len(v) for v in NAPALM_SITES.values())} devices")
+    NAPALM_SITES[_site][_host] = {
+        "ip":        _d["ip"],
+        "driver":    _driver,
+        "container": _d.get("container"),  # populated for clab nodes
+        "port":      _d.get("port", 22),
+    }
+print(f"NAPALM sites: {len(NAPALM_SITES)} sites, "
+      f"{sum(len(v) for v in NAPALM_SITES.values())} devices")
+
+
+def _resolve_napalm_site(data: dict):
+    """Resolve a NAPALM site from the request body, accepting site/hostname/host/device.
+
+    Returns (site, error_response). On success, error_response is None.
+    On failure, returns (None, jsonify(...)) suitable to ``return`` directly.
+
+    Why: every napalm endpoint used to demand a `site` and returned the opaque
+    ``"Unknown site: "`` error if the caller sent `hostname` instead. Now we
+    accept any common key shape and surface the actual accepted values when
+    the lookup fails — so a 400 tells the user how to fix it.
+    """
+    site = (data.get("site") or "").lower().strip()
+    if site and site in NAPALM_SITES:
+        return site, None
+
+    # Try to resolve from a hostname/device-style key
+    candidate = (data.get("hostname") or data.get("host") or data.get("device") or "").strip()
+    if candidate:
+        host_lower = candidate.split(".")[0].lower()
+        for s, devs in NAPALM_SITES.items():
+            if host_lower in {h.lower() for h in devs.keys()}:
+                return s, None
+
+    return None, (jsonify({
+        "error": f"Unknown site: {site!r}" if site else "site (or hostname/host/device) is required",
+        "accepted_keys": ["site", "hostname", "host", "device"],
+        "valid_sites": sorted(NAPALM_SITES.keys()),
+        "got_keys": list(data.keys()),
+    }), 400)
 
 # ── Command Templates ──────────────────────────────────────────────────────────
 COMMANDS = {
@@ -752,11 +852,65 @@ def _clean_prompt(raw_prompt):
     last = raw_prompt.strip().splitlines()[-1].strip()
     return re.escape(last) if last else None
 
+def _clab_exec_for_command(ip: str, command: str) -> dict | None:
+    """If ``ip`` belongs to a clab fabric node (has a ``container`` field in
+    inventory), run ``command`` via ``docker exec`` and return the result dict.
+    Returns ``None`` if the IP isn't a clab node — caller falls through to SSH.
+    """
+    # _DEVICE_BY_IP is populated after DEVICES is finalized.
+    dev = _DEVICE_BY_IP.get(ip) if "_DEVICE_BY_IP" in globals() else None
+    if not dev or not dev.get("container") or not shutil.which("docker"):
+        return None
+
+    container = dev["container"]
+    # DCN FRR lab routers don't have a vendor tag — use type as the fallback.
+    # Without this, the shim returns "unsupported vendor ''" and the Nornir
+    # worker fails for every de-fra-* / uk-lon-* / nl-ams-* / us-nyc-* host.
+    vendor = (dev.get("vendor") or dev.get("type") or "").lower()
+    cmd_lower = command.lower().strip()
+
+    if vendor in ("frr",):
+        argv = ["docker", "exec", container, "vtysh", "-c", command]
+    elif vendor in ("arista-eos", "arista", "eos"):
+        # Arista accepts the command verbatim; "show ip bgp summary" works as-is.
+        argv = ["docker", "exec", container, "Cli", "-p", "15", "-c", command]
+    elif vendor in ("nokia-srl", "nokia", "srl"):
+        # SR Linux doesn't grok "show ip bgp" — translate the common verbs.
+        srl_cmd = command
+        if "bgp" in cmd_lower:
+            srl_cmd = "show network-instance default protocols bgp neighbor"
+        elif "ospf" in cmd_lower:
+            srl_cmd = "show network-instance default protocols ospf neighbor"
+        elif "interface" in cmd_lower or "intf" in cmd_lower:
+            srl_cmd = "show interface"
+        argv = ["docker", "exec", container, "sr_cli", "-d", srl_cmd]
+    elif vendor in ("linux",):
+        argv = ["docker", "exec", container, "sh", "-c", command]
+    else:
+        return {"success": False, "output": "", "error": f"unsupported vendor {vendor!r}", "command": command}
+
+    try:
+        proc = subprocess.run(argv, capture_output=True, text=True, timeout=20)
+    except subprocess.TimeoutExpired:
+        return {"success": False, "output": "", "error": "docker exec timed out", "command": command}
+    except Exception as exc:  # noqa: BLE001
+        return {"success": False, "output": "", "error": f"docker exec failed: {exc}", "command": command}
+    if proc.returncode != 0:
+        return {"success": False, "output": proc.stdout, "error": (proc.stderr or "").strip()[:300], "command": command}
+    return {"success": True, "output": proc.stdout.strip(), "command": command, "via": "docker-exec", "vendor": vendor, "container": container}
+
+
 def run_command_on_device(ip, dtype, command, port=22):
     """Execute a single command on a device via paramiko interactive shell.
     Works for both pkcs11 (YubiKey) and key (netadmin) modes.
     FRR devices use exec_command + vtysh -c instead of an interactive shell.
+    Containerlab fabric nodes (any vendor) are dispatched through docker exec.
     """
+    # clab fabric short-circuit — no SSH needed.
+    clab = _clab_exec_for_command(ip, command)
+    if clab is not None:
+        return clab
+
     client = paramiko.SSHClient()
     apply_ssh_policy(client)
     try:
@@ -957,6 +1111,31 @@ def get_commands(dtype):
     """Return available commands for a device type."""
     cmds = COMMANDS.get(dtype, COMMANDS["junos"])
     return jsonify(cmds)
+
+
+@app.route("/api/health/<hostname>", methods=["GET"])
+def get_device_health(hostname):
+    """Single-device operational snapshot — version, BGP, OSPF, interfaces, routes, mem, CPU.
+
+    Runs a parallel fan-out of vendor-specific show commands (typically <2s on the lab)
+    and returns one normalized JSON document. See src/health.py for the schema.
+
+    Inspired by scottpeterman/what_a_NOS_could_be — no agents, no SNMP, just show commands.
+    """
+    dev = get_device_by_hostname(hostname)
+    if not dev:
+        return jsonify({"success": False, "error": f"Unknown hostname: {hostname}"}), 404
+
+    from health import collect_health  # local import — keeps cold-start cheap
+
+    snapshot = collect_health(
+        hostname=dev["hostname"],
+        ip=dev.get("ip") or "127.0.0.1",
+        dtype=dev.get("type", "frr"),
+        port=int(dev.get("port") or 22),
+        runner=run_command_on_device,
+    )
+    return jsonify(snapshot)
 
 @app.route("/api/run", methods=["POST"])
 def run_command():
@@ -10514,12 +10693,247 @@ def _eos_ssh_collect(hostname, ip, getters):
     return result
 
 
-def _napalm_collect(hostname, ip, driver_name, getters):
-    """Collect data via paramiko SSH for all devices (both Junos and EOS)."""
+def _docker_run(container: str, *cmd: str, timeout: int = 8) -> str:
+    """Run a command inside a container via docker (list-arg subprocess, no shell).
+    Returns stdout text; raises RuntimeError on non-zero exit or timeout.
+    Used by the NAPALM-equivalent collectors for FRR / Nokia SRL / Arista cEOS."""
+    import subprocess as _sp
+    p = _sp.run(["docker", "exec", container, *cmd],
+                capture_output=True, text=True, timeout=timeout)
+    if p.returncode != 0:
+        raise RuntimeError(f"{container}: rc={p.returncode}: {(p.stderr or '').strip()[:200]}")
+    return p.stdout
+
+
+def _frr_collect(hostname: str, container: str | None, ip: str, getters: list[str]) -> dict:
+    """NAPALM-equivalent collector for FRR (vtysh) — works on docker containers
+    (preferred) OR over SSH if a container is not known. Returns the same shape
+    as the Junos/EOS paths so the existing /api/napalm/* endpoints work
+    unchanged for FRR sites."""
+    import json as _jm
+    container = container or (f"clab-clos-evpn-{hostname}"
+                              if hostname.startswith(("spine","leaf")) else container)
+    if not container:
+        # SSH fallback for legacy DCN lab routers exposed on port 2201+
+        dev = get_device_by_hostname(hostname)
+        if not dev:
+            return {"hostname": hostname, "error": "device not found", "data": {}}
+        try:
+            import paramiko as _pm
+            client = _pm.SSHClient()
+            client.set_missing_host_key_policy(_pm.AutoAddPolicy())
+            client.connect(ip, port=dev.get("port", 22),
+                           username=os.environ.get("SSH_USER", "frr"),
+                           key_filename=SSH_KEY_PATH, timeout=4)
+            _, stdout, _ = client.exec_command(
+                "vtysh -c 'show version' && vtysh -c 'show bgp summary json'", timeout=6)
+            _ = stdout.read().decode(errors="replace")
+            client.close()
+        except Exception as e:
+            return {"hostname": hostname, "error": f"ssh: {e}", "data": {}}
+    data: dict = {}
+    def _vt(cmd: str) -> str:
+        try:
+            return _docker_run(container, "vtysh", "-c", cmd) if container else ""
+        except Exception as e:
+            return f"__error__{e}"
+    if "get_facts" in getters:
+        ver = _vt("show version")
+        m = re.search(r"FRRouting\s+(\S+)", ver)
+        data["get_facts"] = {
+            "os_version": (m.group(1) if m else "FRR"),
+            "vendor": "FRRouting", "model": "container", "hostname": hostname,
+            "serial_number": "N/A", "uptime": -1, "interface_list": [],
+        }
+    if "get_bgp_neighbors" in getters:
+        raw = _vt("show bgp summary json")
+        try: j = _jm.loads(raw) if not raw.startswith("__error__") else {}
+        except Exception: j = {}
+        peers: dict = {}
+        for af, afdata in (j.items() if isinstance(j, dict) else []):
+            ps = (afdata or {}).get("peers") if isinstance(afdata, dict) else None
+            if not ps: continue
+            for pip, p in ps.items():
+                peers[pip] = {
+                    "is_up": str(p.get("state","")).lower() == "established",
+                    "is_enabled": True, "remote_as": p.get("remoteAs"),
+                    "uptime": p.get("peerUptimeMsec", 0) // 1000,
+                    "address_family": {"ipv4": {
+                        "received_prefixes": p.get("pfxRcd", 0),
+                        "accepted_prefixes": p.get("pfxRcd", 0),
+                        "sent_prefixes":     p.get("pfxSnt", 0)}},
+                }
+        data["get_bgp_neighbors"] = {"global": {
+            "router_id": (j.get("ipv4Unicast") or {}).get("routerId", "") if isinstance(j, dict) else "",
+            "peers": peers}}
+    if "get_environment" in getters:
+        data["get_environment"] = {"cpu": {"0": {"%usage": 0.0}}, "memory": {},
+                                   "temperature": {}, "fans": {}, "power": {}}
+    if "get_interfaces" in getters or "get_interfaces_counters" in getters:
+        raw = _vt("show interface brief json")
+        try: j = _jm.loads(raw) if not raw.startswith("__error__") else {}
+        except Exception: j = {}
+        ifs: dict = {}
+        for iname, idata in (j.items() if isinstance(j, dict) else []):
+            if not isinstance(idata, dict): continue
+            ifs[iname] = {
+                "is_up":      str(idata.get("status","")).lower() in ("up", "active"),
+                "is_enabled": str(idata.get("administrativeStatus","")).lower() in ("up", "active"),
+                "description": "", "speed": 0, "mac_address": "", "mtu": 1500,
+            }
+        if "get_interfaces" in getters:
+            data["get_interfaces"] = ifs
+        if "get_interfaces_counters" in getters:
+            data["get_interfaces_counters"] = {iname: {
+                "tx_errors": 0, "rx_errors": 0, "tx_discards": 0, "rx_discards": 0,
+                "tx_octets": 0,  "rx_octets": 0,
+                "tx_unicast_packets": 0, "rx_unicast_packets": 0,
+                "tx_multicast_packets": 0, "rx_multicast_packets": 0,
+                "tx_broadcast_packets": 0, "rx_broadcast_packets": 0} for iname in ifs}
+    return {"hostname": hostname, "data": data}
+
+
+def _clab_srl_collect(hostname: str, container: str, getters: list[str]) -> dict:
+    """NAPALM-equivalent collector for Nokia SR Linux via sr_cli inside docker.
+
+    NOTE: SRL doesn't accept the Cisco-style `show system information` —
+    its CLI uses `info from state /system/...`. The previous version crashed
+    the whole collection on the first getter; per-getter try/except now
+    isolates failures so partial data still returns."""
+    data: dict = {}
+    errors: list[str] = []
+    # get_facts — best effort, falls back to a stub if the SRL CLI rejects.
+    if "get_facts" in getters:
+        try:
+            raw = _docker_run(container, "sr_cli",
+                              "info from state /system information version")
+            m_ver = re.search(r"version\s*:?\s*\"?([0-9][^\s\"]+)", raw, re.I)
+            data["get_facts"] = {
+                "os_version": m_ver.group(1) if m_ver else "SR Linux",
+                "vendor": "Nokia", "model": "SR Linux container", "hostname": hostname,
+                "serial_number": "N/A", "uptime": -1, "interface_list": [],
+            }
+        except Exception:
+            data["get_facts"] = {
+                "os_version": "SR Linux", "vendor": "Nokia",
+                "model": "SR Linux container", "hostname": hostname,
+                "serial_number": "N/A", "uptime": -1, "interface_list": [],
+            }
+    if "get_bgp_neighbors" in getters:
+        try:
+            raw = _docker_run(container, "sr_cli",
+                              "show network-instance default protocols bgp neighbor")
+            peers: dict = {}
+            for line in raw.splitlines():
+                m = re.search(r"^\s*\|\s*\S+\s*\|\s*(\d+\.\d+\.\d+\.\d+)\s*\|\s*\S+\s*\|\s*\S+\s*\|\s*(\d+)\s*\|\s*(established|active|connect|idle|opensent|openconfirm)\s",
+                              line, re.I)
+                if m:
+                    ip_, asn, state = m.group(1), int(m.group(2)), m.group(3).lower()
+                    peers[ip_] = {"is_up": state == "established", "is_enabled": True,
+                                  "remote_as": asn, "uptime": 0,
+                                  "address_family": {"ipv4": {"received_prefixes": 0,
+                                                                "accepted_prefixes": 0,
+                                                                "sent_prefixes": 0}}}
+            data["get_bgp_neighbors"] = {"global": {"router_id": "", "peers": peers}}
+        except Exception as e:
+            errors.append(f"bgp: {e}")
+    if "get_interfaces" in getters:
+        try:
+            raw = _docker_run(container, "sr_cli", "show interface")
+            ifs: dict = {}
+            for line in raw.splitlines():
+                m = re.match(r"^(ethernet\S+|mgmt\d+|system\d+)\s+is\s+(up|down)", line, re.I)
+                if m:
+                    ifs[m.group(1)] = {"is_up": m.group(2).lower() == "up",
+                                       "is_enabled": True, "description": "",
+                                       "speed": 0, "mac_address": "", "mtu": 1500}
+            data["get_interfaces"] = ifs
+        except Exception as e:
+            errors.append(f"intf: {e}")
+    if "get_environment" in getters:
+        data["get_environment"] = {"cpu": {"0": {"%usage": 0.0}}, "memory": {},
+                                   "temperature": {}, "fans": {}, "power": {}}
+    out = {"hostname": hostname, "data": data}
+    if errors and not data.get("get_bgp_neighbors") and not data.get("get_interfaces"):
+        out["error"] = "; ".join(errors)[:200]
+    return out
+
+
+def _clab_eos_collect(hostname: str, container: str, getters: list[str]) -> dict:
+    """NAPALM-equivalent collector for Arista cEOS via Cli -p 15 -c '... | json'."""
+    import json as _jm
+    data: dict = {}
+    def _j(raw: str) -> dict:
+        try:
+            m = re.search(r'\{.*\}', raw, re.DOTALL)
+            return _jm.loads(m.group(0)) if m else {}
+        except Exception:
+            return {}
+    try:
+        if "get_facts" in getters:
+            j = _j(_docker_run(container, "Cli", "-p", "15", "-c", "show version | json"))
+            data["get_facts"] = {
+                "os_version": j.get("version", "cEOS"),
+                "vendor": "Arista", "model": j.get("modelName", "cEOS container"),
+                "hostname": hostname,
+                "serial_number": j.get("serialNumber", "N/A"),
+                "uptime": int(j.get("uptime", 0)), "interface_list": [],
+            }
+        if "get_bgp_neighbors" in getters:
+            j = _j(_docker_run(container, "Cli", "-p", "15", "-c",
+                               "show ip bgp summary | json"))
+            peers: dict = {}
+            for pip, p in ((j.get("vrfs") or {}).get("default", {}).get("peers", {}) or {}).items():
+                peers[pip] = {
+                    "is_up": str(p.get("peerState","")).lower() == "established",
+                    "is_enabled": not p.get("underMaintenance", False),
+                    "remote_as": int(p.get("asn", 0) or 0),
+                    "uptime": int(p.get("upDownTime", 0) or 0),
+                    "address_family": {"ipv4": {
+                        "received_prefixes": p.get("prefixReceived", 0),
+                        "accepted_prefixes": p.get("prefixAccepted", 0),
+                        "sent_prefixes": 0}},
+                }
+            data["get_bgp_neighbors"] = {"global": {
+                "router_id": (j.get("vrfs") or {}).get("default",{}).get("routerId",""),
+                "peers": peers}}
+        if "get_interfaces" in getters:
+            j = _j(_docker_run(container, "Cli", "-p", "15", "-c",
+                               "show interfaces status | json"))
+            ifs: dict = {}
+            for iname, idata in (j.get("interfaceStatuses") or {}).items():
+                ifs[iname] = {"is_up": str(idata.get("linkStatus","")).lower() == "connected",
+                              "is_enabled": True,
+                              "description": idata.get("description",""),
+                              "speed": 0, "mac_address": "", "mtu": 1500}
+            data["get_interfaces"] = ifs
+        if "get_environment" in getters:
+            data["get_environment"] = {"cpu": {"0": {"%usage": 0.0}}, "memory": {},
+                                       "temperature": {}, "fans": {}, "power": {}}
+    except Exception as e:
+        return {"hostname": hostname, "error": str(e), "data": data}
+    return {"hostname": hostname, "data": data}
+
+
+def _napalm_collect(hostname, ip, driver_name, getters, container=None):
+    """Vendor-aware dispatcher. Routes to docker-exec collectors for clab + FRR
+    containers; otherwise falls back to paramiko SSH for Junos / EOS hardware.
+
+    Previously every non-EOS device went through the Junos SSH path which hung
+    on FRR containers (no NETCONF) — version-audit / bgp-status / env-health /
+    interface-errors all returned `{"job_id": "…"}` and never produced results.
+    This dispatcher makes those 4 endpoints work uniformly across all vendor
+    families in inventory."""
+    if driver_name == "frr":
+        return _frr_collect(hostname, container, ip, getters)
+    if driver_name == "clab-srl" and container:
+        return _clab_srl_collect(hostname, container, getters)
+    if driver_name == "clab-eos" and container:
+        return _clab_eos_collect(hostname, container, getters)
     if driver_name == "eos":
         return _eos_ssh_collect(hostname, ip, getters)
-    # Default: Junos SSH CLI fallback
     return _junos_ssh_collect(hostname, ip, getters)
+
 
 def _napalm_collect_site(site, getters, max_workers=5):
     from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -10527,7 +10941,7 @@ def _napalm_collect_site(site, getters, max_workers=5):
     results = {}
     with ThreadPoolExecutor(max_workers=max_workers) as ex:
         futs = {
-            ex.submit(_napalm_collect, h, d["ip"], d["driver"], getters): h
+            ex.submit(_napalm_collect, h, d["ip"], d["driver"], getters, d.get("container")): h
             for h, d in devices.items() if d.get("ip")
         }
         for f in as_completed(futs):
@@ -10568,7 +10982,13 @@ def napalm_job(job_id):
 @app.route("/api/napalm/version-audit", methods=["POST"])
 def napalm_version_audit():
     data = request.json or {}
-    site = data.get("site", "").lower()
+    # Site is optional here — empty means "all sites". Accept hostname/host
+    # as an alias when callers send a single device's name instead of a site.
+    site = (data.get("site") or "").lower()
+    if not site and (data.get("hostname") or data.get("host") or data.get("device")):
+        # Resolve device → its site (helper returns None when nothing matches)
+        candidate, _ = _resolve_napalm_site(data)
+        site = candidate or ""
     job_id = _napalm_new_job("version_audit", site or "all")
 
     def _run():
@@ -10617,9 +11037,9 @@ def napalm_version_audit():
 @app.route("/api/napalm/bgp-status", methods=["POST"])
 def napalm_bgp_status():
     data = request.json or {}
-    site = data.get("site", "").lower()
-    if not site or site not in NAPALM_SITES:
-        return jsonify({"error": f"Unknown site: {site}"}), 400
+    site, _err = _resolve_napalm_site(data)
+    if _err:
+        return _err
     job_id = _napalm_new_job("bgp_status", site)
 
     def _run():
@@ -10666,9 +11086,9 @@ def napalm_bgp_status():
 @app.route("/api/napalm/env-health", methods=["POST"])
 def napalm_env_health():
     data = request.json or {}
-    site = data.get("site", "").lower()
-    if not site or site not in NAPALM_SITES:
-        return jsonify({"error": f"Unknown site: {site}"}), 400
+    site, _err = _resolve_napalm_site(data)
+    if _err:
+        return _err
     job_id = _napalm_new_job("env_health", site)
 
     def _run():
@@ -10936,9 +11356,9 @@ def napalm_global_report():
 @app.route("/api/napalm/interface-errors", methods=["POST"])
 def napalm_interface_errors():
     data = request.json or {}
-    site = data.get("site", "").lower()
-    if not site or site not in NAPALM_SITES:
-        return jsonify({"error": f"Unknown site: {site}"}), 400
+    site, _err = _resolve_napalm_site(data)
+    if _err:
+        return _err
     job_id = _napalm_new_job("interface_errors", site)
 
     def _run():
@@ -10977,9 +11397,9 @@ def napalm_interface_errors():
 @app.route("/api/napalm/lldp-topology", methods=["POST"])
 def napalm_lldp_topology():
     data = request.json or {}
-    site = data.get("site", "").lower()
-    if not site or site not in NAPALM_SITES:
-        return jsonify({"error": f"Unknown site: {site}"}), 400
+    site, _err = _resolve_napalm_site(data)
+    if _err:
+        return _err
     job_id = _napalm_new_job("lldp_topology", site)
 
     def _run():
@@ -11020,9 +11440,9 @@ def napalm_lldp_topology():
 @app.route("/api/napalm/site-collect", methods=["POST"])
 def napalm_site_collect():
     data = request.json or {}
-    site = data.get("site", "").lower()
-    if not site or site not in NAPALM_SITES:
-        return jsonify({"error": f"Unknown site: {site}"}), 400
+    site, _err = _resolve_napalm_site(data)
+    if _err:
+        return _err
     job_id = _napalm_new_job("site_collect", site)
 
     def _run():
@@ -11061,10 +11481,10 @@ def napalm_site_collect():
 @app.route("/api/napalm/snapshot", methods=["POST"])
 def napalm_snapshot():
     data = request.json or {}
-    site = data.get("site", "").lower()
     label = data.get("label", "snapshot")
-    if not site or site not in NAPALM_SITES:
-        return jsonify({"error": f"Unknown site: {site}"}), 400
+    site, _err = _resolve_napalm_site(data)
+    if _err:
+        return _err
     job_id = _napalm_new_job("snapshot", site)
 
     def _run():
@@ -11180,6 +11600,237 @@ Examples:
 - eos + "bgp neighbors" -> {"cli": "show bgp neighbors"}
 Return ONLY the JSON object. No markdown, no explanation, no code fences."""
 
+# ══════════════════════════════════════════════════════════════════════════════
+# ── 🧠 netlog-ai KNOWLEDGE LAYER (RAG over sanitized configs) ───────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# netlog-ai (port 6060) already stores sanitized configs + per-device compliance
+# findings + a RAG copilot for both fabrics. We don't reimplement any of that;
+# we proxy it and inject the result into our LLM-driven endpoints so every
+# answer is grounded in *this specific* device's actual config.
+
+_NETLOG_URL = os.environ.get("NETLOG_AI_URL", "http://localhost:6060")
+_NETLOG_TOKEN = os.environ.get("NETLOG_AI_API_TOKEN", "")
+
+# Hostname → netlog-ai site_id. We currently have two clab + DCN labs.
+_NETLOG_HOST_TO_SITE = {
+    # Clos-EVPN clab fabric → clab-clos-evpn
+    **{h: "clab-clos-evpn" for h in
+       ("spine1", "spine2", "spine3",
+        "leaf1", "leaf2", "leaf3", "leaf4", "leaf5", "leaf6")},
+    # 10-device FRR DCN lab — netlog-ai has a dedicated dcn-lab bundle with
+    # the same hostnames (verified live via /api/sites).
+    **{h: "dcn-lab" for h in
+       ("de-fra-core-01", "de-fra-core-02", "uk-lon-core-01", "nl-ams-core-01",
+        "us-nyc-core-01", "de-fra-edge-01", "uk-lon-edge-01", "nl-ams-edge-01",
+        "uk-lon-dist-01", "de-fra-dist-01")},
+}
+
+def _netlog_headers() -> dict:
+    h = {"Content-Type": "application/json"}
+    if _NETLOG_TOKEN:
+        h["X-API-Token"] = _NETLOG_TOKEN
+    return h
+
+
+def _netlog_site_for(hostname: str) -> str | None:
+    """Map a tool hostname to a netlog-ai site_id, or None when unknown."""
+    if not hostname:
+        return None
+    h = hostname.lower()
+    if h in _NETLOG_HOST_TO_SITE:
+        return _NETLOG_HOST_TO_SITE[h]
+    # Heuristic fallbacks
+    if any(p in h for p in ("spine", "leaf", "host")) and not h.startswith(("de-", "uk-", "nl-", "us-", "eu-")):
+        return "clab-clos-evpn"
+    return None
+
+
+def _netlog_fetch(path: str, method: str = "GET", body: dict | None = None,
+                  timeout: int = 6) -> tuple[int, dict | str | None]:
+    """Thin wrapper around requests for netlog-ai endpoints."""
+    url = f"{_NETLOG_URL}{path}"
+    try:
+        if method == "GET":
+            r = _requests.get(url, headers=_netlog_headers(), timeout=timeout)
+        else:
+            r = _requests.post(url, headers=_netlog_headers(),
+                               data=_json_mod.dumps(body or {}), timeout=timeout)
+    except Exception as exc:  # noqa: BLE001
+        app.logger.warning("netlog-ai unreachable at %s: %s", url, exc)
+        return 0, None
+    try:
+        return r.status_code, r.json()
+    except ValueError:
+        return r.status_code, r.text
+
+
+def _netlog_findings_for(hostname: str) -> list[dict]:
+    """Return failed compliance checks for a single device, or [] if unknown."""
+    site = _netlog_site_for(hostname)
+    if not site:
+        return []
+    code, data = _netlog_fetch(f"/api/compliance/{site}")
+    if code != 200 or not isinstance(data, dict):
+        return []
+    return [c for c in (data.get("checks") or [])
+            if c.get("device", "").lower() == hostname.lower() and not c.get("passed")]
+
+
+def _netlog_summary_for(hostname: str, max_findings: int = 6) -> str:
+    """Short human-readable context block for prompt enrichment."""
+    findings = _netlog_findings_for(hostname)
+    if not findings:
+        return ""
+    lines = [f"netlog-ai compliance findings for {hostname}:"]
+    for f in findings[:max_findings]:
+        sev = (f.get("severity") or "info").upper()
+        rule = f.get("rule_name") or f.get("rule_id") or "rule"
+        why  = (f.get("reason") or "").strip()[:120]
+        lines.append(f"  - [{sev}] {rule}: {why}")
+    if len(findings) > max_findings:
+        lines.append(f"  - …and {len(findings) - max_findings} more findings")
+    return "\n".join(lines)
+
+
+@app.route("/api/knowledge/sites", methods=["GET"])
+def api_knowledge_sites():
+    """List netlog-ai site bundles (proxy for /api/sites)."""
+    code, data = _netlog_fetch("/api/sites")
+    if code != 200:
+        return jsonify({"error": "netlog-ai unreachable",
+                        "hint": f"start it: cd 04_Scripts_Tools/netlog-ai && .venv/bin/python -m ai_log_analyzer.cli serve"}), 503
+    return jsonify(data)
+
+
+@app.route("/api/knowledge/device/<hostname>", methods=["GET"])
+def api_knowledge_device(hostname: str):
+    """Return all netlog-ai context for one host: site, findings, topology snippet."""
+    site = _netlog_site_for(hostname)
+    if not site:
+        return jsonify({"hostname": hostname, "site": None, "findings": [],
+                        "note": "hostname not mapped to a netlog-ai site bundle"}), 200
+    findings = _netlog_findings_for(hostname)
+    return jsonify({
+        "hostname": hostname, "site": site,
+        "findings_failed": findings,
+        "findings_total": len(findings),
+        "netlog_url": f"{_NETLOG_URL}/?site={site}",
+    })
+
+
+@app.route("/api/knowledge/copilot", methods=["POST"])
+def api_knowledge_copilot():
+    """Proxy netlog-ai's RAG copilot. Body: {question, hostname?, site_id?}"""
+    body = request.get_json(silent=True) or {}
+    question = (body.get("question") or "").strip()
+    if not question:
+        return jsonify({"error": "question required"}), 400
+    site_id  = (body.get("site_id")  or "").strip()
+    hostname = (body.get("hostname") or "").strip()
+    if not site_id and hostname:
+        site_id = _netlog_site_for(hostname) or ""
+    payload = {"question": question}
+    if site_id:  payload["site_id"]  = site_id
+    if hostname: payload["hostname"] = hostname
+    code, data = _netlog_fetch("/api/copilot", method="POST", body=payload, timeout=30)
+    if code != 200:
+        return jsonify({"error": "netlog-ai copilot unavailable",
+                        "status_code": code, "detail": data}), 503
+    return jsonify(data)
+
+
+@app.route("/api/knowledge/correlate", methods=["POST"])
+def api_knowledge_correlate():
+    """For every host in the request, return its netlog-ai findings. Used by
+    the Alerts tab to enrich each alert card with the device's known issues.
+
+    Body: {"hostnames": ["leaf3", "spine1", ...]}
+    """
+    body = request.get_json(silent=True) or {}
+    hostnames = body.get("hostnames") or []
+    out: dict[str, list[dict]] = {}
+    for h in hostnames[:32]:  # hard cap
+        out[h] = _netlog_findings_for(h)
+    return jsonify({"per_device_findings": out})
+
+
+_GNMIC_API_URL = os.environ.get("GNMIC_API_URL", "http://localhost:7890")
+
+
+@app.route("/api/telemetry/gnmic-status", methods=["GET"])
+def api_gnmic_status():
+    """Return health of the gnmic streaming-telemetry sidecar.
+
+    The sidecar subscribes to Nokia SR Linux nodes on the clab fabric and
+    pushes ON_CHANGE BGP/intf state + SAMPLE counters into the same
+    InfluxDB bucket the legacy collector writes to. Cisco/Arista/FRR keep
+    using the 15-second docker-exec collector — see OPTIMIZATION_ROADMAP.md
+    §2 for the cEOS Octa gNMI quirk that blocks Arista from this path.
+    """
+    out: dict = {"sidecar_url": _GNMIC_API_URL, "available": False, "targets": []}
+    try:
+        r = _requests.get(f"{_GNMIC_API_URL}/api/v1/targets", timeout=3)
+    except Exception as exc:  # noqa: BLE001
+        out["error"] = f"gnmic API unreachable: {exc}"
+        return jsonify(out), 200
+    if r.status_code != 200:
+        out["error"] = f"gnmic API returned {r.status_code}"
+        return jsonify(out), 200
+
+    targets_raw = r.json() or {}
+    out["available"] = True
+    for name, info in targets_raw.items():
+        subs = info.get("subscriptions") or []
+        # gnmic returns subscriptions as either ["name1", "name2"] or
+        # [{"name": "..."}] depending on version — handle both.
+        sub_names = [s if isinstance(s, str) else s.get("name") for s in subs]
+        out["targets"].append({
+            "name": name,
+            "subscriptions": len(subs),
+            "subscription_names": sub_names,
+        })
+
+    # Cross-check freshness against InfluxDB — what's the most recent
+    # gnmic-sourced point per target (in seconds)?
+    # gnmic preserves subscription names as measurement names (with hyphens).
+    # We use `intf-counters` (10 s SAMPLE) tagged with the `source` tag that
+    # ONLY gnmic writes. Filtering on `source` distinguishes the streaming
+    # pipeline from the other collectors that share the bucket — so a green
+    # freshness now genuinely means gnmic is healthy, not that some other
+    # collector happens to be writing.
+    flux = '''
+      from(bucket:"network-telemetry")
+        |> range(start:-2m)
+        |> filter(fn:(r) => r._measurement == "intf-counters" and exists r.source)
+        |> group(columns:["source"])
+        |> last()
+        |> keep(columns:["_time", "source"])
+    '''
+    rows = _influx_query_csv(flux, timeout=5)
+    now = time.time()
+    fresh: dict[str, float] = {}
+    for row in rows:
+        ts_raw = row.get("_time", "")
+        try:
+            from datetime import datetime as _dt
+            ts = _dt.fromisoformat(ts_raw.replace("Z", "+00:00")).timestamp()
+            fresh[row.get("source", "")] = round(now - ts, 1)
+        except Exception:
+            continue
+    out["freshness_sec_per_host"] = fresh
+    out["all_fresh_under_30s"] = all(v < 30 for v in fresh.values()) if fresh else False
+    # If gnmic writes haven't reached InfluxDB at all, surface a hint so the UI
+    # can show "configured but no data" instead of a misleading green check.
+    if not fresh and out["target_count"] > 0:
+        out["warning"] = ("gnmic has subscriptions configured but no data "
+                          "found in InfluxDB — check SRL config (e.g. BGP not "
+                          "configured → no bgp-session-state events) or "
+                          "gnmic InfluxDB output config")
+    out["target_count"] = len(out["targets"])
+    return jsonify(out)
+
+
 @app.route("/api/ai-command", methods=["POST"])
 def api_ai_command():
     """Translate natural language to CLI, execute via SSH, explain output with LLM."""
@@ -11224,18 +11875,27 @@ def api_ai_command():
         ssh_text = ""
         result["output"] = f"(device '{hostname}' not in inventory — command translation only)"
 
-    # Step 3: LLM explains the command + output (always, even if SSH failed)
+    # Step 3: LLM explains the command + output (always, even if SSH failed).
+    # Enrich with netlog-ai compliance findings for this device so the
+    # explanation is grounded in the actual sanitized config of THIS host.
+    knowledge_ctx = _netlog_summary_for(hostname) if hostname else ""
     explain_sys = (
         "You are a senior network engineer. "
         "Explain what the CLI command does and what the output means in 2-3 sentences of plain English. "
-        "If no device output is available, just explain what the command does and what to look for."
+        "If knowledge-base context is provided, cite specific findings when they explain the output."
     )
+    parts = [f"Command: {cli_cmd}"]
     if ssh_text:
-        explain_prompt = f"Command: {cli_cmd}\nOutput:\n{ssh_text[:3000]}"
+        parts.append(f"Output:\n{ssh_text[:3000]}")
     else:
-        explain_prompt = f"Command: {cli_cmd}\n(No device output available — lab containers may not be running.)"
-    explanation = _llm_query(explain_sys, explain_prompt, max_tokens=300)
+        parts.append("(No device output — lab containers may not be running.)")
+    if knowledge_ctx:
+        parts.append(knowledge_ctx)
+    explanation = _llm_query(explain_sys, "\n\n".join(parts), max_tokens=350)
     result["explanation"] = _clean_llm_response(explanation) if explanation else None
+    if knowledge_ctx:
+        result["knowledge_used"] = True
+        result["netlog_site"] = _netlog_site_for(hostname)
 
     return jsonify(result)
 
@@ -11322,11 +11982,26 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Task definitions: name → (command_junos, command_eos, result_parser_hint)
 _NORNIR_TASKS: dict[str, dict] = {
-    "bgp_health":     {"cmd_junos": "show bgp summary",      "cmd_eos": "show bgp summary",          "cmd_frr": "show bgp summary",      "label": "BGP Health Check"},
-    "interface_check":{"cmd_junos": "show interfaces terse", "cmd_eos": "show interfaces",           "cmd_frr": "show interface",         "label": "Interface Status"},
-    "version":        {"cmd_junos": "show version",          "cmd_eos": "show version",              "cmd_frr": "show version",           "label": "Software Version"},
-    "routing_table":  {"cmd_junos": "show route summary",    "cmd_eos": "show ip route summary",     "cmd_frr": "show ip route summary",  "label": "Routing Table Summary"},
-    "alarm_check":    {"cmd_junos": "show chassis alarms",   "cmd_eos": "show system environment all","cmd_frr": "show ip ospf neighbor",  "label": "System Alarms / OSPF"},
+    # Per-task per-vendor command templates. Keys:
+    #   cmd_junos     · cmd_eos · cmd_frr · cmd_srl  (sr_cli) · cmd_ceos  (Cli -p 15)
+    # When a vendor-specific key is missing the dispatcher falls through to the
+    # closest match. UI aliases ("lldp", "lldp_neighbors", "lldp_discovery",
+    # "config_compliance") are mapped via _NORNIR_ALIASES below.
+    "bgp_health":     {"cmd_junos": "show bgp summary",       "cmd_eos": "show bgp summary",            "cmd_frr": "show bgp summary",      "cmd_srl": "show network-instance default protocols bgp neighbor", "cmd_ceos": "show ip bgp summary", "label": "BGP Health Check"},
+    "interface_check":{"cmd_junos": "show interfaces terse",  "cmd_eos": "show interfaces",             "cmd_frr": "show interface brief",  "cmd_srl": "show interface", "cmd_ceos": "show interfaces status", "label": "Interface Status"},
+    "version":        {"cmd_junos": "show version",           "cmd_eos": "show version",                "cmd_frr": "show version",          "cmd_srl": "info from state /system information version", "cmd_ceos": "show version", "label": "Software Version"},
+    "routing_table":  {"cmd_junos": "show route summary",     "cmd_eos": "show ip route summary",       "cmd_frr": "show ip route summary", "cmd_srl": "show network-instance default route-table ipv4-unicast summary", "cmd_ceos": "show ip route summary", "label": "Routing Table Summary"},
+    "alarm_check":    {"cmd_junos": "show chassis alarms",    "cmd_eos": "show system environment all", "cmd_frr": "show ip ospf neighbor", "cmd_srl": "show system events", "cmd_ceos": "show logging severity errors", "label": "System Alarms / OSPF"},
+    # NEW vendor-aware tasks for the LLDP/Compliance buttons the UI exposed:
+    "lldp_neighbors": {"cmd_junos": "show lldp neighbors",    "cmd_eos": "show lldp neighbors",         "cmd_frr": "show lldp neighbors",   "cmd_srl": "show system lldp neighbor", "cmd_ceos": "show lldp neighbors", "label": "LLDP Discovery"},
+    "config_compliance":{"cmd_junos": "show configuration | display set | count", "cmd_eos": "show running-config | include hostname|interface|bgp|ospf", "cmd_frr": "show running-config", "cmd_srl": "info /", "cmd_ceos": "show running-config | include hostname|interface|bgp|ospf", "label": "Config Compliance"},
+}
+# UI sends short names — map them to canonical task keys.
+_NORNIR_ALIASES = {
+    "bgp": "bgp_health", "bgp-health": "bgp_health",
+    "iface-errors": "interface_check", "interfaces": "interface_check",
+    "config-diff": "config_compliance", "compliance": "config_compliance",
+    "lldp": "lldp_neighbors", "lldp-discovery": "lldp_neighbors",
 }
 
 def _nornir_worker(dev: dict, cmd: str) -> dict:
@@ -11357,14 +12032,21 @@ def _nornir_worker(dev: dict, cmd: str) -> dict:
 def api_nornir_run():
     """Parallel multi-device task execution using ThreadPoolExecutor (Nornir-style)."""
     data = request.get_json(force=True) or {}
-    task_name: str  = (data.get("task") or "bgp_health").strip()
+    task_raw: str = (data.get("task") or "bgp_health").strip()
+    task_name = _NORNIR_ALIASES.get(task_raw, task_raw)
     site_filter: str = (data.get("site") or "").strip().lower()
-    workers: int    = min(int(data.get("workers") or 50), 200)
+    workers: int = min(int(data.get("workers") or 50), 200)
 
     task_def = _NORNIR_TASKS.get(task_name) or _NORNIR_TASKS["bgp_health"]
 
-    # Filter devices by site
-    targets = [d for d in DEVICES if not site_filter or d.get("site", "").lower() == site_filter]
+    # Filter devices by site. Linux hosts ("role=host", "type=linux") cannot
+    # accept network CLI — exclude them from Nornir runs entirely so they
+    # don't pollute the result with N error rows. They're still discoverable
+    # via the inventory / connectivity-test workflow.
+    targets = [d for d in DEVICES
+               if (not site_filter or d.get("site", "").lower() == site_filter)
+               and d.get("type", "").lower() != "linux"
+               and d.get("role", "").lower() != "host"]
     if not targets:
         return jsonify({"error": f"No devices found for site '{site_filter}'"}), 404
 
@@ -11374,8 +12056,15 @@ def api_nornir_run():
     with ThreadPoolExecutor(max_workers=min(workers, len(targets))) as pool:
         def _cmd_for(dev: dict) -> str:
             t = dev.get("type", "junos")
+            vc = (dev.get("vendor_canonical") or dev.get("vendor") or "").lower()
+            # Clab-specific vendor commands first — these route via docker exec
+            # in run_command_on_device's clab shim.
+            if vc == "nokia-srl" and "cmd_srl" in task_def:
+                return task_def["cmd_srl"]
+            if vc == "arista-eos" and dev.get("container") and "cmd_ceos" in task_def:
+                return task_def["cmd_ceos"]
             if t == "eos":
-                return task_def["cmd_eos"]
+                return task_def.get("cmd_eos", task_def["cmd_junos"])
             if t == "frr":
                 return task_def.get("cmd_frr", task_def["cmd_junos"])
             return task_def["cmd_junos"]
@@ -11493,18 +12182,645 @@ def api_pyats_diff():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# ── 🔁 CLOSED-LOOP CHANGE PIPELINE (Roadmap #4) ─────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Single endpoint that chains the existing change-management stages into one
+# governed operation:
+#
+#   1. Predict    — digital-twin what-if (predict_engine.predict)
+#                   REJECT verdict short-circuits the whole pipeline
+#   2. Batfish    — LLM static-config analysis (blast radius if errors)
+#   3. Apply gate — Health Gate (RFC 6241 §8.4 confirmed-commit) runs:
+#                       3a. PRE-snapshot (capture state)
+#                       3b. Apply (commit-confirmed on Junos · -c on FRR)
+#                       3c. Watch (TIMEOUT_S; monitor BGP + interfaces)
+#                       3d. Decide (confirm OR roll back automatically)
+#   4. POST diff  — pyATS structured diff PRE vs POST
+#   5. Intent     — verify config claims match observed reachability
+#
+# The whole flow runs in a background thread; the endpoint returns a
+# change_id immediately. Use GET /api/change/closed-loop/<id> to poll.
+#
+# This is the TM Forum ANL L3 maturity move — Awareness + Analysis +
+# Decision + Execution + governed rollback in one user action.
+# ══════════════════════════════════════════════════════════════════════════════
+
+import threading as _cl_threading
+import uuid as _cl_uuid
+from collections import deque as _cl_deque
+
+_CLOSED_LOOP_LOCK = _cl_threading.RLock()
+_CLOSED_LOOP_JOBS: dict[str, dict] = {}
+_CLOSED_LOOP_HISTORY: _cl_deque = _cl_deque(maxlen=200)
+
+
+def _cl_now_ts() -> float:
+    return _time.time()
+
+
+def _cl_set_phase(job: dict, phase: str, **fields) -> None:
+    """Update the phase + arbitrary fields atomically."""
+    with _CLOSED_LOOP_LOCK:
+        job["phase"] = phase
+        job["last_update_ts"] = _cl_now_ts()
+        job["timeline"].append({"phase": phase, "ts": _cl_now_ts(), **fields})
+        job.update(fields)
+
+
+def _cl_finish(job: dict, verdict: str, summary: str) -> None:
+    """Mark the job done with a final verdict (APPROVED / REJECTED / ROLLED_BACK / FAILED)."""
+    with _CLOSED_LOOP_LOCK:
+        job["phase"] = "done"
+        job["verdict"] = verdict
+        job["summary"] = summary
+        job["finished_ts"] = _cl_now_ts()
+        job["elapsed_s"] = round(job["finished_ts"] - job["started_ts"], 2)
+
+
+def _cl_run(job: dict, body: dict) -> None:
+    """Background worker — chain every stage of the change pipeline.
+
+    On any stage error or REJECT verdict, the pipeline short-circuits with
+    an explanatory summary. Health Gate handles its own rollback; we surface
+    it as `verdict=ROLLED_BACK`.
+    """
+    hostname        = job["hostname"]
+    proposed_change = body.get("proposed_change") or ""
+    timeout_s       = int(body.get("timeout_s") or 30)
+    dry_run         = bool(body.get("dry_run", False))
+    # Optional skip flags — explicitly lab/demo only. Documented behaviour:
+    #  - skip_predict:  don't run digital-twin (use when predict_engine can't
+    #                   parse the vendor syntax, e.g. FRR `ip route ...`)
+    #  - skip_batfish:  don't run LLM static analysis (use when the change is
+    #                   externally pre-validated, OR for testing the apply path
+    #                   without depending on non-deterministic LLM output)
+    skip_predict    = bool(body.get("skip_predict", False))
+    skip_batfish    = bool(body.get("skip_batfish", False))
+    # Test-hook pass-through (whitelisted on the health-gate side too)
+    _HOOK_KEYS = ("fail_at_phase", "induce_regression_after_s", "induce_alert_spike_after_s")
+    hg_hooks = {k: body[k] for k in _HOOK_KEYS if k in body and body[k] is not None}
+
+    try:
+        # ─── Stage 1: Predict ────────────────────────────────────────────
+        _cl_set_phase(job, "predict")
+        if skip_predict:
+            job["predict"] = {"verdict": "SKIPPED",
+                              "reasons": ["skip_predict=true — operator override"],
+                              "ms": 0}
+        else:
+            try:
+                from predict_engine import predict as _predict
+                # _build_topology lives in multivendor_extensions
+                from multivendor_extensions import _build_topology  # type: ignore
+                topo = _build_topology()
+                pred = _predict(hostname, proposed_change, topo)
+                job["predict"] = {
+                    "verdict": pred.verdict,
+                    "reasons": list(pred.reasons),
+                    "diff":    pred.diff,
+                    "ms":      pred.ms,
+                }
+                if pred.verdict == "REJECT":
+                    _cl_finish(job, "REJECTED",
+                               f"Predict rejected change: {'; '.join(pred.reasons)}")
+                    return
+            except Exception as e:
+                _cl_finish(job, "FAILED", f"predict stage error: {e}")
+                return
+
+        # ─── Stage 2: Batfish blast-radius (LLM) ─────────────────────────
+        _cl_set_phase(job, "batfish")
+        bf_summary = {"errors": [], "warnings": [], "passed": []}
+        if skip_batfish:
+            bf_summary["passed"].append("skipped_by_operator")
+            job["batfish"] = bf_summary
+        else:
+            try:
+                sys_p = (
+                    "You are a Batfish network validation expert. Analyse the proposed "
+                    "change for syntax, missing prerequisites, and obvious foot-guns. "
+                    "Return JSON only: "
+                    '{"errors":[{"check":"...","detail":"..."}],'
+                    '"warnings":[{"check":"...","detail":"..."}],'
+                    '"passed":["check_name"]}'
+                )
+                llm_raw = _llm_query(sys_p, f"Device {hostname} change:\n{proposed_change[:2000]}",
+                                     max_tokens=600)
+                if llm_raw:
+                    import re as _re_bf, json as _json_bf
+                    m = _re_bf.search(r'\{.*\}', _clean_llm_response(llm_raw), _re_bf.DOTALL)
+                    if m:
+                        parsed = _json_bf.loads(m.group())
+                        bf_summary = {
+                            "errors":   parsed.get("errors", []),
+                            "warnings": parsed.get("warnings", []),
+                            "passed":   parsed.get("passed", []),
+                        }
+            except Exception as e:
+                bf_summary["errors"].append({"check": "llm_failed", "detail": str(e)})
+            job["batfish"] = bf_summary
+
+            if bf_summary["errors"]:
+                _cl_finish(job, "REJECTED",
+                           f"Batfish found {len(bf_summary['errors'])} error(s) — change blocked")
+                return
+
+        if dry_run:
+            _cl_finish(job, "APPROVED",
+                       "Dry-run passed predict + batfish (no apply requested)")
+            return
+
+        # ─── Stage 3: Health Gate (PRE-snap + apply + watch + auto-confirm/rollback) ──
+        _cl_set_phase(job, "applying")
+        try:
+            from health_gate import submit as _hg_submit, get_job as _hg_get
+            hg_job = _hg_submit(
+                hostname=hostname,
+                edit_payload=proposed_change,
+                timeout_s=timeout_s,
+                **hg_hooks,  # forward fail_at_phase / induce_*_after_s test hooks
+            )
+            job["health_gate_job_id"] = hg_job.job_id
+        except Exception as e:
+            _cl_finish(job, "FAILED", f"health-gate submit failed: {e}")
+            return
+
+        # Poll the gate until it leaves the "applying"/"watching"/"deciding" phases.
+        gate_deadline = _cl_now_ts() + timeout_s + 30  # gate's timeout + grace
+        gate_final: dict | None = None
+        while _cl_now_ts() < gate_deadline:
+            _time.sleep(2)
+            current = _hg_get(hg_job.job_id)
+            if not current:
+                break
+            with _CLOSED_LOOP_LOCK:
+                job["health_gate_phase"] = current.phase
+            if current.phase == "done":
+                gate_final = current.to_dict()
+                break
+            if current.phase == "watching":
+                _cl_set_phase(job, "watching",
+                              health_gate_phase=current.phase)
+            elif current.phase == "deciding":
+                _cl_set_phase(job, "deciding",
+                              health_gate_phase=current.phase)
+
+        if gate_final is None:
+            _cl_finish(job, "FAILED", "health-gate timed out waiting for decision")
+            return
+        job["health_gate"] = gate_final
+
+        # Gate decided. final_verdict is one of {confirmed, abandoned, error}.
+        # NOTE: this used to look for `decision` which never existed — the
+        # actual field on HealthGateJob is `final_verdict`. Fix from the
+        # 2026-05-25 closed-loop bring-up.
+        gate_verdict = gate_final.get("final_verdict", "")
+        if gate_verdict == "abandoned":
+            regressions = gate_final.get("regressions") or []
+            reason = "; ".join(regressions[:3]) if regressions else "tolerance exceeded"
+            _cl_finish(job, "ROLLED_BACK",
+                       f"Health Gate detected regression during watch window — change reverted "
+                       f"(reason: {reason})")
+            return
+        if gate_verdict != "confirmed":
+            _cl_finish(job, "FAILED",
+                       f"Health Gate ended in unexpected state: final_verdict={gate_verdict!r} "
+                       f"error={gate_final.get('error', '')!r}")
+            return
+
+        # ─── Stage 4: POST snapshot + structured diff ────────────────────
+        _cl_set_phase(job, "post_snapshot")
+        try:
+            # `_collect_state_snapshot` uses NAPALM which only supports
+            # Junos/EOS. FRR devices have neither NETCONF nor eAPI — NAPALM
+            # hangs on conn.open() and ThreadPoolExecutor.__exit__ blocks
+            # waiting for the orphan thread. Short-circuit on device type
+            # rather than fight the executor.
+            _dev = get_device_by_hostname(hostname)
+            _dtype = (_dev or {}).get("type", "").lower() if _dev else ""
+            if _dtype in {"junos", "eos"}:
+                # NAPALM-capable. Cap wall time as a belt-and-braces measure.
+                import concurrent.futures as _cl_cf
+                _ex = _cl_cf.ThreadPoolExecutor(max_workers=1)
+                _fut = _ex.submit(_collect_state_snapshot, hostname)
+                try:
+                    post_snap = _fut.result(timeout=15)
+                except _cl_cf.TimeoutError:
+                    post_snap = {"error": "snapshot timed out after 15s"}
+                _ex.shutdown(wait=False)  # don't block on orphan SSH
+            else:
+                post_snap = {
+                    "skipped": True,
+                    "reason":  f"NAPALM doesn't support device type {_dtype!r} — skipped",
+                }
+            _bounded_insert(_PYATS_SNAPSHOTS, f"{hostname}:post",
+                            {"ts": _cl_now_ts(), "data": post_snap,
+                             "hostname": hostname, "label": "post"}, max_size=50)
+            # Compute pyATS-style diff vs the PRE snapshot health-gate captured
+            pre = _PYATS_SNAPSHOTS.get(f"{hostname}:pre")
+            diffs: list[dict] = []
+            if pre:
+                pre_d = pre.get("data", {})
+                for iface in (set(pre_d.get("interfaces", {}).keys()) |
+                              set(post_snap.get("interfaces", {}).keys())):
+                    pa = pre_d.get("interfaces", {}).get(iface, {}).get("is_up")
+                    pb = post_snap.get("interfaces", {}).get(iface, {}).get("is_up")
+                    if pa != pb:
+                        diffs.append({"type": "interface", "name": iface,
+                                      "before": "UP" if pa else "DOWN",
+                                      "after":  "UP" if pb else "DOWN"})
+                for vrf, vd in (post_snap.get("bgp_neighbors") or {}).items():
+                    for pip, pd in vd.get("peers", {}).items():
+                        pre_up = ((pre_d.get("bgp_neighbors") or {})
+                                  .get(vrf, {}).get("peers", {}).get(pip, {}).get("is_up"))
+                        post_up = pd.get("is_up")
+                        if pre_up != post_up:
+                            diffs.append({"type": "bgp", "name": pip,
+                                          "before": "UP" if pre_up else "DOWN",
+                                          "after":  "UP" if post_up else "DOWN"})
+            job["pyats_diff"] = {
+                "pre_present": pre is not None,
+                "total_changes": len(diffs),
+                "diffs": diffs,
+            }
+        except Exception as e:
+            job["pyats_diff"] = {"error": str(e)}
+
+        # ─── Stage 5: Intent verify ──────────────────────────────────────
+        _cl_set_phase(job, "verify_intent")
+        try:
+            # Reuse the helper from multivendor_extensions if it loaded
+            # Lightweight: count Suzieq-observed BGP peers vs claimed
+            from multivendor_extensions import _suzieq_parse_device, _ALL_DEVICES  # type: ignore
+            dev = next((d for d in _ALL_DEVICES if d.get("hostname") == hostname), None)
+            intent = {"checked": False}
+            if dev and dev.get("config"):
+                parsed = _suzieq_parse_device(dev)
+                intent = {
+                    "checked":     True,
+                    "config_peers": len(parsed.get("bgp_peers", [])),
+                    "notes":        "Static config analysed",
+                }
+            job["intent"] = intent
+        except Exception as e:
+            job["intent"] = {"checked": False, "error": str(e)}
+
+        _cl_finish(job, "APPROVED",
+                   f"Change committed and verified — "
+                   f"{job.get('pyats_diff', {}).get('total_changes', 0)} state changes detected")
+    except Exception as e:
+        _cl_finish(job, "FAILED", f"unhandled pipeline error: {e}")
+
+
+@app.route("/api/change/closed-loop", methods=["POST"])
+def api_change_closed_loop():
+    """Run the full closed-loop change pipeline (async).
+
+    Body: {
+        hostname:        string  required  device to change
+        proposed_change: string  required  config snippet (vendor-native)
+        timeout_s:       int     optional  health-gate watch window (default 30)
+        dry_run:         bool    optional  stop after Predict+Batfish, never apply
+    }
+    Returns immediately with {change_id, status_url}. Poll
+    GET /api/change/closed-loop/<change_id> for live phase + final verdict.
+    """
+    body = request.get_json(force=True) or {}
+    hostname = (body.get("hostname") or body.get("host") or
+                body.get("device") or body.get("target_device") or "").strip()
+    proposed_change = (body.get("proposed_change") or "").strip()
+    if not hostname:
+        return jsonify({
+            "error": "hostname required",
+            "accepted_device_keys": ["hostname", "host", "device", "target_device"],
+        }), 400
+    if not proposed_change:
+        return jsonify({"error": "proposed_change required (non-empty config snippet)"}), 400
+
+    change_id = f"chg-{_cl_uuid.uuid4().hex[:12]}"
+    job: dict = {
+        "change_id":       change_id,
+        "hostname":        hostname,
+        "proposed_change": proposed_change,
+        "phase":           "queued",
+        "verdict":         None,
+        "started_ts":      _cl_now_ts(),
+        "last_update_ts":  _cl_now_ts(),
+        "timeline":        [],
+        "dry_run":         bool(body.get("dry_run", False)),
+    }
+    with _CLOSED_LOOP_LOCK:
+        _CLOSED_LOOP_JOBS[change_id] = job
+        _CLOSED_LOOP_HISTORY.append({"change_id": change_id, "hostname": hostname,
+                                     "started_ts": job["started_ts"]})
+
+    t = _cl_threading.Thread(target=_cl_run, args=(job, body), daemon=True)
+    t.start()
+
+    return jsonify({
+        "change_id":   change_id,
+        "status_url":  f"/api/change/closed-loop/{change_id}",
+        "hostname":    hostname,
+        "phase":       "queued",
+        "dry_run":     job["dry_run"],
+    }), 202
+
+
+@app.route("/api/change/closed-loop/<change_id>", methods=["GET"])
+def api_change_closed_loop_status(change_id: str):
+    """Poll a closed-loop change job's current phase + final verdict."""
+    with _CLOSED_LOOP_LOCK:
+        job = _CLOSED_LOOP_JOBS.get(change_id)
+        if not job:
+            return jsonify({"error": "change_id not found"}), 404
+        return jsonify(dict(job))
+
+
+@app.route("/api/change/closed-loop", methods=["GET"])
+def api_change_closed_loop_list():
+    """Recent closed-loop change runs (last 200)."""
+    with _CLOSED_LOOP_LOCK:
+        return jsonify({
+            "history": list(_CLOSED_LOOP_HISTORY),
+            "active":  [j for j in _CLOSED_LOOP_JOBS.values() if j.get("phase") != "done"],
+        })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # ── 🔔 KEEP ALERT CORRELATION (P2) ───────────────────────────────────────────
 # ══════════════════════════════════════════════════════════════════════════════
 
+def _influx_query_csv(flux: str, timeout: int = 6) -> list[dict]:
+    """Run a Flux query against the InfluxDB used by the DCN+clab collectors,
+    return the rows as a list of dicts. Empty list on failure (logged)."""
+    influx_url   = os.environ.get("INFLUXDB_URL",   "http://localhost:8086")
+    influx_org   = os.environ.get("INFLUXDB_ORG",   "dcn-lab")
+    influx_token = os.environ.get("INFLUXDB_TOKEN", "dcn-lab-token-secret")
+    try:
+        r = _requests.post(
+            f"{influx_url}/api/v2/query?org={influx_org}",
+            headers={
+                "Authorization": f"Token {influx_token}",
+                "Content-Type":  "application/vnd.flux",
+                "Accept":        "application/csv",
+            },
+            data=flux.encode("utf-8"),
+            timeout=timeout,
+        )
+    except Exception as exc:  # noqa: BLE001
+        app.logger.warning("InfluxDB query failed: %s", exc)
+        return []
+    if r.status_code != 200:
+        app.logger.warning("InfluxDB query returned %s: %s", r.status_code, r.text[:200])
+        return []
+    rows: list[dict] = []
+    header: list[str] = []
+    for line in r.text.splitlines():
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split(",")
+        if not header:
+            header = parts
+            continue
+        if len(parts) != len(header):
+            continue
+        rows.append(dict(zip(header, parts)))
+    return rows
+
+
+def _influx_derive_alerts(site_filter: str = "") -> list[dict]:
+    """Derive alerts from the time-series fabric state.
+
+    We do not need LibreNMS — the InfluxDB bucket already has BGP /
+    interface counters from both the DCN collector and the clab collector.
+
+    Alert rules (all dimensions tagged ``fabric``, ``host``, ``vendor``, ``role``, ``site``):
+        - bgp_session_count.established < bgp_session_count.total  → "BGP peers down"
+        - interface_count.up           < interface_count.total     → "Interfaces down"
+        - ospf_neighbor_count.full     < ospf_neighbor_count.total → "OSPF adjacencies missing"
+    """
+    flux = '''
+      bgp_now = from(bucket:"network-telemetry") |> range(start:-2m)
+        |> filter(fn:(r) => r._measurement == "bgp_session_count")
+        |> last()
+        |> pivot(rowKey:["host","fabric","site","vendor","role"], columnKey:["_field"], valueColumn:"_value")
+      bgp_down = bgp_now |> filter(fn:(r) => r.established < r.total)
+        |> map(fn:(r) => ({ host:r.host, site:r.site, vendor:r.vendor, role:r.role,
+                            fabric:r.fabric, kind:"bgp",
+                            down:int(v: r.total - r.established), total:int(v: r.total) }))
+      intf_now = from(bucket:"network-telemetry") |> range(start:-2m)
+        |> filter(fn:(r) => r._measurement == "interface_count")
+        |> last()
+        |> pivot(rowKey:["host","fabric","site","vendor","role"], columnKey:["_field"], valueColumn:"_value")
+      intf_down = intf_now |> filter(fn:(r) => r.up < r.total)
+        |> map(fn:(r) => ({ host:r.host, site:r.site, vendor:r.vendor, role:r.role,
+                            fabric:r.fabric, kind:"intf",
+                            down:int(v: r.total - r.up), total:int(v: r.total) }))
+      union(tables:[bgp_down, intf_down])
+    '''
+    rows = _influx_query_csv(flux, timeout=8)
+    alerts: list[dict] = []
+    for r in rows:
+        kind   = r.get("kind", "")
+        host   = r.get("host", "")
+        site   = r.get("site", "")
+        vendor = r.get("vendor", "")
+        role   = r.get("role", "")
+        try:
+            down  = int(r.get("down",  "0") or 0)
+            total = int(r.get("total", "0") or 0)
+        except ValueError:
+            continue
+        if down <= 0:
+            continue
+        # Skip pure spine/leaf hosts that legitimately have 0 sessions
+        if kind == "bgp" and total == 0:
+            continue
+        msg = (f"{down}/{total} BGP peers down" if kind == "bgp"
+               else f"{down}/{total} interfaces down")
+        severity = "critical" if (kind == "bgp" and down >= 2) or (kind == "intf" and down >= 2) else "warning"
+        alerts.append({
+            "source":   "influxdb",
+            "device":   host,
+            "site":     site,
+            "vendor":   vendor,
+            "role":     role,
+            "kind":     kind,
+            "message":  msg,
+            "severity": severity,
+            "down":     down,
+            "total":    total,
+        })
+    if site_filter:
+        sf = site_filter.lower()
+        alerts = [a for a in alerts if sf in (a.get("site") or "").lower()]
+    return alerts
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# ── 📈 ADTK anomaly detection (Roadmap #3) ────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────────────────
+# The classic alert rule (`up < total`) is a binary tripwire — it fires only
+# once a peer has fully dropped. Real BGP problems are visible MUCH earlier
+# as flap counts, prefix-count drift, or CPU spikes — anomalies the time-
+# series can detect 5-30 min before the threshold trips.
+#
+# Implementation: pull recent history per (host, measurement, field) and run
+# two cheap, deterministic detectors per series:
+#   1. Z-score over rolling mean (univariate level anomalies)
+#   2. Persistent-flap detector (count up/down transitions in a window)
+#
+# Why Python over the InfluxDB ADTK plugin: that plugin requires InfluxDB v3,
+# which would force a full DB migration. The math is simple — running it in
+# Flask alongside the existing correlator is the lower-risk path. When/if we
+# bump to v3 we can replace this with the plugin and keep the API contract.
+# ──────────────────────────────────────────────────────────────────────────────
+
+def _adtk_series(measurement: str, field: str, window_min: int = 30) -> list[dict]:
+    """Pull a measurement+field time series grouped by host for the last
+    ``window_min`` minutes. Returns raw rows {host, _time, _value}."""
+    flux = f'''
+      from(bucket:"network-telemetry")
+        |> range(start:-{window_min}m)
+        |> filter(fn:(r) => r._measurement == "{measurement}" and r._field == "{field}")
+        |> keep(columns:["_time","_value","host"])
+    '''
+    return _influx_query_csv(flux, timeout=10)
+
+
+def _adtk_zscore(values: list[float], threshold: float = 3.0) -> tuple[bool, float]:
+    """Return (is_anomaly, last_zscore). Stable when stddev is 0 (returns False)."""
+    if len(values) < 5:
+        return False, 0.0
+    mean = sum(values) / len(values)
+    var = sum((v - mean) ** 2 for v in values) / len(values)
+    std = var ** 0.5
+    if std < 1e-9:
+        return False, 0.0
+    last = values[-1]
+    z = (last - mean) / std
+    return abs(z) >= threshold, round(z, 2)
+
+
+def _adtk_flap_count(values: list[float]) -> int:
+    """Count transitions where the value drops then recovers within the window
+    — classic BGP flap signature. Skips no-op consecutive duplicates."""
+    transitions = 0
+    last_dir = 0  # +1 / -1 / 0
+    prev = None
+    for v in values:
+        if prev is None:
+            prev = v; continue
+        if v < prev:
+            d = -1
+        elif v > prev:
+            d = 1
+        else:
+            d = 0
+        if d != 0 and d != last_dir:
+            transitions += 1
+            last_dir = d
+        prev = v
+    # Each flap = 2 transitions (down then up). Round down.
+    return transitions // 2
+
+
+def detect_anomalies(window_min: int = 30) -> list[dict]:
+    """Detect time-series anomalies across the live fabric.
+
+    Three signals (all per host):
+      - BGP established count: z-score of value vs last 30 min
+      - BGP established count: flap-count detector (down/up cycles)
+      - Interface up count: z-score (catches link-flap storms)
+    """
+    by_host_bgp:  dict[str, list[float]] = {}
+    by_host_intf: dict[str, list[float]] = {}
+    for r in _adtk_series("bgp_session_count", "established", window_min):
+        try:
+            by_host_bgp.setdefault(r.get("host",""), []).append(float(r.get("_value","0")))
+        except ValueError:
+            continue
+    for r in _adtk_series("interface_count", "up", window_min):
+        try:
+            by_host_intf.setdefault(r.get("host",""), []).append(float(r.get("_value","0")))
+        except ValueError:
+            continue
+
+    anomalies: list[dict] = []
+    for host, series in by_host_bgp.items():
+        if not host:
+            continue
+        is_anom, z = _adtk_zscore(series)
+        if is_anom:
+            anomalies.append({
+                "source":   "adtk", "detector": "zscore",
+                "device":   host, "metric": "bgp_established",
+                "severity": "warning" if abs(z) < 5 else "critical",
+                "message":  f"BGP established count z-score {z} (mean drift over {window_min}m)",
+                "z":        z, "samples": len(series),
+            })
+        flaps = _adtk_flap_count(series)
+        if flaps >= 2:
+            anomalies.append({
+                "source":   "adtk", "detector": "flap",
+                "device":   host, "metric": "bgp_established",
+                "severity": "critical" if flaps >= 5 else "warning",
+                "message":  f"BGP flap detector: {flaps} session flaps in last {window_min}m",
+                "flaps":    flaps, "samples": len(series),
+            })
+    for host, series in by_host_intf.items():
+        if not host:
+            continue
+        is_anom, z = _adtk_zscore(series)
+        if is_anom:
+            anomalies.append({
+                "source":   "adtk", "detector": "zscore",
+                "device":   host, "metric": "interface_up",
+                "severity": "warning",
+                "message":  f"Interface up-count z-score {z} (level shift in {window_min}m)",
+                "z":        z, "samples": len(series),
+            })
+    return anomalies
+
+
+@app.route("/api/anomaly/detect", methods=["GET", "POST"])
+def api_anomaly_detect():
+    """Run the ADTK-style anomaly detector and return the raw findings.
+
+    Query / body:
+        window_min — default 30, max 720 (12h)
+    """
+    body = request.get_json(silent=True) or {}
+    try:
+        win = int(body.get("window_min") or request.args.get("window_min") or 30)
+    except (TypeError, ValueError):
+        win = 30
+    win = max(5, min(win, 720))
+    try:
+        anomalies = detect_anomalies(window_min=win)
+    except Exception as e:
+        return jsonify({"error": f"anomaly_detect_failed: {e}",
+                        "anomalies": [], "window_min": win}), 500
+    return jsonify({
+        "window_min": win,
+        "count":      len(anomalies),
+        "detectors":  ["zscore", "flap"],
+        "anomalies":  anomalies,
+    })
+
+
 @app.route("/api/keep/correlate", methods=["POST"])
 def api_keep_correlate():
-    """Pull alerts from LibreNMS + Kibana and correlate into incidents using LLM."""
+    """Pull alerts from LibreNMS (optional) + InfluxDB derived state and
+    correlate into incidents using the LLM. InfluxDB is always tried so
+    the endpoint stays useful without external SaaS."""
     data = request.get_json(force=True) or {}
     site_filter: str = (data.get("site") or "").strip().lower()
 
     raw_alerts: list[dict] = []
 
-    # Pull LibreNMS alerts
+    # Pull LibreNMS alerts (optional)
     try:
         lnms_url = os.environ.get("LIBRENMS_URL", "")
         lnms_token = os.environ.get("LIBRENMS_TOKEN", "")
@@ -11514,28 +12830,106 @@ def api_keep_correlate():
             if resp.status_code == 200:
                 for a in (resp.json().get("alerts") or []):
                     raw_alerts.append({"source": "librenms", "device": a.get("hostname", ""),
-                                       "message": a.get("rule", {}).get("name", "alert"), "severity": a.get("severity", "warning")})
+                                       "message": a.get("rule", {}).get("name", "alert"),
+                                       "severity": a.get("severity", "warning")})
     except Exception:
         pass
 
-    # Filter by site if specified
+    # ALWAYS try InfluxDB — that's where the real live state of both
+    # fabrics lives. site_filter is applied inside the helper.
+    raw_alerts.extend(_influx_derive_alerts(site_filter))
+
+    # Merge ADTK anomaly detections — z-score level shifts + flap-count signals
+    # that fire before binary `up<total` rules. (Roadmap #3 — 2026-05-25.)
+    try:
+        for a in detect_anomalies(window_min=30):
+            raw_alerts.append({
+                "source":   a.get("source", "adtk"),
+                "detector": a.get("detector"),
+                "device":   a.get("device", ""),
+                "site":     "",  # tag not in series — left blank, correlator
+                "vendor":   "",  # doesn't need it for grouping
+                "role":     "",
+                "kind":     a.get("metric", "anomaly"),
+                "message":  a.get("message", ""),
+                "severity": a.get("severity", "warning"),
+                "z":        a.get("z"),
+                "flaps":    a.get("flaps"),
+            })
+    except Exception:
+        # ADTK is best-effort — never let it break the correlator.
+        pass
+
+    # Merge fleet-wide forecast (predictive) alerts. Roadmap #5 — these fire
+    # when forecast P95 upper bound crosses a per-metric threshold within the
+    # horizon. They give the operator an ETA ("in ~6h, leaf2 errors will
+    # exceed 1k/s — 87% confidence") to act on before the threshold trips.
+    try:
+        from multivendor_extensions import get_recent_predictive_alerts  # type: ignore
+        for a in get_recent_predictive_alerts(max_age_s=1800):
+            raw_alerts.append({
+                "source":   "forecast",
+                "detector": a.get("model", "predictive"),
+                "device":   a.get("device", ""),
+                "site":     "",
+                "vendor":   "",
+                "role":     "",
+                "kind":     a.get("metric", "predictive"),
+                "message":  a.get("message") or
+                            f"{a.get('metric')} predicted to {a.get('direction','breach')} "
+                            f"~{a.get('eta_s','?')}s",
+                "severity": a.get("severity", "predictive"),
+                "eta_s":    a.get("eta_s"),
+                "confidence": a.get("confidence"),
+            })
+    except Exception:
+        pass
+
+    # Filter LibreNMS rows by site if specified (InfluxDB already filtered).
     if site_filter:
-        raw_alerts = [a for a in raw_alerts if site_filter in a.get("device", "").lower()]
+        raw_alerts = [a for a in raw_alerts
+                      if a.get("source") == "influxdb"
+                      or site_filter in (a.get("device") or "").lower()]
 
     if not raw_alerts:
-        return jsonify({"error": "No alerts available — configure LIBRENMS_URL and LIBRENMS_TOKEN"}), 503
+        return jsonify({
+            "raw_alerts": 0, "incidents": 0, "suppressed": 0,
+            "noise_reduction": "n/a", "incident_list": [],
+            "sources_used": ["influxdb" if not (os.environ.get("LIBRENMS_URL") and os.environ.get("LIBRENMS_TOKEN")) else "influxdb+librenms"],
+            "note": "fabric is healthy — no BGP/intf anomalies in last 2m",
+        }), 200
+
+    # Enrich each alert with netlog-ai compliance findings for the same host.
+    # The LLM correlator then sees *why* the device is fragile, not just that
+    # it's down right now — root cause becomes citable.
+    per_device_findings: dict[str, list[dict]] = {}
+    knowledge_blocks: list[str] = []
+    unique_hosts = {a.get("device", "") for a in raw_alerts if a.get("device")}
+    for h in list(unique_hosts)[:32]:  # hard cap
+        findings = _netlog_findings_for(h)
+        if findings:
+            per_device_findings[h] = findings
+            summary = _netlog_summary_for(h, max_findings=4)
+            if summary:
+                knowledge_blocks.append(summary)
 
     # LLM correlation
     alert_text = "\n".join(f"[{a['source']}] {a['device']}: {a['message']} ({a['severity']})" for a in raw_alerts)
+    if knowledge_blocks:
+        alert_text += "\n\n--- knowledge-base context (sanitized from netlog-ai) ---\n" + \
+                      "\n".join(knowledge_blocks)
     sys_p = (
-        "You are a network operations expert. Given these alerts, identify the root cause and group correlated alerts into incidents. "
-        "Return a JSON array of incidents: [{\"id\":\"INC-001\",\"title\":\"...\",\"root_cause\":\"...\",\"suppressed\":N,\"alerts\":[...]}]"
+        "You are a network operations expert. Given these alerts and any knowledge-base "
+        "context, identify the root cause and group correlated alerts into incidents. "
+        "When a compliance finding plausibly explains an alert (e.g. missing prefix-limit + "
+        "BGP flap), cite it explicitly in root_cause. "
+        "Return a JSON array of incidents: "
+        "[{\"id\":\"INC-001\",\"title\":\"...\",\"root_cause\":\"...\",\"suppressed\":N,\"alerts\":[...]}]"
     )
-    llm_raw = _llm_query(sys_p, alert_text, max_tokens=800)
+    llm_raw = _llm_query(sys_p, alert_text, max_tokens=1000)
     incidents: list[dict] = []
     if llm_raw:
         try:
-            # extract JSON array from LLM response
             match = _re.search(r"\[.*\]", _clean_llm_response(llm_raw), _re.DOTALL)
             if match:
                 incidents = _json_mod.loads(match.group())
@@ -11549,6 +12943,8 @@ def api_keep_correlate():
         "suppressed": suppressed,
         "noise_reduction": f"{len(raw_alerts) / max(len(incidents), 1):.0f}x" if incidents else "n/a",
         "incident_list": incidents,
+        "knowledge_enriched_hosts": list(per_device_findings.keys()),
+        "per_device_findings": per_device_findings,
     })
 
 
@@ -11676,9 +13072,20 @@ def api_telemetry_metrics():
 # ── 🔧 ROADMAP FEATURE 1: AUTO-REMEDIATION RUNBOOKS ──────────────────────────
 # ══════════════════════════════════════════════════════════════════════════════
 
-_SIM_SCRIPT = os.path.normpath(
-    os.path.join(os.path.dirname(__file__), "../../network-lab/sim_bgp_failure.sh")
-)
+# Resolve the sim script — try the DCN_Network_Tool-local path first
+# (src/../network-lab/...) and fall back to the workspace-root copy
+# (../../../network-lab/...) so the endpoint works in either layout.
+def _find_sim_script() -> str:
+    here = os.path.dirname(__file__)
+    for rel in ("../network-lab/sim_bgp_failure.sh",
+                "../../network-lab/sim_bgp_failure.sh",
+                "../../../network-lab/sim_bgp_failure.sh"):
+        p = os.path.normpath(os.path.join(here, rel))
+        if os.path.exists(p):
+            return p
+    return os.path.normpath(os.path.join(here, "../network-lab/sim_bgp_failure.sh"))
+
+_SIM_SCRIPT = _find_sim_script()
 
 @app.route("/api/remediate", methods=["POST"])
 def api_remediate():
@@ -11845,9 +13252,51 @@ def api_device_health_all():
         dtype = dev.get("type", "junos")
         ip = dev.get("ip", "")
         port = dev.get("port", 22)
+        container = dev.get("container")
+        vendor = (dev.get("vendor") or "").lower()
         cmd_set = _HEALTH_CMDS.get(dtype, _HEALTH_CMDS["junos"])
-        # Run all commands for this device in parallel — avoids sequential SSH overhead
+
         raw: dict[str, str] = {}
+
+        # clab fabric nodes: SSH is unreachable from the host (separate docker
+        # network), so use docker exec with the right per-vendor CLI shim.
+        if container and shutil.which("docker"):
+            for key, _frr_cmd in cmd_set.items():
+                try:
+                    if vendor in ("frr", ""):
+                        ext = ["docker", "exec", container, "vtysh", "-c", _frr_cmd]
+                    elif vendor in ("arista", "arista-eos", "eos"):
+                        eos_cmd = (_frr_cmd
+                                   .replace("show ip bgp summary", "show ip bgp summary")
+                                   .replace("show bgp summary",    "show ip bgp summary"))
+                        ext = ["docker", "exec", container, "Cli", "-p", "15", "-c", eos_cmd]
+                    elif vendor in ("nokia", "nokia-srl", "srl"):
+                        srl_cmd = _frr_cmd  # SRL won't parse "show ip ..." — emit raw, no parse
+                        if "bgp" in _frr_cmd:
+                            srl_cmd = "show network-instance default protocols bgp neighbor"
+                        elif "ospf" in _frr_cmd:
+                            srl_cmd = "show network-instance default protocols ospf neighbor"
+                        elif "interface" in _frr_cmd:
+                            srl_cmd = "show interface"
+                        ext = ["docker", "exec", container, "sr_cli", "-d", srl_cmd]
+                    elif vendor == "linux":
+                        ext = ["docker", "exec", container, "ip", "-br", "a"]
+                    else:
+                        raw[key] = f"ERROR: unsupported vendor {vendor!r}"
+                        continue
+                    proc = subprocess.run(ext, capture_output=True, text=True, timeout=CMD_DEADLINE)
+                    raw[key] = proc.stdout if proc.returncode == 0 else f"ERROR rc={proc.returncode}: {(proc.stderr or '').strip()[:160]}"
+                except subprocess.TimeoutExpired:
+                    raw[key] = "ERROR: docker exec timed out"
+                except Exception as exc:  # noqa: BLE001
+                    raw[key] = f"ERROR: {exc}"
+            metrics = _parse_frr_health(raw) if vendor == "frr" else {}
+            return {"hostname": dev["hostname"], "type": dtype, "ip": ip,
+                    "vendor": vendor, "container": container,
+                    "raw": raw, "metrics": metrics}
+
+        # SSH path (original): used by the 10-device FRR lab and the static
+        # sanitized configs.
         from concurrent.futures import ThreadPoolExecutor as _TPE, as_completed as _ac, TimeoutError as _TE
         with _TPE(max_workers=len(cmd_set)) as cmd_pool:
             cmd_futs = {cmd_pool.submit(_run_cmd, ip, dtype, port, k, c): k
@@ -13548,17 +14997,115 @@ _CHAOS_SCRIPT = os.path.normpath(
                  "../../network-lab/sim_bgp_failure.sh"))
 
 
+def _clab_chaos(action: str, target: str | None) -> dict:
+    """Chaos Monkey actions against the clab Clos-EVPN fabric. Implemented via
+    docker exec + per-vendor BGP control commands. Returns a dict with
+    `output`, `active_failures`, `mode`, and `target` so the UI can render.
+
+    - status: walk all 9 routing nodes, count established peers
+    - break:  pick a router with established peers and clear a session
+    - fix:    `clear bgp` / `bgp ... restart` on every node — flaps everything
+              back to a clean state
+    - chaos:  break, sleep 30s, fix (best-effort; runs synchronously)
+    """
+    import random
+    routing = [d for d in DEVICES
+               if d.get("fabric") == "clos-evpn" and d.get("container")
+               and d.get("role", "").lower() in ("spine", "leaf")]
+    if target:
+        routing = [d for d in routing if d["hostname"] == target] or routing[:1]
+
+    if action == "status":
+        lines, up_total, down_total = [], 0, 0
+        for dev in routing:
+            try:
+                if dev.get("vendor_canonical") == "frr":
+                    raw = _docker_run(dev["container"], "vtysh", "-c",
+                                      "show bgp summary json", timeout=6)
+                    import json as _jc
+                    j = _jc.loads(re.search(r"\{.*\}", raw, re.DOTALL).group(0))
+                    af = j.get("ipv4Unicast") or j.get("l2VpnEvpn") or {}
+                    peers = (af or {}).get("peers", {}) if isinstance(af, dict) else {}
+                    up = sum(1 for p in peers.values() if str(p.get("state","")).lower()=="established")
+                    tot = len(peers)
+                else:
+                    # cEOS / SRL — use the existing collectors for parity
+                    if dev.get("vendor_canonical") == "arista-eos":
+                        r = _clab_eos_collect(dev["hostname"], dev["container"], ["get_bgp_neighbors"])
+                    else:
+                        r = _clab_srl_collect(dev["hostname"], dev["container"], ["get_bgp_neighbors"])
+                    peers = (r.get("data",{}).get("get_bgp_neighbors",{}).get("global",{}).get("peers") or {})
+                    up = sum(1 for p in peers.values() if p.get("is_up"))
+                    tot = len(peers)
+                up_total += up
+                down_total += (tot - up)
+                lines.append(f"  {dev['hostname']:8s}  {up}/{tot}  ({dev.get('vendor_canonical','?')})")
+            except Exception as e:
+                lines.append(f"  {dev['hostname']:8s}  -/-  error: {e}")
+        return {"mode": "live-clab", "active_failures": down_total,
+                "output": f"Clab BGP status — {up_total} up · {down_total} down\n" + "\n".join(lines)}
+
+    if action == "fix":
+        outs = []
+        for dev in routing[:3]:  # only need a few to broadcast a fix
+            try:
+                if dev.get("vendor_canonical") == "frr":
+                    _docker_run(dev["container"], "vtysh", "-c", "clear bgp * soft", timeout=8)
+                    outs.append(f"  fixed {dev['hostname']}")
+            except Exception as e:
+                outs.append(f"  {dev['hostname']}: {e}")
+        return {"mode": "live-clab", "active_failures": 0,
+                "output": "✅ Clab BGP sessions soft-cleared:\n" + "\n".join(outs)}
+
+    if action == "break":
+        candidates = [d for d in routing if d.get("vendor_canonical") == "frr"]
+        if not candidates:
+            return {"mode": "live-clab", "active_failures": 0,
+                    "output": "no FRR-vendor target available — cEOS/SRL chaos not yet implemented"}
+        victim = random.choice(candidates)
+        try:
+            # `clear bgp * hard` forces a session reset which counts as a brief outage
+            _docker_run(victim["container"], "vtysh", "-c", "clear bgp * hard", timeout=8)
+            return {"mode": "live-clab", "active_failures": 1, "target": victim["hostname"],
+                    "output": f"⚡ Hard-cleared BGP on {victim['hostname']} ({victim['vendor_canonical']})\n"
+                              f"Sessions will renegotiate over ~15s."}
+        except Exception as e:
+            return {"mode": "live-clab", "error": str(e)}
+
+    if action == "chaos":
+        # In-place: break → wait 30s → fix. Synchronous (matches sim_bgp_failure.sh)
+        broken = _clab_chaos("break", target)
+        import time as _t; _t.sleep(30)
+        _clab_chaos("fix", None)
+        return {"mode": "live-clab", "active_failures": 0,
+                "output": f"🎲 Chaos cycle complete (30s outage on {broken.get('target','?')}, restored)"}
+
+    return {"mode": "live-clab", "error": f"unknown action {action!r}"}
+
+
 @app.route("/api/chaos/bgp", methods=["POST"])
 def api_chaos_bgp():
     """
     BGP Chaos Monkey — trigger controlled failures to stress-test auto-remediation.
-    Body: {"action": "status"|"break"|"fix"|"chaos"}
+    Body: {"action": "status"|"break"|"fix"|"chaos",
+           "fabric": "dcn"|"clab",      (optional · defaults to dcn)
+           "target": "<hostname>"        (optional · constrains break to one device)}
     """
     data   = request.get_json(force=True) or {}
     action = (data.get("action") or "status").strip().lower()
+    fabric = (data.get("fabric") or "dcn").strip().lower()
+    target = (data.get("target") or "").strip() or None
     if action not in ("status", "break", "fix", "chaos"):
         return jsonify({"error": f"invalid action '{action}'"}), 400
 
+    # Clab path: vendor-aware docker exec
+    if fabric in ("clab", "clos", "clos-evpn", "clab-dc1"):
+        r = _clab_chaos(action, target)
+        _agent_emit("chaos", f"🐒 Chaos [clab {action}]", (r.get("output","") or r.get("error",""))[:140],
+                    "warn" if action in ("break", "chaos") else "info")
+        return jsonify({"action": action, "fabric": "clab", **r})
+
+    # DCN path: sim_bgp_failure.sh (legacy)
     _SIMULATED = {
         "status": {"output": "✅ All 10 BGP sessions ESTABLISHED\nNo active failures.", "active_failures": 0},
         "break":  {"output": "⚡ Breaking BGP: de-fra-core-01 ↔ uk-lon-core-01\n"
@@ -13572,7 +15119,7 @@ def api_chaos_bgp():
         r = _SIMULATED[action]
         _agent_emit("chaos", f"🐒 Chaos Monkey [{action}]", r["output"][:120],
                     "warn" if r["active_failures"] else "info")
-        return jsonify({"action": action, "mode": "simulated", **r})
+        return jsonify({"action": action, "fabric": "dcn", "mode": "simulated", **r})
 
     try:
         res = subprocess.run(["bash", _CHAOS_SCRIPT, action],
@@ -13580,7 +15127,7 @@ def api_chaos_bgp():
         out = (res.stdout + res.stderr).strip()
         _agent_emit("chaos", f"🐒 Chaos Monkey [{action}]", out[:180],
                     "warn" if action in ("break", "chaos") else "info")
-        return jsonify({"action": action, "mode": "live",
+        return jsonify({"action": action, "fabric": "dcn", "mode": "live",
                         "output": out, "returncode": res.returncode})
     except Exception as exc:
         return jsonify({"action": action, "error": str(exc)}), 500
@@ -13605,11 +15152,16 @@ def api_shadow_audit():
     check = (data.get("check") or "all").strip().lower()
 
     _SITE_DEVICES: dict[str, list[str]] = {
-        "de-fra": ["de-fra-core-01", "de-fra-core-02", "de-fra-edge-01", "de-fra-dist-01"],
-        "uk-lon": ["uk-lon-core-01", "uk-lon-edge-01", "uk-lon-dist-01"],
-        "nl-ams": ["nl-ams-core-01", "nl-ams-edge-01"],
-        "us-nyc": ["us-nyc-core-01"],
-        "all":    list(_LAB_ADJACENCY.keys()),
+        "de-fra":   ["de-fra-core-01", "de-fra-core-02", "de-fra-edge-01", "de-fra-dist-01"],
+        "uk-lon":   ["uk-lon-core-01", "uk-lon-edge-01", "uk-lon-dist-01"],
+        "nl-ams":   ["nl-ams-core-01", "nl-ams-edge-01"],
+        "us-nyc":   ["us-nyc-core-01"],
+        # clab Clos-EVPN fabric — 9 routing nodes. Hosts excluded (no CLI).
+        "clab-dc1": ["spine1", "spine2", "spine3",
+                     "leaf1", "leaf2", "leaf3", "leaf4", "leaf5", "leaf6"],
+        # 'all' merges every device with a running container in inventory
+        "all":      [d["hostname"] for d in DEVICES
+                     if d.get("container") and d.get("role", "").lower() != "host"],
     }
     targets = _SITE_DEVICES.get(site, _SITE_DEVICES["de-fra"])
 
@@ -13634,8 +15186,9 @@ def api_shadow_audit():
     if check in ("ospf", "all"):
         active.extend(_CHECKS["ospf"])
 
-    # Hostname → on-disk frr.conf path (relative to network-lab dir)
-    # Avoids SSH entirely for FRR containers — configs are mounted on the host filesystem
+    # Hostname → on-disk frr.conf path. Kept as a fallback when docker exec
+    # is unavailable; primary path is now `docker exec vtysh show running-config`
+    # which always reflects live state.
     _FRR_CONFIG_MAP: dict[str, str] = {
         "de-fra-core-01": "configs/r1/frr.conf",
         "de-fra-core-02": "configs/r2/frr.conf",
@@ -13648,34 +15201,62 @@ def api_shadow_audit():
         "uk-lon-dist-01": "configs/sw2/frr.conf",
         "de-fra-dist-01": "configs/sw5/frr.conf",
     }
-    _LAB_DIR = os.path.normpath(os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "../../network-lab"))
+    # network-lab/ is at the repo root, 3 levels up from this file:
+    # /04_Scripts_Tools/DCN_Network_Tool/src/app.py → ../../../network-lab.
+    # Previous version used ../../network-lab which doesn't exist — every
+    # device reported "Could not read running config". Try multiple levels.
+    _here = os.path.dirname(os.path.abspath(__file__))
+    _LAB_DIR = None
+    for _rel in ("../../network-lab", "../../../network-lab", "../network-lab"):
+        _candidate = os.path.normpath(os.path.join(_here, _rel))
+        if os.path.isdir(_candidate):
+            _LAB_DIR = _candidate
+            break
+
+    def _read_running_config(hostname: str) -> str:
+        """Resolve a device's running config from the strongest source first:
+        1. docker exec vtysh / Cli / sr_cli (LIVE state — reflects real device)
+        2. on-disk startup-config file (fallback when docker is unavailable)
+        3. SSH for production hardware (last-resort path)
+        Returns "" if nothing succeeds — the caller flags it as unreachable.
+        """
+        dev = get_device_by_hostname(hostname)
+        if dev and dev.get("container"):
+            container = dev["container"]
+            vc = (dev.get("vendor_canonical") or "").lower()
+            try:
+                if vc == "nokia-srl":
+                    return _docker_run(container, "sr_cli", "info /", timeout=10)
+                if vc == "arista-eos":
+                    return _docker_run(container, "Cli", "-p", "15",
+                                       "-c", "show running-config", timeout=10)
+                # default: FRR
+                return _docker_run(container, "vtysh", "-c",
+                                   "show running-config", timeout=10)
+            except Exception:
+                pass
+        # On-disk fallback for DCN lab devices that pre-date the docker exec path
+        rel = _FRR_CONFIG_MAP.get(hostname)
+        if rel and _LAB_DIR:
+            try:
+                with open(os.path.join(_LAB_DIR, rel)) as f:
+                    return f.read()
+            except Exception:
+                pass
+        # SSH fallback for genuine production hardware
+        if dev:
+            try:
+                result = run_command_on_device(dev["ip"], dev.get("type", "junos"),
+                                               "show running-config", port=dev.get("port", 22))
+                if result.get("success"):
+                    return result.get("output", "")
+            except Exception:
+                pass
+        return ""
 
     findings: list[dict] = []
     for hostname in targets:
-        live_cfg = ""
-        # FRR lab devices: read config directly from disk (instantaneous, no SSH)
-        rel = _FRR_CONFIG_MAP.get(hostname)
-        if rel:
-            cfg_path = os.path.join(_LAB_DIR, rel)
-            try:
-                with open(cfg_path) as _f:
-                    live_cfg = _f.read()
-            except Exception:
-                pass
-        else:
-            # Production devices: SSH via Netmiko/NAPALM
-            dev = next((d for d in DEVICES
-                        if d.get("hostname", "").lower().startswith(hostname)), None)
-            if dev:
-                try:
-                    result = run_command_on_device(dev["ip"], dev.get("type", "junos"),
-                                                   "show running-config", port=dev.get("port", 22))
-                    if result.get("success"):
-                        live_cfg = result.get("output", "")
-                except Exception:
-                    pass
-
+        live_cfg = _read_running_config(hostname)
         if not live_cfg:
             findings.append({"hostname": hostname, "severity": "WARNING",
                               "type": "unreachable",

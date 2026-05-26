@@ -9,6 +9,39 @@
 > Demo: [`demo/linkedin-demo.mp4`](demo/linkedin-demo.mp4) (0:52 · 1280×720) ·
 > [`demo/LINKEDIN_POST.md`](demo/LINKEDIN_POST.md) · full feature map in
 > [`FEATURES.md`](FEATURES.md).
+>
+> **🛡 2026-05-25 audit hardening:** end-to-end functional audit closed 9 of 11
+> gaps in one session. Tool now reports honestly against the live 25-device
+> deployment: **19 network devices · 5 sites · 41/41 clab BGP up · 0 console
+> errors · 20/20 endpoints green**. Collector under launchd KeepAlive, KPI
+> strip wired to live counts, gnmic freshness uses `source`-tag filter.
+> Full audit: [`GAPS_REPORT.md`](GAPS_REPORT.md) · post-audit architecture:
+> [`docs/ARCHITECTURE_HARDENED.md`](docs/ARCHITECTURE_HARDENED.md).
+>
+> **🔁 2026-05-25 closed-loop pipeline (roadmap #4):** new
+> `POST /api/change/closed-loop` chains **6 stages** — Predict → Batfish →
+> Apply (Health Gate) → Watch → POST diff → Intent verify — into a single
+> governed operation with auto-rollback. Verified live: **APPROVED in 12s**,
+> **ROLLED_BACK in 6s** on induced regression. Pushes the tool from
+> TM Forum ANL **L2 → L3**. Design + sequence: [`docs/CHANGE_PIPELINE.md`](docs/CHANGE_PIPELINE.md).
+>
+> **🩺 2026-05-25 round-2 audit + #3 ADTK:** every previously-broken tab now
+> functional on **both fabrics** for **all 4 vendor families** (Juniper / Arista
+> EOS / Nokia SR Linux / FRR). NAPALM endpoints return real data (60 clab + 18
+> DCN peers); Nornir LLDP / Config Compliance work; Shadow Auditor reads live
+> running-config via docker exec; Chaos Monkey targets both fabrics; Postmortem
+> + AI Insights have fabric/device selectors. New `/api/anomaly/detect`
+> endpoint runs Z-score + flap-count detectors over the live time series and
+> merges findings into `/api/keep/correlate`. Full evidence:
+> [`docs/POST_AUDIT_FIXES_2.md`](docs/POST_AUDIT_FIXES_2.md).
+>
+> **🎯 2026-05-25 Phase 5 COMPLETE:** all 5 roadmap items shipped (#1 RAG, #2
+> gNMI for SRL, #3 ADTK, #4 closed-loop, #5 predictive forecast) plus 13 new
+> MCP tools (63 total), persistent docker-exec session pool, and cEOS+FRR
+> streaming migration script. **Stress test: 41 PASS / 0 FAIL** across every
+> feature × every fabric × every vendor. Post-Phase-5 architecture +
+> Phase-6 backlog: [`docs/ARCHITECTURE_PHASE_5.md`](docs/ARCHITECTURE_PHASE_5.md) ·
+> agent handoff: [`docs/PHASE_5_HANDOFF.md`](docs/PHASE_5_HANDOFF.md).
 
 A 26-device multivendor (Juniper / Arista / FRR) network operations lab driven
 by a Pydantic-AI orchestrator, eval harness, and immutable AI audit trail.
@@ -35,6 +68,7 @@ hooks for Cisco IOS-XE / NX-OS.
 | 🛡️ **Auto-remediation runbooks** — YAML playbooks (BGP/OSPF/Interface/ACL) | `src/runbooks/` | NetClaw |
 | 🔍 **CVE scanner** — static `(vendor, OS version)` lookup over fleet | `src/cve_db.json`, `/api/mv/cve` | NetClaw |
 | ⚙️ **MCP server** — 49 tools so Claude Code can call any capability | `src/mcp_dcn_server.py` | coding-networks-blog |
+| 🩺 **Single-device health snapshot** — `GET /api/health/<hostname>` → one JSON doc with BGP/OSPF/interfaces/routes/mem/CPU in parallel | `src/health.py`, [`docs/HEALTH_ENDPOINT.md`](docs/HEALTH_ENDPOINT.md) | what_a_NOS_could_be |
 
 ## How does this compare to RANCID, Oxidized, SolarWinds NCM, Forward Networks, NetSpectraAI?
 

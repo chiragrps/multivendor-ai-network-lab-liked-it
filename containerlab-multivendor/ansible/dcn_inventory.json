@@ -1,0 +1,141 @@
+{
+  "lab_name": "containerlab-multivendor",
+  "devices": [
+    {
+      "hostname": "evpn-leaf1",
+      "ip": "172.20.20.21",
+      "vendor": "arista",
+      "nos": "arista_eos",
+      "role": "leaf",
+      "tier": "leaf",
+      "rack": "rack-1",
+      "ssh_port": 22,
+      "credentials": {
+        "username": "admin",
+        "password": "admin"
+      },
+      "container": "clab-clos-evpn-leaf1"
+    },
+    {
+      "hostname": "evpn-leaf2",
+      "ip": "172.20.20.22",
+      "vendor": "nokia",
+      "nos": "nokia_srl",
+      "role": "leaf",
+      "tier": "leaf",
+      "rack": "rack-1",
+      "ssh_port": 22,
+      "credentials": {
+        "username": "admin",
+        "password": "NokiaSrl1!"
+      },
+      "container": "clab-clos-evpn-leaf2"
+    },
+    {
+      "hostname": "evpn-leaf3",
+      "ip": "172.20.20.23",
+      "vendor": "frr",
+      "nos": "cisco_ios",
+      "role": "leaf",
+      "tier": "leaf",
+      "rack": "rack-2",
+      "ssh_port": 22,
+      "credentials": {
+        "username": "root",
+        "password": ""
+      },
+      "container": "clab-clos-evpn-leaf3"
+    },
+    {
+      "hostname": "evpn-leaf4",
+      "ip": "172.20.20.24",
+      "vendor": "arista",
+      "nos": "arista_eos",
+      "role": "leaf",
+      "tier": "leaf",
+      "rack": "rack-2",
+      "ssh_port": 22,
+      "credentials": {
+        "username": "admin",
+        "password": "admin"
+      },
+      "container": "clab-clos-evpn-leaf4"
+    },
+    {
+      "hostname": "evpn-leaf5",
+      "ip": "172.20.20.25",
+      "vendor": "nokia",
+      "nos": "nokia_srl",
+      "role": "leaf",
+      "tier": "leaf",
+      "rack": "rack-3",
+      "ssh_port": 22,
+      "credentials": {
+        "username": "admin",
+        "password": "NokiaSrl1!"
+      },
+      "container": "clab-clos-evpn-leaf5"
+    },
+    {
+      "hostname": "evpn-leaf6",
+      "ip": "172.20.20.26",
+      "vendor": "frr",
+      "nos": "cisco_ios",
+      "role": "leaf",
+      "tier": "leaf",
+      "rack": "rack-3",
+      "ssh_port": 22,
+      "credentials": {
+        "username": "root",
+        "password": ""
+      },
+      "container": "clab-clos-evpn-leaf6"
+    },
+    {
+      "hostname": "evpn-spine1",
+      "ip": "172.20.20.11",
+      "vendor": "nokia",
+      "nos": "nokia_srl",
+      "role": "spine",
+      "tier": "spine",
+      "rack": "",
+      "ssh_port": 22,
+      "credentials": {
+        "username": "admin",
+        "password": "NokiaSrl1!"
+      },
+      "container": "clab-clos-evpn-spine1"
+    },
+    {
+      "hostname": "evpn-spine2",
+      "ip": "172.20.20.12",
+      "vendor": "arista",
+      "nos": "arista_eos",
+      "role": "spine",
+      "tier": "spine",
+      "rack": "",
+      "ssh_port": 22,
+      "credentials": {
+        "username": "admin",
+        "password": "admin"
+      },
+      "container": "clab-clos-evpn-spine2"
+    },
+    {
+      "hostname": "evpn-spine3",
+      "ip": "172.20.20.13",
+      "vendor": "frr",
+      "nos": "cisco_ios",
+      "role": "spine",
+      "tier": "spine",
+      "rack": "",
+      "ssh_port": 22,
+      "credentials": {
+        "username": "root",
+        "password": ""
+      },
+      "container": "clab-clos-evpn-spine3"
+    }
+  ],
+  "topology": "clos-evpn"
+}

@@ -57,6 +57,61 @@ def bgp_status(hostname: str) -> dict:
     return _post("/api/run", {"hostname": hostname, "raw": "show bgp summary"})
 
 
+def run_command(hostname: str, command: str) -> dict:
+    """Run an arbitrary CLI command on a device — Flask dispatches per vendor.
+
+    The Flask `/api/run` endpoint already knows how to talk to each device
+    family (FRR vtysh, Junos NETCONF / CLI, Arista EOS eAPI / SSH, Nokia SRL
+    `sr_cli`). MCP clients send the command in the operator's native syntax
+    for the target — list_devices() exposes the vendor field so the LLM can
+    pick the right syntax.
+    """
+    return _post("/api/run", {"hostname": hostname, "raw": command})
+
+
+# Per-vendor "show running-config" mapping. Falls back to FRR/IOS-style if a
+# vendor isn't in the map — most network OSes accept `show running-config`.
+_CONFIG_COMMAND_BY_VENDOR: dict[str, str] = {
+    "frr":             "show running-config",
+    "cisco_iosxr":     "show running-config",
+    "cisco_ios":       "show running-config",
+    "arista_eos":      "show running-config",
+    "eos":             "show running-config",
+    "juniper":         "show configuration | display set",
+    "junos":           "show configuration | display set",
+    "nokia_srl":       "info",
+    "srl":             "info",
+}
+
+
+def get_config(hostname: str, section: str | None = None) -> dict:
+    """Fetch a device's running config — multivendor-aware.
+
+    Looks up the device's vendor via /api/devices, then dispatches the right
+    `show config` flavor (Junos uses `show configuration | display set`, EOS
+    and FRR use `show running-config`, Nokia SRL uses `info`). Optional
+    `section` is appended to scope the output (e.g. `interface eth0` on FRR,
+    `protocols bgp` on Junos).
+    """
+    devices = list_devices().get("devices", []) or []
+    dev = next(
+        (d for d in devices
+         if (d.get("hostname") or d.get("name") or "").lower() == hostname.lower()),
+        None,
+    )
+    if not dev:
+        return {"error": f"unknown hostname: {hostname}",
+                "hint": "call list_devices() to enumerate"}
+    vendor = (dev.get("vendor") or dev.get("dtype") or dev.get("os") or "").lower()
+    base = _CONFIG_COMMAND_BY_VENDOR.get(vendor, "show running-config")
+    command = f"{base} {section}".strip() if section else base
+    result = _post("/api/run", {"hostname": hostname, "raw": command})
+    if isinstance(result, dict):
+        result.setdefault("vendor", vendor)
+        result.setdefault("command", command)
+    return result
+
+
 def topology_snapshot() -> dict:
     """Return current BGP topology graph (nodes + edges + colors)."""
     try:
@@ -140,6 +195,8 @@ __all__ = [
     "API_BASE",
     "list_devices",
     "bgp_status",
+    "run_command",
+    "get_config",
     "topology_snapshot",
     "compliance_scan",
     "health_gate_apply",

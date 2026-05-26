@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- launchd supervisor for clab_collector.py.
+     Install:
+       cp com.geshlab.clab-collector.plist ~/Library/LaunchAgents/
+       launchctl load ~/Library/LaunchAgents/com.geshlab.clab-collector.plist
+     The collector writes /tmp/clab_status.json every 15s. If it dies, KeepAlive
+     restarts it. Edits to clab_collector.py take effect on next restart:
+       launchctl kickstart -k gui/$(id -u)/com.geshlab.clab-collector
+
+     Without this, the collector was a dangling python3 process from an
+     interactive shell — it kept running 5 days with stale code while edits
+     to clab_collector.py were ignored. See GAPS_REPORT.md §4. -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.geshlab.clab-collector</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/python3</string>
+        <string>/Users/georgigaydarov/02_Projects/Network_Automation/VSS_Code_Georgi/04_Scripts_Tools/DCN_Network_Tool/network-lab/telemetry/clab_collector.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/georgigaydarov/02_Projects/Network_Automation/VSS_Code_Georgi/04_Scripts_Tools/DCN_Network_Tool</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>INFLUXDB_URL</key>
+        <string>http://localhost:8086</string>
+        <key>INFLUXDB_TOKEN</key>
+        <string>dcn-lab-token-secret</string>
+        <key>INFLUXDB_ORG</key>
+        <string>dcn-lab</string>
+        <key>INFLUXDB_BUCKET</key>
+        <string>network-telemetry</string>
+        <key>CLAB_POLL_INTERVAL</key>
+        <string>15</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/clab_collector.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/clab_collector.log</string>
+</dict>
+</plist>

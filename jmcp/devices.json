@@ -1,0 +1,2936 @@
+{
+  "ach1-fw-20a": {
+    "ip": "10.1.15.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "ach1-sw-01a": {
+    "ip": "10.1.15.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "ach1-sw-02a": {
+    "ip": "10.1.15.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "akl1-fw-20a": {
+    "ip": "10.1.3.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "akl1-sw-01a": {
+    "ip": "10.1.3.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "akl1-sw-02a": {
+    "ip": "10.1.3.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "ams1-rt-01": {
+    "ip": "10.3.254.5",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "auh1-fw-20a": {
+    "ip": "10.1.59.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "auh1-sw-01a": {
+    "ip": "10.1.59.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "auh1-sw-02": {
+    "ip": "10.1.59.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "auh1-sw-03a": {
+    "ip": "10.1.59.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bll1-fw-01a": {
+    "ip": "10.1.27.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bll1-fw-02a": {
+    "ip": "10.1.27.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bll1-sw-01a": {
+    "ip": "10.1.27.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bll1-sw-02a": {
+    "ip": "10.1.27.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bll1-sw-03a": {
+    "ip": "10.1.27.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bll1-sw-04a": {
+    "ip": "10.1.27.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bom1-fw-01a": {
+    "ip": "10.1.30.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bom1-fw-02a": {
+    "ip": "10.1.30.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bom1-rt-01": {
+    "ip": "10.1.30.51",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bom1-rt-02": {
+    "ip": "10.1.30.52",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bom1-sw-01a": {
+    "ip": "10.1.30.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bom1-sw-02a": {
+    "ip": "10.1.30.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bom1-sw-03a": {
+    "ip": "10.1.30.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bom1-sw-04a": {
+    "ip": "10.1.30.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bom1-sw-06a": {
+    "ip": "10.1.30.106",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bud1-fw-20a": {
+    "ip": "10.1.51.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bud1-sw-01a": {
+    "ip": "10.1.51.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "bud1-sw-02": {
+    "ip": "10.1.51.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "cdg1-rt-01": {
+    "ip": "10.3.254.8",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "cgk1-fw-20a": {
+    "ip": "10.1.35.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "cgk1-sw-01a": {
+    "ip": "10.1.35.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "cgk1-sw-02": {
+    "ip": "10.1.35.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "dfw1-rt-01": {
+    "ip": "10.3.255.12",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fco1-fw-01a": {
+    "ip": "10.1.47.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fco1-fw-02a": {
+    "ip": "10.1.47.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fco1-rt-01": {
+    "ip": "10.1.47.51",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fco1-rt-02": {
+    "ip": "10.1.47.52",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fco1-sw-01a": {
+    "ip": "10.1.47.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fco1-sw-02": {
+    "ip": "10.1.47.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fco1-sw-03a": {
+    "ip": "10.1.47.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fco1-sw-04a": {
+    "ip": "10.1.47.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-fw-01a": {
+    "ip": "10.1.42.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-fw-02a": {
+    "ip": "10.1.42.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-rt-01": {
+    "ip": "10.3.254.7",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-01a": {
+    "ip": "10.1.42.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-02a": {
+    "ip": "10.1.42.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-03a": {
+    "ip": "10.1.42.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-04a": {
+    "ip": "10.1.42.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-05a": {
+    "ip": "10.1.42.105",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-06a": {
+    "ip": "10.1.42.106",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-07a": {
+    "ip": "10.1.42.107",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-08a": {
+    "ip": "10.1.42.108",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-09a": {
+    "ip": "10.1.42.109",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-100a": {
+    "ip": "10.1.42.200",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-10a": {
+    "ip": "10.1.42.110",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-11a": {
+    "ip": "10.1.42.111",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-12a": {
+    "ip": "10.1.42.112",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-13a": {
+    "ip": "10.1.42.113",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-14a": {
+    "ip": "10.1.42.114",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-16a": {
+    "ip": "10.1.42.116",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-18a": {
+    "ip": "10.1.42.118",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-20a": {
+    "ip": "10.1.42.120",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-22a": {
+    "ip": "10.1.42.122",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-24a": {
+    "ip": "10.1.42.124",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-26a": {
+    "ip": "10.1.42.126",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-28a": {
+    "ip": "10.1.42.128",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-30a": {
+    "ip": "10.1.42.130",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "fra4-sw-99a": {
+    "ip": "10.1.42.199",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "got1-fw-20a": {
+    "ip": "10.1.46.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "got1-sw-01a": {
+    "ip": "10.1.46.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "got1-sw-02": {
+    "ip": "10.1.46.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "got1-sw-04": {
+    "ip": "10.1.46.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru1-fw-01a": {
+    "ip": "10.1.16.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru1-fw-02a": {
+    "ip": "10.1.16.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru1-rt-01": {
+    "ip": "10.1.16.51",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru1-rt-02": {
+    "ip": "10.1.16.52",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru1-sw-01a": {
+    "ip": "10.1.16.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru1-sw-02a": {
+    "ip": "10.1.16.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru1-sw-03a": {
+    "ip": "10.1.16.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru1-sw-04a": {
+    "ip": "10.1.16.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru2-fw-01a": {
+    "ip": "10.1.38.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru2-fw-02a": {
+    "ip": "10.1.38.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru2-rt-01": {
+    "ip": "10.1.38.51",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru2-sw-06": {
+    "ip": "10.1.38.106",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru2-sw-08": {
+    "ip": "10.1.38.108",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru2-sw-10": {
+    "ip": "10.1.38.110",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru2-sw-12": {
+    "ip": "10.1.38.112",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru2-sw-14": {
+    "ip": "10.1.38.114",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru2-sw-16": {
+    "ip": "10.1.38.116",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "gru2-sw-99": {
+    "ip": "10.1.38.199",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "net-ch-dc-fw-001": {
+    "ip": "10.112.0.190",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "net-ch-dc-fw-002": {
+    "ip": "10.112.0.191",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "hel1-fw-20a": {
+    "ip": "10.1.44.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "hel1-sw-01a": {
+    "ip": "10.1.44.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "hel1-sw-02": {
+    "ip": "10.1.44.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "hel1-sw-04": {
+    "ip": "10.1.44.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "hnd1-fw-05a": {
+    "ip": "10.1.28.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "hnd1-rt-01": {
+    "ip": "10.1.28.51",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "hnd1-rt-02": {
+    "ip": "10.1.28.52",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "hnd1-sw-01a": {
+    "ip": "10.1.28.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "hnd1-sw-02a": {
+    "ip": "10.1.28.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "iad1-rt-01": {
+    "ip": "10.3.255.8",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "iad10-fw-20a": {
+    "ip": "10.1.50.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "iad10-sw-01a": {
+    "ip": "10.1.50.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "iad10-sw-02": {
+    "ip": "10.1.50.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "iad2-fw-01a": {
+    "ip": "10.1.57.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "iad2-fw-02a": {
+    "ip": "10.1.57.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "iad2-sw-01a": {
+    "ip": "10.1.57.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "iad2-sw-02a": {
+    "ip": "10.1.57.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "iad2-sw-03a": {
+    "ip": "10.1.57.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "iad2-sw-04a": {
+    "ip": "10.1.57.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "iad2-sw-05a": {
+    "ip": "10.1.57.105",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "iad2-sw-06a": {
+    "ip": "10.1.57.106",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "iad2-sw-100a": {
+    "ip": "10.1.57.200",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "iad2-sw-99a": {
+    "ip": "10.1.57.199",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "icn1-fw-20a": {
+    "ip": "10.1.20.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "icn1-sw-01a": {
+    "ip": "10.1.20.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "icn1-sw-02": {
+    "ip": "10.1.20.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "icn1-sw-03a": {
+    "ip": "10.1.20.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "icn1-sw-04a": {
+    "ip": "10.1.20.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "ist1-fw-20a": {
+    "ip": "10.1.33.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "ist1-sw-01a": {
+    "ip": "10.1.33.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "ist1-sw-02a": {
+    "ip": "10.1.33.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "ist1-sw-04": {
+    "ip": "10.1.33.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "jnb1-fw-01a": {
+    "ip": "10.1.45.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "jnb1-fw-02a": {
+    "ip": "10.1.45.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "jnb1-sw-01a": {
+    "ip": "10.1.45.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "jnb1-sw-02": {
+    "ip": "10.1.45.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "jnb1-sw-03a": {
+    "ip": "10.1.45.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "jnb1-sw-04": {
+    "ip": "10.1.45.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "jnb1-sw-06a": {
+    "ip": "10.1.45.106",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "kul1-fw-20a": {
+    "ip": "10.1.55.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "kul1-sw-01a": {
+    "ip": "10.1.55.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "kul1-sw-02": {
+    "ip": "10.1.55.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-fw-01a": {
+    "ip": "10.1.22.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-fw-02a": {
+    "ip": "10.1.22.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-rt-01": {
+    "ip": "10.3.254.6",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-sw-01a": {
+    "ip": "10.1.22.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-sw-02a": {
+    "ip": "10.1.22.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-sw-03a": {
+    "ip": "10.1.22.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-sw-04a": {
+    "ip": "10.1.22.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-sw-05a": {
+    "ip": "10.1.22.105",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-sw-06a": {
+    "ip": "10.1.22.106",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-sw-07a": {
+    "ip": "10.1.22.107",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-sw-08a": {
+    "ip": "10.1.22.108",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-sw-100a": {
+    "ip": "10.1.22.200",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-sw-10a": {
+    "ip": "10.1.22.110",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-sw-12a": {
+    "ip": "10.1.22.112",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-sw-13a": {
+    "ip": "10.1.22.113",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-sw-14a": {
+    "ip": "10.1.22.114",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lhr3-sw-99a": {
+    "ip": "10.1.22.199",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lis1-fw-20a": {
+    "ip": "10.1.21.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lis1-sw-01a": {
+    "ip": "10.1.21.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lis1-sw-02": {
+    "ip": "10.1.21.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lis1-sw-03a": {
+    "ip": "10.1.21.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "lis1-sw-04": {
+    "ip": "10.1.21.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "osl1-fw-20a": {
+    "ip": "10.1.37.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "osl1-sw-01a": {
+    "ip": "10.1.37.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "osl1-sw-02": {
+    "ip": "10.1.37.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "osl1-sw-03a": {
+    "ip": "10.1.37.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "osl1-sw-04": {
+    "ip": "10.1.37.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "otp1-fw-20a": {
+    "ip": "10.1.40.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "otp1-sw-01a": {
+    "ip": "10.1.40.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "otp1-sw-02": {
+    "ip": "10.1.40.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-fw-01a": {
+    "ip": "10.1.9.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-fw-02a": {
+    "ip": "10.1.9.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-rt-01": {
+    "ip": "10.3.255.3",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-01a": {
+    "ip": "10.1.9.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-02a": {
+    "ip": "10.1.9.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-03a": {
+    "ip": "10.1.9.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-04a": {
+    "ip": "10.1.9.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-05a": {
+    "ip": "10.1.9.105",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-06a": {
+    "ip": "10.1.9.106",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-07a": {
+    "ip": "10.1.9.107",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-08a": {
+    "ip": "10.1.9.108",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-09a": {
+    "ip": "10.1.9.109",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-100a": {
+    "ip": "10.1.9.200",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-101a": {
+    "ip": "10.1.9.201",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-10a": {
+    "ip": "10.1.9.110",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-11a": {
+    "ip": "10.1.9.111",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-12a": {
+    "ip": "10.1.9.112",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-13a": {
+    "ip": "10.1.9.113",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-14a": {
+    "ip": "10.1.9.114",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-16a": {
+    "ip": "10.1.9.116",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-18a": {
+    "ip": "10.1.9.118",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-19a": {
+    "ip": "10.1.9.119",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-20a": {
+    "ip": "10.1.9.120",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-41a": {
+    "ip": "10.1.9.141",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-42": {
+    "ip": "10.1.9.142",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-43a": {
+    "ip": "10.1.9.143",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-48a": {
+    "ip": "10.1.9.148",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-50a": {
+    "ip": "10.1.9.150",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-52a": {
+    "ip": "10.1.9.152",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-54a": {
+    "ip": "10.1.9.154",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-56a": {
+    "ip": "10.1.9.156",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-58a": {
+    "ip": "10.1.9.158",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-97": {
+    "ip": "10.1.9.197",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-98a": {
+    "ip": "10.1.9.198",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx1-sw-99a": {
+    "ip": "10.1.9.199",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx10-fw-20b": {
+    "ip": "10.1.49.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx10-sw-01b": {
+    "ip": "10.1.49.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx11-fw-20b": {
+    "ip": "10.1.56.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx11-sw-01b": {
+    "ip": "10.1.56.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx10-sw-02": {
+    "ip": "10.1.49.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx11-sw-02": {
+    "ip": "10.1.56.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "phx19-sw-99": {
+    "ip": "10.1.119.199",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "prg1-fw-20a": {
+    "ip": "10.1.23.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "prg1-sw-01a": {
+    "ip": "10.1.23.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "prg1-sw-02": {
+    "ip": "10.1.23.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "prg1-sw-03a": {
+    "ip": "10.1.23.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "prg1-sw-04": {
+    "ip": "10.1.23.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "qro1-fw-01a": {
+    "ip": "10.1.52.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "qro1-fw-02a": {
+    "ip": "10.1.52.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "qro1-rt-01": {
+    "ip": "10.1.52.51",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "qro1-rt-02": {
+    "ip": "10.1.52.52",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "qro1-sw-02": {
+    "ip": "10.1.52.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "qro1-sw-04": {
+    "ip": "10.1.52.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "qro1-sw-99": {
+    "ip": "10.1.52.199",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sin2-fw-01a": {
+    "ip": "10.1.7.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sin2-fw-02a": {
+    "ip": "10.1.7.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sin2-sw-01a": {
+    "ip": "10.1.7.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sin2-sw-02a": {
+    "ip": "10.1.7.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sin2-sw-03a": {
+    "ip": "10.1.7.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sin2-sw-04a": {
+    "ip": "10.1.7.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sin2-sw-06a": {
+    "ip": "10.1.7.106",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sin2-sw-08": {
+    "ip": "10.1.7.108",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sin2-sw-10": {
+    "ip": "10.1.7.110",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sin2-sw-12": {
+    "ip": "10.1.7.112",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "skg1-fw-20a": {
+    "ip": "10.1.25.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "skg1-sw-01a": {
+    "ip": "10.1.25.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "skg1-sw-02": {
+    "ip": "10.1.25.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "skg1-sw-03a": {
+    "ip": "10.1.25.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "skg1-sw-04a": {
+    "ip": "10.1.25.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof1-fw-20a": {
+    "ip": "10.1.29.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof1-sw-01a": {
+    "ip": "10.1.29.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof1-sw-02": {
+    "ip": "10.1.29.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof1-sw-03a": {
+    "ip": "10.1.29.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof1-sw-04": {
+    "ip": "10.1.29.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof91-fw-20b": {
+    "ip": "10.1.61.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof91-sw-01b": {
+    "ip": "10.1.61.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof91-sw-02b": {
+    "ip": "10.1.61.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof92-fw-20b": {
+    "ip": "10.1.62.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof92-sw-01b": {
+    "ip": "10.1.62.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof94-fw-20b": {
+    "ip": "10.1.64.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof94-sw-01b": {
+    "ip": "10.1.64.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof92-sw-02": {
+    "ip": "10.1.62.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof94-fw-02a": {
+    "ip": "10.1.64.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof94-sw-02a": {
+    "ip": "10.1.64.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "sof94-sw-04a": {
+    "ip": "10.1.64.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd1-fw-01a": {
+    "ip": "10.1.8.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd1-fw-02a": {
+    "ip": "10.1.8.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd1-sw-02a": {
+    "ip": "10.1.8.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd1-sw-04a": {
+    "ip": "10.1.8.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd1-sw-05": {
+    "ip": "10.1.8.105",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd1-sw-07": {
+    "ip": "10.1.8.107",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd1-sw-10a": {
+    "ip": "10.1.8.110",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd1-sw-11a": {
+    "ip": "10.1.8.111",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd1-sw-12a": {
+    "ip": "10.1.8.112",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd2-fw-01a": {
+    "ip": "10.1.39.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd2-fw-02a": {
+    "ip": "10.1.39.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd2-rt-01": {
+    "ip": "10.1.39.51",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd2-rt-02": {
+    "ip": "10.1.39.52",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd2-sw-02a": {
+    "ip": "10.1.39.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd2-sw-04a": {
+    "ip": "10.1.39.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd2-sw-06": {
+    "ip": "10.1.39.106",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd2-sw-100a": {
+    "ip": "10.1.39.200",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "syd2-sw-99": {
+    "ip": "10.1.39.199",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "tlv1-fw-01a": {
+    "ip": "10.1.17.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "tlv1-fw-02a": {
+    "ip": "10.1.17.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "tlv1-rt-01": {
+    "ip": "10.1.17.51",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "tlv1-rt-02": {
+    "ip": "10.1.17.52",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "tlv1-sw-01a": {
+    "ip": "10.1.17.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "tlv1-sw-02": {
+    "ip": "10.1.17.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "tlv1-sw-03a": {
+    "ip": "10.1.17.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "tlv1-sw-04a": {
+    "ip": "10.1.17.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "tpe1-fw-20a": {
+    "ip": "10.1.36.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "tpe1-sw-01a": {
+    "ip": "10.1.36.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "tpe1-sw-02": {
+    "ip": "10.1.36.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "vie1-fw-20a": {
+    "ip": "10.1.31.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "vie1-sw-01a": {
+    "ip": "10.1.31.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "vie1-sw-02": {
+    "ip": "10.1.31.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "vie1-sw-03a": {
+    "ip": "10.1.31.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "vie1-sw-04": {
+    "ip": "10.1.31.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "vlc1-fw-01a": {
+    "ip": "10.1.18.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "vlc1-fw-02a": {
+    "ip": "10.1.18.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "vlc1-rt-01": {
+    "ip": "10.1.18.51",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "vlc1-rt-02": {
+    "ip": "10.1.18.52",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "vlc1-sw-01a": {
+    "ip": "10.1.18.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "vlc1-sw-02": {
+    "ip": "10.1.18.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "vlc1-sw-03a": {
+    "ip": "10.1.18.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "vlc1-sw-04a": {
+    "ip": "10.1.18.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "vlc1-sw-06": {
+    "ip": "10.1.18.106",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "waw1-fw-20a": {
+    "ip": "10.1.26.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "waw1-sw-01a": {
+    "ip": "10.1.26.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "waw1-sw-02a": {
+    "ip": "10.1.26.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "waw1-sw-03a": {
+    "ip": "10.1.26.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "waw1-sw-04": {
+    "ip": "10.1.26.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "yvr1-fw-01a": {
+    "ip": "10.1.14.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "yvr1-fw-02a": {
+    "ip": "10.1.14.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "yvr1-rt-01": {
+    "ip": "10.1.14.51",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "yvr1-rt-02": {
+    "ip": "10.1.14.52",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "yvr1-sw-02": {
+    "ip": "10.1.14.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "yvr1-sw-04": {
+    "ip": "10.1.14.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "yvr1-sw-06": {
+    "ip": "10.1.14.106",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "yvr1-sw-100a": {
+    "ip": "10.1.14.200",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "yyz1-rt-01": {
+    "ip": "10.3.255.13",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "yyz2-fw-01a": {
+    "ip": "10.1.19.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "yyz2-fw-02a": {
+    "ip": "10.1.19.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "yyz2-sw-01a": {
+    "ip": "10.1.19.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "yyz2-sw-02a": {
+    "ip": "10.1.19.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "zrh1-fw-01a": {
+    "ip": "10.1.5.1",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "zrh1-fw-02a": {
+    "ip": "10.1.5.2",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "zrh1-rt-01": {
+    "ip": "10.1.5.51",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "zrh1-rt-02": {
+    "ip": "10.1.5.52",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "zrh1-sw-01a": {
+    "ip": "10.1.5.101",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "zrh1-sw-02a": {
+    "ip": "10.1.5.102",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "zrh1-sw-03a": {
+    "ip": "10.1.5.103",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "zrh1-sw-04": {
+    "ip": "10.1.5.104",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "zrh1-sw-05a": {
+    "ip": "10.1.5.105",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "zrh1-sw-06a": {
+    "ip": "10.1.5.106",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "zrh1-sw-08a": {
+    "ip": "10.1.5.108",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "zrh1-sw-100a": {
+    "ip": "10.1.5.200",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "zrh1-sw-11a": {
+    "ip": "10.1.5.111",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "zrh1-sw-13a": {
+    "ip": "10.1.5.113",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  },
+  "zrh1-sw-99a": {
+    "ip": "10.1.5.199",
+    "port": 22,
+    "username": "netadmin",
+    "auth": {
+      "type": "ssh_key",
+      "private_key_path": "/data/ssh/netlab_admin"
+    }
+  }
+}

@@ -58,5 +58,9 @@ htmlcov/
 # Docker
 docker-compose.override.yml
 
+# Containerlab runtime artifacts (generated on deploy, not source)
+containerlab-multivendor/topologies/clab-*/
+containerlab-multivendor/configs/backups/
+
 # Sanitization — source-company tokens (never commit)
 network-lab/demo-devices/sanitize_tokens.json
