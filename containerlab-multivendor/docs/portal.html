@@ -103,7 +103,7 @@ tr:hover td{background:#1a284033}
 
 <!-- ═══════════ OVERVIEW ═══════════ -->
 <div class="section active" id="sec-overview">
-  <h2>Multi-Vendor EVPN-VXLAN Fabric</h2>
+  <h2>Multi-Vendor Dual-Stack EVPN-VXLAN Fabric</h2>
 
   <div class="stats">
     <div class="stat"><div class="val">15</div><div class="label">Total Nodes</div></div>
@@ -111,7 +111,8 @@ tr:hover td{background:#1a284033}
     <div class="stat"><div class="val">6</div><div class="label">Leaf VTEPs</div></div>
     <div class="stat"><div class="val">6</div><div class="label">Dual-Homed Hosts</div></div>
     <div class="stat"><div class="val">3</div><div class="label">Vendors</div></div>
-    <div class="stat"><div class="val">36</div><div class="label">BGP Sessions</div></div>
+    <div class="stat"><div class="val">36+18</div><div class="label">BGP IPv4+IPv6</div></div>
+    <div class="stat"><div class="val">IPv6</div><div class="label">Dual-Stack</div></div>
     <div class="stat"><div class="val">3</div><div class="label">VLANs / VNIs</div></div>
     <div class="stat"><div class="val">30/30</div><div class="label">Ping Matrix</div></div>
   </div>
@@ -214,6 +215,21 @@ tr:hover td{background:#1a284033}
     <tr><td>leaf4</td><td>Leaf VTEP</td><td><span class="tag ceos">cEOS</span></td><td>65004</td><td>10.255.1.4</td><td>10.255.1.4</td><td>172.20.20.24</td></tr>
     <tr><td>leaf5</td><td>Leaf VTEP</td><td><span class="tag srl">SRL</span></td><td>65005</td><td>10.255.1.5</td><td>10.255.100.5</td><td>172.20.20.25</td></tr>
     <tr><td>leaf6</td><td>Leaf VTEP</td><td><span class="tag frr">FRR</span></td><td>65006</td><td>10.255.1.6</td><td>10.255.100.6</td><td>172.20.20.26</td></tr>
+  </table>
+
+  <h2>IPv6 Addressing (Dual-Stack)</h2>
+  <p style="font-size:13px;color:#8899aa;margin-bottom:12px">Loopbacks: <code>fd00:dc1::X/128</code> &mdash; P2P links: <code>fd00:dc1:SPINE:LEAF::/127</code> (::0 = spine side, ::1 = leaf side)</p>
+  <table>
+    <tr><th>Device</th><th>IPv6 Loopback</th><th>P2P to spine1</th><th>P2P to spine2</th><th>P2P to spine3</th></tr>
+    <tr><td>spine1</td><td>fd00:dc1::1/128</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+    <tr><td>spine2</td><td>fd00:dc1::2/128</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+    <tr><td>spine3</td><td>fd00:dc1::3/128</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+    <tr><td>leaf1</td><td>fd00:dc1::11/128</td><td>fd00:dc1:1:1::1</td><td>fd00:dc1:2:1::1</td><td>fd00:dc1:3:1::1</td></tr>
+    <tr><td>leaf2</td><td>fd00:dc1::12/128</td><td>fd00:dc1:1:2::1</td><td>fd00:dc1:2:2::1</td><td>fd00:dc1:3:2::1</td></tr>
+    <tr><td>leaf3</td><td>fd00:dc1::13/128</td><td>fd00:dc1:1:3::1</td><td>fd00:dc1:2:3::1</td><td>fd00:dc1:3:3::1</td></tr>
+    <tr><td>leaf4</td><td>fd00:dc1::14/128</td><td>fd00:dc1:1:4::1</td><td>fd00:dc1:2:4::1</td><td>fd00:dc1:3:4::1</td></tr>
+    <tr><td>leaf5</td><td>fd00:dc1::15/128</td><td>fd00:dc1:1:5::1</td><td>fd00:dc1:2:5::1</td><td>fd00:dc1:3:5::1</td></tr>
+    <tr><td>leaf6</td><td>fd00:dc1::16/128</td><td>fd00:dc1:1:6::1</td><td>fd00:dc1:2:6::1</td><td>fd00:dc1:3:6::1</td></tr>
   </table>
 
   <h2>VLAN / VNI / Subnet Mapping</h2>
@@ -326,10 +342,13 @@ tr:hover td{background:#1a284033}
     </table>
   </div>
 
+  <h2 style="margin-top:32px">IPv6 Underlay Reachability</h2>
+  <p style="font-size:13px;color:#8899aa;margin-bottom:16px">All 9 loopbacks (fd00:dc1::1 through fd00:dc1::16) are reachable over the IPv6 underlay. Each spine-leaf link carries both an IPv4 /31 and an IPv6 /127. Dedicated IPv6 BGP neighbors exchange IPv6 unicast routes independently of the IPv4 sessions. Verify with: <code>ping6 -c1 fd00:dc1::1</code> from any leaf.</p>
+
   <h2 style="margin-top:32px">Protocol Stack</h2>
   <table>
     <tr><th>Layer</th><th>Protocol</th><th>Details</th></tr>
-    <tr><td>Underlay</td><td>eBGP IPv4</td><td>18 sessions (3 spines &times; 6 leafs). Per-leaf ASN. Loopback redistribution via route-map EXPORT_LO</td></tr>
+    <tr><td>Underlay</td><td>eBGP IPv4 + IPv6 dual-stack</td><td>18 IPv4 sessions + 18 IPv6 sessions (3 spines &times; 6 leafs). Per-leaf ASN. Loopback redistribution via route-map EXPORT_LO. IPv6 uses dedicated native neighbors on global P2P addresses (fd00:dc1::/48)</td></tr>
     <tr><td>Overlay</td><td>eBGP EVPN</td><td>18 sessions (leaf loopbacks &rarr; spine RRs via multihop). Type-1 AD, Type-2 MAC/IP, Type-3 IMET, Type-4 ES, Type-5 Prefix</td></tr>
     <tr><td>Data Plane</td><td>VXLAN</td><td>L2 VNIs: 10010 (VLAN10), 10020 (VLAN20), 10030 (VLAN30). L3 VNI: 50001 (TENANT-A)</td></tr>
     <tr><td>Multihoming</td><td>EVPN-MH / ESI-LAG</td><td>6 Ethernet Segments, all-active forwarding. LACP (802.3ad) or active-backup bonds</td></tr>
