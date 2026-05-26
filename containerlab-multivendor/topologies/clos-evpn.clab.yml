@@ -1,0 +1,337 @@
+# ============================================================================
+#  GESH Multi-Vendor Clos EVPN-VXLAN Fabric
+#  15 nodes: 3 spines + 6 leafs + 6 hosts
+#  Vendors: Nokia SR Linux · Arista cEOS · FRR (Cisco/Juniper simulation)
+#  Protocols: eBGP underlay, iBGP EVPN overlay, VXLAN, BFD, ECMP
+#  RAM: ~15GB total — fits M4 Max 36GB
+# ============================================================================
+
+name: clos-evpn
+
+prefix: clab
+
+mgmt:
+  network: clos-mgmt
+  ipv4-subnet: 172.20.20.0/24
+
+topology:
+  defaults:
+    env:
+      CLAB_MGMT_VRF: mgmt
+
+  kinds:
+    srl:
+      image: ghcr.io/nokia/srlinux:24.10.3
+      type: ixrd3l
+    ceos:
+      image: ceosimage:4.33.1F
+      env:
+        CLAB_MGMT_VRF: MGMT
+        INTFTYPE: et
+    linux:
+      image: ghcr.io/hellt/network-multitool:latest
+
+  nodes:
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    #  SPINE LAYER — Route Reflectors, eBGP underlay AS 65100
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    spine1:
+      kind: srl
+      mgmt-ipv4: 172.20.20.11
+      startup-config: ../configs/spine/spine1-srl.cfg
+      labels:
+        role: spine
+        vendor: nokia
+        fabric: clos-evpn
+        tier: spine
+
+    spine2:
+      kind: ceos
+      mgmt-ipv4: 172.20.20.12
+      startup-config: ../configs/spine/spine2-ceos.cfg
+      labels:
+        role: spine
+        vendor: arista
+        fabric: clos-evpn
+        tier: spine
+
+    spine3:
+      kind: linux
+      image: frrouting/frr:latest
+      mgmt-ipv4: 172.20.20.13
+      binds:
+        - ../configs/spine/spine3-frr.conf:/etc/frr/frr.conf:rw
+        - ../configs/spine/spine3-daemons:/etc/frr/daemons:rw
+        - ../configs/spine/spine3-vtysh.conf:/etc/frr/vtysh.conf:rw
+        - ../configs/spine/spine3-snmpd.conf:/etc/snmp/snmpd.conf:rw
+      exec:
+        - bash -c "sysctl -w net.ipv4.ip_forward=1"
+        - bash -c "sysctl -w net.ipv6.conf.all.forwarding=1"
+        - bash -c "mkdir -p /var/agentx && apt-get update -qq && apt-get install -y -qq snmpd snmp > /dev/null 2>&1 || true"
+        - bash -c "chown -R frr:frr /etc/frr && /usr/lib/frr/frrinit.sh start"
+        - bash -c "snmpd -c /etc/snmp/snmpd.conf -Lo 2>/dev/null &"
+      labels:
+        role: spine
+        vendor: frr-cisco
+        fabric: clos-evpn
+        tier: spine
+
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    #  LEAF LAYER — VTEPs, per-leaf eBGP ASN, VXLAN tunnels
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    leaf1:
+      kind: ceos
+      mgmt-ipv4: 172.20.20.21
+      startup-config: ../configs/leaf/leaf1-ceos.cfg
+      labels:
+        role: leaf
+        vendor: arista
+        fabric: clos-evpn
+        tier: leaf
+        rack: rack-1
+
+    leaf2:
+      kind: srl
+      mgmt-ipv4: 172.20.20.22
+      startup-config: ../configs/leaf/leaf2-srl.cfg
+      labels:
+        role: leaf
+        vendor: nokia
+        fabric: clos-evpn
+        tier: leaf
+        rack: rack-1
+
+    leaf3:
+      kind: linux
+      image: frrouting/frr:latest
+      mgmt-ipv4: 172.20.20.23
+      binds:
+        - ../configs/leaf/leaf3-frr.conf:/etc/frr/frr.conf:rw
+        - ../configs/leaf/leaf3-daemons:/etc/frr/daemons:rw
+        - ../configs/leaf/leaf3-vtysh.conf:/etc/frr/vtysh.conf:rw
+        - ../configs/leaf/leaf3-snmpd.conf:/etc/snmp/snmpd.conf:rw
+      exec:
+        - bash -c "sysctl -w net.ipv4.ip_forward=1"
+        - bash -c "sysctl -w net.ipv6.conf.all.forwarding=1"
+        - bash -c "mkdir -p /var/agentx && apt-get update -qq && apt-get install -y -qq snmpd snmp > /dev/null 2>&1 || true"
+        - bash -c "chown -R frr:frr /etc/frr && /usr/lib/frr/frrinit.sh start"
+        - bash -c "snmpd -c /etc/snmp/snmpd.conf -Lo 2>/dev/null &"
+        # ── L2 EVPN VXLAN bootstrap — VTEP 10.255.100.3, VNI 10020 (host3+host4 access) ──
+        - bash -c "ip link add lo1 type dummy 2>/dev/null; ip link set lo1 up; ip addr add 10.255.100.3/32 dev lo1 2>/dev/null"
+        - bash -c "ip link add br10020 type bridge 2>/dev/null; ip link set br10020 up"
+        - bash -c "ip link add vxlan10020 type vxlan id 10020 dstport 4789 local 10.255.100.3 nolearning 2>/dev/null; ip link set vxlan10020 master br10020; ip link set vxlan10020 up; bridge link set dev vxlan10020 learning off; bridge link set dev vxlan10020 neigh_suppress on"
+        - bash -c "ip addr flush dev eth4 2>/dev/null; ip link set eth4 master br10020; ip link set eth4 up"
+        - bash -c "ip addr flush dev eth5 2>/dev/null; ip link set eth5 master br10020; ip link set eth5 up"
+      labels:
+        role: leaf
+        vendor: frr-cisco
+        fabric: clos-evpn
+        tier: leaf
+        rack: rack-2
+
+    leaf4:
+      kind: ceos
+      mgmt-ipv4: 172.20.20.24
+      startup-config: ../configs/leaf/leaf4-ceos.cfg
+      labels:
+        role: leaf
+        vendor: arista
+        fabric: clos-evpn
+        tier: leaf
+        rack: rack-2
+
+    leaf5:
+      kind: srl
+      mgmt-ipv4: 172.20.20.25
+      startup-config: ../configs/leaf/leaf5-srl.cfg
+      labels:
+        role: leaf
+        vendor: nokia
+        fabric: clos-evpn
+        tier: leaf
+        rack: rack-3
+
+    leaf6:
+      kind: linux
+      image: frrouting/frr:latest
+      mgmt-ipv4: 172.20.20.26
+      binds:
+        - ../configs/leaf/leaf6-frr.conf:/etc/frr/frr.conf:rw
+        - ../configs/leaf/leaf6-daemons:/etc/frr/daemons:rw
+        - ../configs/leaf/leaf6-vtysh.conf:/etc/frr/vtysh.conf:rw
+        - ../configs/leaf/leaf6-snmpd.conf:/etc/snmp/snmpd.conf:rw
+      exec:
+        - bash -c "sysctl -w net.ipv4.ip_forward=1"
+        - bash -c "sysctl -w net.ipv6.conf.all.forwarding=1"
+        - bash -c "mkdir -p /var/agentx && apt-get update -qq && apt-get install -y -qq snmpd snmp > /dev/null 2>&1 || true"
+        - bash -c "chown -R frr:frr /etc/frr && /usr/lib/frr/frrinit.sh start"
+        - bash -c "snmpd -c /etc/snmp/snmpd.conf -Lo 2>/dev/null &"
+        # ── L2 EVPN VXLAN bootstrap — VTEP 10.255.100.6, VNI 10030 (host5+host6 access) ──
+        - bash -c "ip link add lo1 type dummy 2>/dev/null; ip link set lo1 up; ip addr add 10.255.100.6/32 dev lo1 2>/dev/null"
+        - bash -c "ip link add br10030 type bridge 2>/dev/null; ip link set br10030 up"
+        - bash -c "ip link add vxlan10030 type vxlan id 10030 dstport 4789 local 10.255.100.6 nolearning 2>/dev/null; ip link set vxlan10030 master br10030; ip link set vxlan10030 up; bridge link set dev vxlan10030 learning off; bridge link set dev vxlan10030 neigh_suppress on"
+        - bash -c "ip addr flush dev eth4 2>/dev/null; ip link set eth4 master br10030; ip link set eth4 up"
+        - bash -c "ip addr flush dev eth5 2>/dev/null; ip link set eth5 master br10030; ip link set eth5 up"
+      labels:
+        role: leaf
+        vendor: frr-juniper
+        fabric: clos-evpn
+        tier: leaf
+        rack: rack-3
+
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    #  HOST LAYER — End devices for traffic testing
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    # ── Dual-homed hosts — LACP bond0 to leaf pair per rack ──
+    # Rack-1: host1+host2 → leaf1 (cEOS) + leaf2 (SRL), VLAN 10
+    # Rack-2: host3+host4 → leaf3 (FRR)  + leaf4 (cEOS), VLAN 20
+    # Rack-3: host5+host6 → leaf5 (SRL)  + leaf6 (FRR),  VLAN 30
+
+    host1:
+      kind: linux
+      mgmt-ipv4: 172.20.20.31
+      exec:
+        - bash -c "ip link add bond0 type bond mode 802.3ad 2>/dev/null; ip link set bond0 up"
+        - bash -c "ip link set eth1 down; ip link set eth1 master bond0; ip link set eth1 up"
+        - bash -c "ip link set eth2 down; ip link set eth2 master bond0; ip link set eth2 up"
+        - ip addr add 10.10.10.1/24 dev bond0
+        - ip route add 10.10.0.0/16 via 10.10.10.254
+      labels:
+        role: host
+        vlan: "10"
+        rack: rack-1
+        multihome: "leaf1+leaf2"
+
+    host2:
+      kind: linux
+      mgmt-ipv4: 172.20.20.32
+      exec:
+        - bash -c "ip link add bond0 type bond mode 802.3ad 2>/dev/null; ip link set bond0 up"
+        - bash -c "ip link set eth1 down; ip link set eth1 master bond0; ip link set eth1 up"
+        - bash -c "ip link set eth2 down; ip link set eth2 master bond0; ip link set eth2 up"
+        - ip addr add 10.10.10.2/24 dev bond0
+        - ip route add 10.10.0.0/16 via 10.10.10.254
+      labels:
+        role: host
+        vlan: "10"
+        rack: rack-1
+        multihome: "leaf1+leaf2"
+
+    host3:
+      kind: linux
+      mgmt-ipv4: 172.20.20.33
+      exec:
+        - bash -c "ip link add bond0 type bond mode 802.3ad 2>/dev/null; ip link set bond0 up"
+        - bash -c "ip link set eth1 down; ip link set eth1 master bond0; ip link set eth1 up"
+        - bash -c "ip link set eth2 down; ip link set eth2 master bond0; ip link set eth2 up"
+        - ip addr add 10.10.20.1/24 dev bond0
+        - ip route add 10.10.0.0/16 via 10.10.20.254
+      labels:
+        role: host
+        vlan: "20"
+        rack: rack-2
+        multihome: "leaf3+leaf4"
+
+    host4:
+      kind: linux
+      mgmt-ipv4: 172.20.20.34
+      exec:
+        - bash -c "ip link add bond0 type bond mode 802.3ad 2>/dev/null; ip link set bond0 up"
+        - bash -c "ip link set eth1 down; ip link set eth1 master bond0; ip link set eth1 up"
+        - bash -c "ip link set eth2 down; ip link set eth2 master bond0; ip link set eth2 up"
+        - ip addr add 10.10.20.2/24 dev bond0
+        - ip route add 10.10.0.0/16 via 10.10.20.254
+      labels:
+        role: host
+        vlan: "20"
+        rack: rack-2
+        multihome: "leaf3+leaf4"
+
+    host5:
+      kind: linux
+      mgmt-ipv4: 172.20.20.35
+      exec:
+        - bash -c "ip link add bond0 type bond mode 802.3ad 2>/dev/null; ip link set bond0 up"
+        - bash -c "ip link set eth1 down; ip link set eth1 master bond0; ip link set eth1 up"
+        - bash -c "ip link set eth2 down; ip link set eth2 master bond0; ip link set eth2 up"
+        - ip addr add 10.10.30.1/24 dev bond0
+        - ip route add 10.10.0.0/16 via 10.10.30.254
+      labels:
+        role: host
+        vlan: "30"
+        rack: rack-3
+        multihome: "leaf5+leaf6"
+
+    host6:
+      kind: linux
+      mgmt-ipv4: 172.20.20.36
+      exec:
+        # active-backup bond with eth2 (leaf5-SRL) as primary — leaf6 FRR lacks kernel VRF for L3 VNI
+        - bash -c "ip link add bond0 type bond mode active-backup primary eth2 2>/dev/null; ip link set bond0 up"
+        - bash -c "ip link set eth1 down; ip link set eth1 master bond0; ip link set eth1 up"
+        - bash -c "ip link set eth2 down; ip link set eth2 master bond0; ip link set eth2 up"
+        - bash -c "echo eth2 > /sys/class/net/bond0/bonding/primary 2>/dev/null || true"
+        - ip addr add 10.10.30.2/24 dev bond0
+        - ip route add 10.10.0.0/16 via 10.10.30.254
+      labels:
+        role: host
+        vlan: "30"
+        rack: rack-3
+        multihome: "leaf5+leaf6 (active-backup, leaf5 primary)"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  LINKS — Full-mesh Spine-Leaf + Host attachments
+  #
+  #  Spine-Leaf: Each leaf connects to ALL 3 spines (18 links)
+  #  Host-Leaf:  Each host connects to one leaf (6 links)
+  #  Total: 24 point-to-point links
+  #
+  #  P2P addressing: 10.0.{spine}.{leaf*2}/31 and 10.0.{spine}.{leaf*2+1}/31
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  links:
+    # ── Spine1 (SRL) to all Leafs ──
+    - endpoints: ["spine1:e1-1", "leaf1:et1"]
+    - endpoints: ["spine1:e1-2", "leaf2:e1-1"]
+    - endpoints: ["spine1:e1-3", "leaf3:eth1"]
+    - endpoints: ["spine1:e1-4", "leaf4:et2"]
+    - endpoints: ["spine1:e1-5", "leaf5:e1-1"]
+    - endpoints: ["spine1:e1-6", "leaf6:eth1"]
+
+    # ── Spine2 (cEOS) to all Leafs ──
+    - endpoints: ["spine2:et1", "leaf1:et2"]
+    - endpoints: ["spine2:et2", "leaf2:e1-2"]
+    - endpoints: ["spine2:et3", "leaf3:eth2"]
+    - endpoints: ["spine2:et4", "leaf4:et3"]
+    - endpoints: ["spine2:et5", "leaf5:e1-2"]
+    - endpoints: ["spine2:et6", "leaf6:eth2"]
+
+    # ── Spine3 (FRR) to all Leafs ──
+    - endpoints: ["spine3:eth3", "leaf1:et3"]
+    - endpoints: ["spine3:eth4", "leaf2:e1-3"]
+    - endpoints: ["spine3:eth5", "leaf3:eth3"]
+    - endpoints: ["spine3:eth6", "leaf4:et4"]
+    - endpoints: ["spine3:eth7", "leaf5:e1-3"]
+    - endpoints: ["spine3:eth8", "leaf6:eth3"]
+
+    # ── Hosts to Leafs — dual-homed LACP (eth1 to primary leaf, eth2 to partner leaf) ──
+    # Rack-1: host1+host2 bonded to leaf1 (cEOS) + leaf2 (SRL)
+    - endpoints: ["host1:eth1", "leaf1:et4"]
+    - endpoints: ["host1:eth2", "leaf2:e1-4"]
+    - endpoints: ["host2:eth1", "leaf2:e1-5"]
+    - endpoints: ["host2:eth2", "leaf1:et5"]
+
+    # Rack-2: host3+host4 bonded to leaf3 (FRR) + leaf4 (cEOS)
+    - endpoints: ["host3:eth1", "leaf3:eth4"]
+    - endpoints: ["host3:eth2", "leaf4:et5"]
+    - endpoints: ["host4:eth1", "leaf4:et6"]
+    - endpoints: ["host4:eth2", "leaf3:eth5"]
+
+    # Rack-3: host5+host6 bonded to leaf5 (SRL) + leaf6 (FRR)
+    - endpoints: ["host5:eth1", "leaf5:e1-4"]
+    - endpoints: ["host5:eth2", "leaf6:eth4"]
+    - endpoints: ["host6:eth1", "leaf6:eth5"]
+    - endpoints: ["host6:eth2", "leaf5:e1-5"]

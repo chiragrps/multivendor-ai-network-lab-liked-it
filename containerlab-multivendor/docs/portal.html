@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GESH DC Fabric — Operations Portal</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e17;color:#c8d6e5;font-family:-apple-system,BlinkMacSystemFont,'SF Pro','Inter',sans-serif;min-height:100vh}
+a{color:#00d4ff;text-decoration:none}
+a:hover{text-decoration:underline;color:#5be8ff}
+
+/* Top nav */
+.topbar{background:#0d1520;border-bottom:1px solid #1a2840;padding:12px 32px;display:flex;align-items:center;gap:24px;position:sticky;top:0;z-index:100}
+.topbar .logo{font-size:20px;font-weight:700;color:#00d4ff;letter-spacing:1px}
+.topbar .logo span{color:#00e87a}
+.topbar nav{display:flex;gap:4px;flex:1}
+.topbar nav a{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;color:#8899aa;transition:all .2s}
+.topbar nav a:hover,.topbar nav a.active{background:#1a2840;color:#fff;text-decoration:none}
+.topbar .status{font-size:12px;padding:6px 14px;border-radius:20px;font-weight:600}
+.topbar .status.up{background:#00e87a22;color:#00e87a;border:1px solid #00e87a44}
+.topbar .status.down{background:#ff3c5a22;color:#ff3c5a;border:1px solid #ff3c5a44}
+
+/* Sections */
+.section{display:none;padding:32px;max-width:1400px;margin:0 auto}
+.section.active{display:block}
+.section h2{font-size:22px;color:#fff;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid #1a2840}
+
+/* Cards grid */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:32px}
+.card{background:#0d1520;border:1px solid #1a2840;border-radius:12px;padding:20px;transition:border-color .2s}
+.card:hover{border-color:#00d4ff44}
+.card h3{font-size:15px;color:#fff;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.card p{font-size:13px;color:#8899aa;line-height:1.5}
+.card .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin-right:4px}
+.tag.srl{background:#004aad22;color:#4a9eff;border:1px solid #004aad44}
+.tag.ceos{background:#00854622;color:#00c46a;border:1px solid #00854644}
+.tag.frr{background:#85450022;color:#ffaa33;border:1px solid #85450044}
+.tag.vlan10{background:#00d4ff22;color:#00d4ff}
+.tag.vlan20{background:#f0b42922;color:#f0b429}
+.tag.vlan30{background:#e84aff22;color:#e84aff}
+
+/* Topology diagram */
+.topo{background:#0d1520;border:1px solid #1a2840;border-radius:12px;padding:32px;margin-bottom:32px;overflow-x:auto}
+.topo pre{font-family:'JetBrains Mono','Fira Code',monospace;font-size:12px;line-height:1.6;color:#c8d6e5;white-space:pre}
+.topo .spine{color:#ff6b6b;font-weight:700}
+.topo .leaf{color:#00e87a;font-weight:700}
+.topo .host{color:#00d4ff}
+.topo .link{color:#4a5568}
+
+/* Stats row */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:32px}
+.stat{background:#0d1520;border:1px solid #1a2840;border-radius:10px;padding:16px;text-align:center}
+.stat .val{font-size:28px;font-weight:700;color:#00d4ff}
+.stat .label{font-size:11px;color:#8899aa;margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+
+/* Config viewer */
+.config-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.config-item{background:#0d1520;border:1px solid #1a2840;border-radius:10px;padding:16px;cursor:pointer;transition:all .2s}
+.config-item:hover{border-color:#00d4ff;transform:translateY(-2px)}
+.config-item h4{font-size:14px;color:#fff;margin-bottom:4px}
+.config-item .meta{font-size:12px;color:#8899aa}
+
+/* Table */
+table{width:100%;border-collapse:collapse;margin-bottom:24px}
+th{text-align:left;padding:10px 14px;background:#0d1520;color:#8899aa;font-size:12px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #1a2840}
+td{padding:10px 14px;border-bottom:1px solid #1a284066;font-size:13px}
+tr:hover td{background:#1a284033}
+.ok{color:#00e87a;font-weight:600}
+.fail{color:#ff3c5a;font-weight:600}
+
+/* Matrix */
+.matrix{overflow-x:auto}
+.matrix table{font-size:12px;text-align:center}
+.matrix th,.matrix td{padding:8px 12px;min-width:60px}
+.matrix .cell-ok{background:#00e87a15;color:#00e87a}
+.matrix .cell-self{background:#1a2840;color:#4a5568}
+
+/* Iframe embed */
+.embed{width:100%;height:80vh;border:1px solid #1a2840;border-radius:12px;background:#050a12}
+
+/* Commands */
+.cmd{background:#0a0e17;border:1px solid #1a2840;border-radius:8px;padding:14px 18px;font-family:'JetBrains Mono',monospace;font-size:13px;color:#00e87a;margin-bottom:10px;position:relative}
+.cmd .label{color:#8899aa;font-size:11px;margin-bottom:4px;display:block}
+.cmd code{color:#00d4ff}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">GESH<span>DC</span></div>
+  <nav>
+    <a href="#" class="active" onclick="show('overview')">Overview</a>
+    <a href="#" onclick="show('topology')">Topology</a>
+    <a href="#" onclick="show('diagram')">Diagram</a>
+    <a href="#" onclick="show('configs')">Configurations</a>
+    <a href="#" onclick="show('connectivity')">Connectivity</a>
+    <a href="#" onclick="show('operations')">Operations</a>
+    <a href="#" onclick="show('docs')">Documentation</a>
+  </nav>
+  <span class="status up" id="fabric-status">FABRIC UP</span>
+</div>
+
+<!-- ═══════════ OVERVIEW ═══════════ -->
+<div class="section active" id="sec-overview">
+  <h2>Multi-Vendor EVPN-VXLAN Fabric</h2>
+
+  <div class="stats">
+    <div class="stat"><div class="val">15</div><div class="label">Total Nodes</div></div>
+    <div class="stat"><div class="val">3</div><div class="label">Spine RRs</div></div>
+    <div class="stat"><div class="val">6</div><div class="label">Leaf VTEPs</div></div>
+    <div class="stat"><div class="val">6</div><div class="label">Dual-Homed Hosts</div></div>
+    <div class="stat"><div class="val">3</div><div class="label">Vendors</div></div>
+    <div class="stat"><div class="val">36</div><div class="label">BGP Sessions</div></div>
+    <div class="stat"><div class="val">3</div><div class="label">VLANs / VNIs</div></div>
+    <div class="stat"><div class="val">30/30</div><div class="label">Ping Matrix</div></div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <h3><span class="tag srl">SRL</span> Nokia SR Linux</h3>
+      <p>spine1 (RR), leaf2 (VTEP rack-1), leaf5 (VTEP rack-3)<br>
+      SR Linux v24.10.3 &mdash; Full EVPN-MH with ESI-LAG, IRB anycast gateway, symmetric IRB routing via ip-vrf</p>
+    </div>
+    <div class="card">
+      <h3><span class="tag ceos">cEOS</span> Arista cEOS</h3>
+      <p>spine2 (RR), leaf1 (VTEP rack-1), leaf4 (VTEP rack-2)<br>
+      cEOS 4.33.1F &mdash; EVPN multihoming with Port-Channel ESI, virtual-router anycast MAC, VXLAN L3 VNI</p>
+    </div>
+    <div class="card">
+      <h3><span class="tag frr">FRR</span> FRRouting</h3>
+      <p>spine3 (RR), leaf3 (VTEP rack-2), leaf6 (VTEP rack-3)<br>
+      FRR 8.4 &mdash; EVPN-MH via es-id/es-sys-mac, Linux bridge VXLAN. L3 VNI limited (no kernel VRF in container)</p>
+    </div>
+  </div>
+
+  <h2>Architecture Highlights</h2>
+  <div class="cards">
+    <div class="card">
+      <h3>eBGP Underlay</h3>
+      <p>Pure eBGP underlay (RFC 7938). Each leaf has unique ASN (65001-65006), spines share AS 65100. Loopbacks redistributed via route-map. No OSPF/IS-IS IGP.</p>
+    </div>
+    <div class="card">
+      <h3>eBGP EVPN Overlay</h3>
+      <p>EVPN overlay runs as eBGP with multihop between leaf loopbacks and spine route-reflectors. Per-leaf AS numbers preserved &mdash; no AS swap tricks needed.</p>
+    </div>
+    <div class="card">
+      <h3>ESI-LAG Multihoming</h3>
+      <p>Every host dual-homed to a leaf pair via LACP bond0. ESI (Ethernet Segment Identifier) ensures active-active forwarding with sub-second failover via EVPN Type-1/Type-4.</p>
+    </div>
+    <div class="card">
+      <h3>IRB Anycast Gateway</h3>
+      <p>Symmetric IRB with shared anycast MAC (00:00:5E:00:53:01). L3 VNI 50001 in TENANT-A VRF. All hosts see the same gateway MAC regardless of which leaf they hit.</p>
+    </div>
+    <div class="card">
+      <h3>SNMP Monitoring</h3>
+      <p>All 9 network nodes send SNMP traps to 172.20.20.1:1162. Community: GESH-DC1-RO. SRL/cEOS use native SNMP; FRR uses external snmpd + AgentX.</p>
+    </div>
+    <div class="card">
+      <h3>Inter-VLAN Routing</h3>
+      <p>30/30 host-to-host paths verified. VLAN 10 (10.10.10.0/24), VLAN 20 (10.10.20.0/24), VLAN 30 (10.10.30.0/24). Full mesh via symmetric IRB over VXLAN.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TOPOLOGY ═══════════ -->
+<div class="section" id="sec-topology">
+  <h2>Fabric Topology</h2>
+
+  <div class="topo"><pre>
+                        ┌─────────────────────────────────────────────────────────┐
+                        │                    SPINE LAYER (AS 65100)                │
+                        │                   EVPN Route Reflectors                  │
+                        │                                                         │
+                        │   <span class="spine">spine1</span>              <span class="spine">spine2</span>              <span class="spine">spine3</span>     │
+                        │   Nokia SRL           Arista cEOS          FRR          │
+                        │   10.255.0.1          10.255.0.2           10.255.0.3   │
+                        │   172.20.20.11        172.20.20.12         172.20.20.13 │
+                        └───────┬──────────────────┬─────────────────┬────────────┘
+                    ┌───────────┼──────────────────┼─────────────────┼───────────┐
+         ┌──────────┼───────────┼──────┬───────────┼──────┬──────────┼───────────┼──────────┐
+         │          │           │      │           │      │          │           │          │
+   ┌─────┴────┐ ┌───┴─────┐ ┌──┴──────┴──┐ ┌─────┴────┐ ┌┴─────────┴─┐ ┌──────┴────────┐ │
+   │  <span class="leaf">leaf1</span>   │ │ <span class="leaf">leaf2</span>   │ │   <span class="leaf">leaf3</span>   │ │  <span class="leaf">leaf4</span>   │ │   <span class="leaf">leaf5</span>    │ │    <span class="leaf">leaf6</span>     │ │
+   │  cEOS    │ │ SRL     │ │   FRR     │ │  cEOS    │ │   SRL      │ │    FRR       │ │
+   │  AS65001 │ │ AS65002 │ │  AS65003  │ │  AS65004 │ │  AS65005   │ │   AS65006    │ │
+   │ VNI10010 │ │VNI10010 │ │ VNI10020  │ │VNI10020  │ │ VNI10030   │ │  VNI10030    │ │
+   └──┬───┬───┘ └──┬───┬──┘ └──┬────┬──┘ └──┬───┬───┘ └──┬────┬───┘ └──┬─────┬───┘ │
+      │   │        │   │       │    │       │   │        │    │        │     │      │
+      │   └────────┤   ├───────┘    └───────┤   ├────────┘    └────────┤     │      │
+      │    ESI-LAG │   │ ESI-LAG     ESI-LAG│   │  ESI-LAG     ESI-LAG│     │      │
+   ┌──┴──┐     ┌───┴───┴──┐     ┌───┴───┴──┐     ┌───┴──┐      ┌────┴─────┴──┐   │
+   │<span class="host">host1</span>│     │  <span class="host">host2</span>   │     │  <span class="host">host3</span>  │     │<span class="host">host4</span>│      │  <span class="host">host5</span>     │   │
+   │bond0│     │  bond0   │     │  bond0   │     │bond0 │      │  bond0      │   │
+   │LACP │     │  LACP    │     │  LACP    │     │LACP  │      │  LACP       │   │
+   │.10.1│     │  .10.2   │     │  .20.1   │     │.20.2 │      │  .30.1      │   │
+   └─────┘     └──────────┘     └──────────┘     └──────┘      └─────────────┘   │
+                                                                                  │
+   ┌──────────────────────────────────────────────────────────────────────────────┘
+   │  <span class="host">host6</span> — bond0 active-backup, primary=eth2 (leaf5 SRL) for L3 VNI routing
+   │  10.10.30.2/24
+   └──────────────────────────────────────────────────────────────────────────────
+  </pre></div>
+
+  <h2>IP Addressing</h2>
+  <table>
+    <tr><th>Device</th><th>Role</th><th>Vendor</th><th>ASN</th><th>Loopback</th><th>VTEP</th><th>Mgmt</th></tr>
+    <tr><td>spine1</td><td>Spine RR</td><td><span class="tag srl">SRL</span></td><td>65100</td><td>10.255.0.1</td><td>&mdash;</td><td>172.20.20.11</td></tr>
+    <tr><td>spine2</td><td>Spine RR</td><td><span class="tag ceos">cEOS</span></td><td>65100</td><td>10.255.0.2</td><td>&mdash;</td><td>172.20.20.12</td></tr>
+    <tr><td>spine3</td><td>Spine RR</td><td><span class="tag frr">FRR</span></td><td>65100</td><td>10.255.0.3</td><td>&mdash;</td><td>172.20.20.13</td></tr>
+    <tr><td>leaf1</td><td>Leaf VTEP</td><td><span class="tag ceos">cEOS</span></td><td>65001</td><td>10.255.1.1</td><td>10.255.1.1</td><td>172.20.20.21</td></tr>
+    <tr><td>leaf2</td><td>Leaf VTEP</td><td><span class="tag srl">SRL</span></td><td>65002</td><td>10.255.1.2</td><td>10.255.100.2</td><td>172.20.20.22</td></tr>
+    <tr><td>leaf3</td><td>Leaf VTEP</td><td><span class="tag frr">FRR</span></td><td>65003</td><td>10.255.1.3</td><td>10.255.100.3</td><td>172.20.20.23</td></tr>
+    <tr><td>leaf4</td><td>Leaf VTEP</td><td><span class="tag ceos">cEOS</span></td><td>65004</td><td>10.255.1.4</td><td>10.255.1.4</td><td>172.20.20.24</td></tr>
+    <tr><td>leaf5</td><td>Leaf VTEP</td><td><span class="tag srl">SRL</span></td><td>65005</td><td>10.255.1.5</td><td>10.255.100.5</td><td>172.20.20.25</td></tr>
+    <tr><td>leaf6</td><td>Leaf VTEP</td><td><span class="tag frr">FRR</span></td><td>65006</td><td>10.255.1.6</td><td>10.255.100.6</td><td>172.20.20.26</td></tr>
+  </table>
+
+  <h2>VLAN / VNI / Subnet Mapping</h2>
+  <table>
+    <tr><th>VLAN</th><th>L2 VNI</th><th>Subnet</th><th>Anycast GW</th><th>MAC</th><th>Leaf Pair</th><th>Hosts</th></tr>
+    <tr><td><span class="tag vlan10">10</span></td><td>10010</td><td>10.10.10.0/24</td><td>10.10.10.254</td><td>00:00:5E:00:53:01</td><td>leaf1 (cEOS) + leaf2 (SRL)</td><td>host1, host2</td></tr>
+    <tr><td><span class="tag vlan20">20</span></td><td>10020</td><td>10.10.20.0/24</td><td>10.10.20.254</td><td>00:00:5E:00:53:01</td><td>leaf3 (FRR) + leaf4 (cEOS)</td><td>host3, host4</td></tr>
+    <tr><td><span class="tag vlan30">30</span></td><td>10030</td><td>10.10.30.0/24</td><td>10.10.30.254</td><td>00:00:5E:00:53:01</td><td>leaf5 (SRL) + leaf6 (FRR)</td><td>host5, host6</td></tr>
+    <tr><td colspan="2">L3 VNI</td><td>50001</td><td colspan="4">TENANT-A VRF &mdash; symmetric IRB inter-VLAN routing</td></tr>
+  </table>
+
+  <h2>ESI-LAG Segments</h2>
+  <table>
+    <tr><th>Host</th><th>Bond Mode</th><th>Primary Leaf</th><th>Partner Leaf</th><th>ESI</th></tr>
+    <tr><td>host1</td><td>802.3ad LACP</td><td>leaf1 (cEOS)</td><td>leaf2 (SRL)</td><td>00:11:11:11:11:11:11:11:11:11</td></tr>
+    <tr><td>host2</td><td>802.3ad LACP</td><td>leaf2 (SRL)</td><td>leaf1 (cEOS)</td><td>00:11:11:11:11:11:11:11:22:22</td></tr>
+    <tr><td>host3</td><td>802.3ad LACP</td><td>leaf3 (FRR)</td><td>leaf4 (cEOS)</td><td>00:22:22:22:22:22:22:22:11:11</td></tr>
+    <tr><td>host4</td><td>802.3ad LACP</td><td>leaf4 (cEOS)</td><td>leaf3 (FRR)</td><td>00:22:22:22:22:22:22:22:22:22</td></tr>
+    <tr><td>host5</td><td>802.3ad LACP</td><td>leaf5 (SRL)</td><td>leaf6 (FRR)</td><td>00:33:33:33:33:33:33:33:11:11</td></tr>
+    <tr><td>host6</td><td>active-backup</td><td>leaf5 (SRL) *</td><td>leaf6 (FRR)</td><td>00:33:33:33:33:33:33:33:22:22</td></tr>
+  </table>
+  <p style="font-size:12px;color:#8899aa;margin-top:-16px">* host6 uses active-backup with leaf5 (SRL) as primary because leaf6 FRR lacks kernel VRF for L3 VNI decapsulation</p>
+</div>
+
+<!-- ═══════════ DIAGRAM ═══════════ -->
+<div class="section" id="sec-diagram">
+  <h2>Interactive Fabric Diagram</h2>
+  <iframe class="embed" src="fabric-diagram.html"></iframe>
+  <p style="margin-top:12px;font-size:12px;color:#8899aa">Source: <code>docs/fabric-diagram.html</code></p>
+</div>
+
+<!-- ═══════════ CONFIGURATIONS ═══════════ -->
+<div class="section" id="sec-configs">
+  <h2>Device Configurations</h2>
+
+  <h3 style="color:#ff6b6b;margin:16px 0 12px">Spines</h3>
+  <div class="config-list">
+    <div class="config-item" onclick="loadConfig('spine/spine1-srl.cfg','spine1')">
+      <h4><span class="tag srl">SRL</span> spine1-srl.cfg</h4>
+      <div class="meta">AS 65100 &bull; Route Reflector &bull; eBGP underlay + EVPN overlay</div>
+    </div>
+    <div class="config-item" onclick="loadConfig('spine/spine2-ceos.cfg','spine2')">
+      <h4><span class="tag ceos">cEOS</span> spine2-ceos.cfg</h4>
+      <div class="meta">AS 65100 &bull; Route Reflector &bull; SNMP traps enabled</div>
+    </div>
+    <div class="config-item" onclick="loadConfig('spine/spine3-frr.conf','spine3')">
+      <h4><span class="tag frr">FRR</span> spine3-frr.conf</h4>
+      <div class="meta">AS 65100 &bull; eBGP EVPN overlay (per-leaf AS, no RR-client)</div>
+    </div>
+  </div>
+
+  <h3 style="color:#00e87a;margin:24px 0 12px">Leafs</h3>
+  <div class="config-list">
+    <div class="config-item" onclick="loadConfig('leaf/leaf1-ceos.cfg','leaf1')">
+      <h4><span class="tag ceos">cEOS</span><span class="tag vlan10">V10</span> leaf1-ceos.cfg</h4>
+      <div class="meta">AS 65001 &bull; VTEP &bull; ESI-LAG Port-Channel &bull; IRB Vlan10</div>
+    </div>
+    <div class="config-item" onclick="loadConfig('leaf/leaf2-srl.cfg','leaf2')">
+      <h4><span class="tag srl">SRL</span><span class="tag vlan10">V10</span> leaf2-srl.cfg</h4>
+      <div class="meta">AS 65002 &bull; VTEP &bull; LAG + ethernet-segment &bull; mac-vrf-10 + ip-vrf</div>
+    </div>
+    <div class="config-item" onclick="loadConfig('leaf/leaf3-frr.conf','leaf3')">
+      <h4><span class="tag frr">FRR</span><span class="tag vlan20">V20</span> leaf3-frr.conf</h4>
+      <div class="meta">AS 65003 &bull; VTEP &bull; evpn mh es-id &bull; Linux bridge VXLAN</div>
+    </div>
+    <div class="config-item" onclick="loadConfig('leaf/leaf4-ceos.cfg','leaf4')">
+      <h4><span class="tag ceos">cEOS</span><span class="tag vlan20">V20</span> leaf4-ceos.cfg</h4>
+      <div class="meta">AS 65004 &bull; VTEP &bull; ESI-LAG Port-Channel &bull; IRB Vlan20</div>
+    </div>
+    <div class="config-item" onclick="loadConfig('leaf/leaf5-srl.cfg','leaf5')">
+      <h4><span class="tag srl">SRL</span><span class="tag vlan30">V30</span> leaf5-srl.cfg</h4>
+      <div class="meta">AS 65005 &bull; VTEP &bull; LAG + ethernet-segment &bull; mac-vrf-30 + ip-vrf</div>
+    </div>
+    <div class="config-item" onclick="loadConfig('leaf/leaf6-frr.conf','leaf6')">
+      <h4><span class="tag frr">FRR</span><span class="tag vlan30">V30</span> leaf6-frr.conf</h4>
+      <div class="meta">AS 65006 &bull; VTEP &bull; evpn mh es-id &bull; Linux bridge VXLAN</div>
+    </div>
+  </div>
+
+  <h3 style="color:#fff;margin:24px 0 12px">Topology File</h3>
+  <div class="config-list">
+    <div class="config-item" onclick="loadConfig('../topologies/clos-evpn.clab.yml','topology')">
+      <h4>clos-evpn.clab.yml</h4>
+      <div class="meta">Containerlab topology &bull; 15 nodes &bull; 30 links &bull; ESI-LAG host bonding</div>
+    </div>
+  </div>
+
+  <div id="config-viewer" style="display:none;margin-top:24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h3 id="config-title" style="color:#00d4ff"></h3>
+      <button onclick="document.getElementById('config-viewer').style.display='none'" style="background:#1a2840;color:#8899aa;border:none;padding:6px 12px;border-radius:6px;cursor:pointer">Close</button>
+    </div>
+    <pre id="config-content" style="background:#0a0e17;border:1px solid #1a2840;border-radius:8px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#c8d6e5;overflow-x:auto;max-height:60vh;overflow-y:auto"></pre>
+  </div>
+</div>
+
+<!-- ═══════════ CONNECTIVITY ═══════════ -->
+<div class="section" id="sec-connectivity">
+  <h2>Connectivity Matrix (30/30 Verified)</h2>
+
+  <div class="matrix">
+    <table>
+      <tr><th></th><th>host1<br><small>V10</small></th><th>host2<br><small>V10</small></th><th>host3<br><small>V20</small></th><th>host4<br><small>V20</small></th><th>host5<br><small>V30</small></th><th>host6<br><small>V30</small></th></tr>
+      <tr><td><strong>host1</strong></td><td class="cell-self">&mdash;</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td></tr>
+      <tr><td><strong>host2</strong></td><td class="cell-ok">OK</td><td class="cell-self">&mdash;</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td></tr>
+      <tr><td><strong>host3</strong></td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-self">&mdash;</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td></tr>
+      <tr><td><strong>host4</strong></td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-self">&mdash;</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td></tr>
+      <tr><td><strong>host5</strong></td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-self">&mdash;</td><td class="cell-ok">OK</td></tr>
+      <tr><td><strong>host6</strong></td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-ok">OK</td><td class="cell-self">&mdash;</td></tr>
+    </table>
+  </div>
+
+  <h2 style="margin-top:32px">Protocol Stack</h2>
+  <table>
+    <tr><th>Layer</th><th>Protocol</th><th>Details</th></tr>
+    <tr><td>Underlay</td><td>eBGP IPv4</td><td>18 sessions (3 spines &times; 6 leafs). Per-leaf ASN. Loopback redistribution via route-map EXPORT_LO</td></tr>
+    <tr><td>Overlay</td><td>eBGP EVPN</td><td>18 sessions (leaf loopbacks &rarr; spine RRs via multihop). Type-1 AD, Type-2 MAC/IP, Type-3 IMET, Type-4 ES, Type-5 Prefix</td></tr>
+    <tr><td>Data Plane</td><td>VXLAN</td><td>L2 VNIs: 10010 (VLAN10), 10020 (VLAN20), 10030 (VLAN30). L3 VNI: 50001 (TENANT-A)</td></tr>
+    <tr><td>Multihoming</td><td>EVPN-MH / ESI-LAG</td><td>6 Ethernet Segments, all-active forwarding. LACP (802.3ad) or active-backup bonds</td></tr>
+    <tr><td>L3 Gateway</td><td>Anycast IRB</td><td>Virtual MAC 00:00:5E:00:53:01 shared across leaf pairs. Symmetric IRB via L3 VNI 50001</td></tr>
+    <tr><td>Monitoring</td><td>SNMPv2c</td><td>Community GESH-DC1-RO, traps to 172.20.20.1:1162</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════ OPERATIONS ═══════════ -->
+<div class="section" id="sec-operations">
+  <h2>Quick Commands</h2>
+
+  <h3 style="margin:16px 0 12px;color:#fff">Fabric Lifecycle</h3>
+  <div class="cmd">
+    <span class="label">Deploy (from macOS)</span>
+    <code>LABPATH=~/02_Projects/.../containerlab-multivendor<br>
+docker run --rm --privileged --network host --pid host \<br>
+&nbsp;&nbsp;-v /var/run/docker.sock:/var/run/docker.sock \<br>
+&nbsp;&nbsp;-v /run/netns:/run/netns -v "$LABPATH:$LABPATH" \<br>
+&nbsp;&nbsp;-w "$LABPATH/topologies" --entrypoint /usr/bin/containerlab \<br>
+&nbsp;&nbsp;ghcr.io/srl-labs/clab:latest deploy -t clos-evpn.clab.yml</code>
+  </div>
+  <div class="cmd">
+    <span class="label">Destroy</span>
+    <code>... ghcr.io/srl-labs/clab:latest destroy -t clos-evpn.clab.yml --cleanup</code>
+  </div>
+  <div class="cmd">
+    <span class="label">Check all containers</span>
+    <code>docker ps --filter "name=clab-clos" --format "table {{.Names}}\t{{.Status}}"</code>
+  </div>
+
+  <h3 style="margin:24px 0 12px;color:#fff">BGP Verification</h3>
+  <div class="cmd">
+    <span class="label">SRL (spine1, leaf2, leaf5)</span>
+    <code>docker exec clab-clos-evpn-spine1 bash -c 'sr_cli "show network-instance default protocols bgp neighbor"'</code>
+  </div>
+  <div class="cmd">
+    <span class="label">cEOS (spine2, leaf1, leaf4)</span>
+    <code>docker exec clab-clos-evpn-spine2 Cli -p 15 -c "show bgp evpn summary"</code>
+  </div>
+  <div class="cmd">
+    <span class="label">FRR (spine3, leaf3, leaf6)</span>
+    <code>docker exec clab-clos-evpn-spine3 vtysh -c "show bgp summary"</code>
+  </div>
+
+  <h3 style="margin:24px 0 12px;color:#fff">EVPN Verification</h3>
+  <div class="cmd">
+    <span class="label">SRL EVPN routes</span>
+    <code>docker exec clab-clos-evpn-leaf2 bash -c 'sr_cli "show network-instance mac-vrf-10 bridge-table mac-table all"'</code>
+  </div>
+  <div class="cmd">
+    <span class="label">cEOS EVPN routes</span>
+    <code>docker exec clab-clos-evpn-leaf1 Cli -p 15 -c "show bgp evpn"</code>
+  </div>
+  <div class="cmd">
+    <span class="label">cEOS VRF routes (inter-VLAN)</span>
+    <code>docker exec clab-clos-evpn-leaf1 Cli -p 15 -c "show ip route vrf TENANT-A"</code>
+  </div>
+
+  <h3 style="margin:24px 0 12px;color:#fff">Host Verification</h3>
+  <div class="cmd">
+    <span class="label">Check bond status</span>
+    <code>docker exec clab-clos-evpn-host1 cat /proc/net/bonding/bond0</code>
+  </div>
+  <div class="cmd">
+    <span class="label">Ping matrix (all 30 paths)</span>
+    <code>for s in 1 2 3 4 5 6; do for d in 1 2 3 4 5 6; do [ $s -ne $d ] && echo -n "h${s}→h${d}: " && docker exec clab-clos-evpn-host$s ping -c1 -W1 10.10.$((( (d-1)/2 *10+10 ))).$(( (d-1)%2+1 )) 2>&1|grep -oE "[0-9]+ received"; done; done</code>
+  </div>
+</div>
+
+<!-- ═══════════ DOCUMENTATION ═══════════ -->
+<div class="section" id="sec-docs">
+  <h2>Documentation</h2>
+
+  <div class="cards">
+    <div class="card">
+      <h3>Architecture Diagram</h3>
+      <p>Interactive visual architecture of the multi-vendor DC fabric with protocol overlays and node details.</p>
+      <a href="architecture.html" target="_blank">Open architecture.html &rarr;</a>
+    </div>
+    <div class="card">
+      <h3>Fabric Diagram</h3>
+      <p>Live topology view with spine-leaf connections, SNMP agents, and management IPs.</p>
+      <a href="fabric-diagram.html" target="_blank">Open fabric-diagram.html &rarr;</a>
+    </div>
+    <div class="card">
+      <h3>IP Plan</h3>
+      <p>Complete IP addressing plan including loopbacks, P2P links, management, and VXLAN VTEPs.</p>
+      <a href="IP_PLAN.md" target="_blank">Open IP_PLAN.md &rarr;</a>
+    </div>
+  </div>
+
+  <h2 style="margin-top:32px">Design Decisions</h2>
+  <table>
+    <tr><th>Decision</th><th>Choice</th><th>Rationale</th></tr>
+    <tr><td>Underlay</td><td>eBGP (not OSPF/IS-IS)</td><td>RFC 7938 &mdash; simpler ops, per-leaf failure domains, no IGP LSA floods</td></tr>
+    <tr><td>Overlay</td><td>eBGP EVPN (not iBGP)</td><td>Each leaf keeps its own AS for EVPN. Avoids AS-swap hacks needed for iBGP on FRR 8.4</td></tr>
+    <tr><td>IRB model</td><td>Symmetric IRB</td><td>Single L3 VNI (50001) for all inter-VLAN traffic. Scales to N VLANs without N&sup2; tunnels</td></tr>
+    <tr><td>Anycast MAC</td><td>00:00:5E:00:53:01</td><td>Single shared MAC across all leafs &mdash; hosts see consistent gateway regardless of active leaf</td></tr>
+    <tr><td>host6 bond</td><td>active-backup (not LACP)</td><td>FRR 8.4 container lacks kernel VRF module &mdash; L3 VNI decap fails. Force traffic to SRL leaf5</td></tr>
+    <tr><td>SRL LAG type</td><td>static (not LACP)</td><td>multitool host containers don't run lldpad/lacpd &mdash; LACP negotiation times out</td></tr>
+    <tr><td>clab deploy</td><td>--pid host</td><td>Docker Desktop macOS lacks /run/netns. --pid host gives clab container access to LinuxKit VM PID namespace</td></tr>
+  </table>
+
+  <h2 style="margin-top:32px">Known Limitations</h2>
+  <table>
+    <tr><th>Issue</th><th>Impact</th><th>Workaround</th></tr>
+    <tr><td>FRR container no kernel VRF</td><td>L3 VNI 50001 can't be decapsulated on FRR leafs</td><td>host6 bond primary set to SRL leaf5; FRR handles L2 only</td></tr>
+    <tr><td>SRL startup-config not auto-loading</td><td>SRL nodes boot blank &mdash; need manual sr_cli push</td><td>Push configs via sr_cli heredoc after deploy</td></tr>
+    <tr><td>cEOS interface numbering</td><td>clab maps et1/et2/et3 which may not match config Ethernet1/2/3</td><td>Verify with <code>show ip interface brief</code> after deploy</td></tr>
+    <tr><td>Docker Desktop netns</td><td><code>clab deploy</code> fails without --pid host</td><td>Always use <code>--pid host</code> flag with clab Docker image</td></tr>
+  </table>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  document.querySelectorAll('.topbar nav a').forEach(a => a.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function loadConfig(path, name) {
+  const viewer = document.getElementById('config-viewer');
+  const title = document.getElementById('config-title');
+  const content = document.getElementById('config-content');
+  title.textContent = name + ' — ' + path;
+  content.textContent = 'Loading...';
+  viewer.style.display = 'block';
+  fetch('../configs/' + path)
+    .then(r => r.ok ? r.text() : fetch(path).then(r2 => r2.text()))
+    .then(text => { content.textContent = text; })
+    .catch(() => { content.textContent = 'Could not load file. Open directly:\nconfigs/' + path; });
+}
+</script>
+</body>
+</html>
