@@ -1128,10 +1128,22 @@ def get_device_health(hostname):
 
     from health import collect_health  # local import — keeps cold-start cheap
 
+    # Resolve the canonical vendor for the health command set. Clab nodes carry
+    # `type=frr` as a lab shorthand (all containers go through the same docker
+    # runner) but the actual CLI grammar is per-vendor. Prefer vendor_canonical
+    # when present so SRL gets sr_cli commands and cEOS gets eos commands.
+    vc = (dev.get("vendor_canonical") or dev.get("vendor") or "").lower()
+    if vc in ("nokia-srl", "srl", "nokia"):
+        dtype = "nokia-srl"
+    elif vc in ("arista-eos", "arista") and dev.get("container"):
+        dtype = "arista-eos"
+    else:
+        dtype = dev.get("type", "frr")
+
     snapshot = collect_health(
         hostname=dev["hostname"],
         ip=dev.get("ip") or "127.0.0.1",
-        dtype=dev.get("type", "frr"),
+        dtype=dtype,
         port=int(dev.get("port") or 22),
         runner=run_command_on_device,
     )

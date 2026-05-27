@@ -483,5 +483,11 @@ def mv_shadow_audit(site: str = "all", check: str = "all") -> str:
     return json.dumps(_post("/api/shadow/audit", {"site": site, "check": check}))
 
 
+@mcp.tool()
+def mv_device_health(hostname: str) -> str:
+    """Single-device operational snapshot — version, BGP, OSPF, interfaces, routes, memory, CPU — all in parallel via vendor-aware show commands. Works for FRR (vtysh), Arista cEOS (Cli), Nokia SR Linux (sr_cli), and Juniper (PyEZ). Typically completes in <2 s for the clab fabric."""
+    return _get(f"/api/health/{hostname}")
+
+
 if __name__ == "__main__":
     mcp.run()

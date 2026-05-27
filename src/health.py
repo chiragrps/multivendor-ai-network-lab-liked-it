@@ -90,12 +90,31 @@ JUNOS_COMMANDS: dict[str, list[str]] = {
     "cpu":        ["show system processes extensive"],
 }
 
+# Nokia SR Linux uses sr_cli with a completely different grammar. JSON output
+# isn't reliable across sr_cli commands; we let the text parsers handle these.
+# Each entry is one command (no fallback variants needed — sr_cli either parses
+# the request fully or rejects with "Parsing error"). The runner dispatches
+# these through `docker exec ... sr_cli "<cmd>"` because the clab fabric tags
+# SRL nodes with vendor_canonical="nokia-srl".
+SRL_COMMANDS: dict[str, list[str]] = {
+    "version":    ["info from state /system information version"],
+    "bgp":        ["show network-instance default protocols bgp neighbor"],
+    "ospf":       ["show network-instance default protocols ospf neighbor"],
+    "interfaces": ["show interface"],
+    "routes":     ["show network-instance default route-table ipv4-unicast summary"],
+    "memory":     ["info from state /platform memory"],
+    "cpu":        ["info from state /platform control cpu"],
+}
+
 COMMAND_MAP: dict[str, dict[str, list[str]]] = {
     "frr":        FRR_COMMANDS,
     "eos":        EOS_COMMANDS,
     "arista-eos": EOS_COMMANDS,
     "arista":     EOS_COMMANDS,
     "junos":      JUNOS_COMMANDS,
+    "nokia-srl":  SRL_COMMANDS,
+    "srl":        SRL_COMMANDS,
+    "nokia":      SRL_COMMANDS,
 }
 
 # Per-command timeout — vtysh is fast, but if a remote routing daemon is wedged
@@ -269,6 +288,32 @@ def _parse_bgp(result: dict, dtype: str) -> dict:
     if not output:
         return out
 
+    # ── Nokia SR Linux text table ────────────────────────────────────────────
+    # SRL renders BGP neighbor as a fixed-column table with `|` separators
+    # and human-friendly state words ("established" / "active" / "connect").
+    # We have to handle it before the generic _try_json since SRL JSON output
+    # is unreliable for this command. The peer row format is:
+    #   | default | <ip> | <group> | <flags> | <as> | <state> | <uptime> | ...
+    if dtype in ("nokia-srl", "srl", "nokia"):
+        for line in output.splitlines():
+            m = re.search(
+                r"^\s*\|\s*\S+\s*\|\s*(\d+\.\d+\.\d+\.\d+)\s*\|\s*\S+\s*\|\s*\S+\s*\|\s*(\d+)\s*\|\s*(established|active|connect|idle|opensent|openconfirm)\s",
+                line, re.I,
+            )
+            if m:
+                neighbor, asn, state = m.group(1), int(m.group(2)), m.group(3).lower()
+                established = state == "established"
+                out["peers"].append({
+                    "neighbor": neighbor, "asn": asn,
+                    "state": "Established" if established else state.title(),
+                    "uptime": None, "prefixes": 0,
+                })
+                if established:
+                    out["established"] += 1
+                else:
+                    out["down"] += 1
+        return out
+
     data = _try_json(output)
     if data and isinstance(data, dict):
         # FRR JSON shape: {"ipv4Unicast": {"peers": {"10.x.x.x": {...}}}}
@@ -379,17 +424,48 @@ def _parse_interfaces(result: dict, dtype: str) -> dict:
     if not output:
         return out
 
+    # ── Nokia SR Linux ───────────────────────────────────────────────────────
+    # `show interface` on SRL produces lines like:
+    #   ethernet-1/1 is up, speed 25G, type 100GBASE-CR4-COPPER
+    #     ethernet-1/1.0 is up
+    #     Network-instances:
+    #       * Name: default
+    #     IPv4 addr    : 10.0.1.0/31 (static, preferred)
+    # We capture top-level interface names + their up/down state, and
+    # accumulate IPv4 addresses that appear on the indented subinterfaces.
+    if dtype in ("nokia-srl", "srl", "nokia"):
+        current = None
+        for line in output.splitlines():
+            m = re.match(r"^(ethernet-\S+|mgmt\d+|system\d+|lo\d+|lag\d+)\s+is\s+(up|down)",
+                         line, re.I)
+            if m:
+                current = {"name": m.group(1), "status": m.group(2).lower(), "addresses": []}
+                out["list"].append(current)
+                if current["status"] == "up":
+                    out["up"] += 1
+                else:
+                    out["down"] += 1
+                continue
+            if current is None:
+                continue
+            m2 = re.search(r"IPv4\s+addr\s*:\s*(\d+\.\d+\.\d+\.\d+/\d+)", line)
+            if m2:
+                current["addresses"].append(m2.group(1))
+        return out
+
     data = _try_json(output)
     if data and isinstance(data, dict):
-        # FRR: {"<name>": {"administrativeStatus": "up", "operationalStatus": "up", ...}}
-        # EOS: {"interfaceStatuses": {"Ethernet1": {"linkStatus": "connected", ...}}}
+        # FRR `show interface brief json` shape:
+        #   {"<name>": {"status": "up", "vrfName": "default", "addresses": [...]}}
+        # EOS:  {"interfaceStatuses": {"Ethernet1": {"linkStatus": "connected", ...}}}
         items = data.get("interfaceStatuses", data)
         if isinstance(items, dict):
             for name, info in items.items():
                 if not isinstance(info, dict):
                     continue
                 status = (
-                    info.get("operationalStatus")
+                    info.get("status")
+                    or info.get("operationalStatus")
                     or info.get("linkStatus")
                     or info.get("lineProtocolStatus")
                     or ""
