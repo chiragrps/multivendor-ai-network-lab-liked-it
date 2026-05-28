@@ -673,7 +673,28 @@ flowchart TB
 <div class="section" id="sec-operations">
   <h2>Quick Commands</h2>
 
-  <h3 style="margin:16px 0 12px;color:#fff">Fabric Lifecycle</h3>
+  <h3 style="margin:16px 0 12px;color:#fff">Portal Service (launchd)</h3>
+  <div class="cmd">
+    <span class="label">What runs this page</span>
+    <code>This portal is served by a launchd agent <b>com.geshlab.portal</b><br>
+(RunAtLoad + KeepAlive) bound to <b>http://127.0.0.1:8099</b>.<br>
+Script: containerlab-multivendor/scripts/start_portal.sh &nbsp;·&nbsp; Log: /tmp/geshlab_portal.log</code>
+  </div>
+  <div class="cmd">
+    <span class="label">Status</span>
+    <code>launchctl list | grep geshlab.portal</code>
+  </div>
+  <div class="cmd">
+    <span class="label">Restart</span>
+    <code>launchctl bootout gui/$(id -u)/com.geshlab.portal<br>
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.geshlab.portal.plist</code>
+  </div>
+  <div class="cmd">
+    <span class="label">Tail log</span>
+    <code>tail -f /tmp/geshlab_portal.log</code>
+  </div>
+
+  <h3 style="margin:24px 0 12px;color:#fff">Fabric Lifecycle</h3>
   <div class="cmd">
     <span class="label">Deploy (from macOS)</span>
     <code>LABPATH=~/02_Projects/.../containerlab-multivendor<br>
