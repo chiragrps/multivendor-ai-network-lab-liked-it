@@ -23,13 +23,26 @@ topology:
     srl:
       image: ghcr.io/nokia/srlinux:24.10.3
       type: ixrd3l
+      # Cap SRL RAM so a single runaway control plane can't OOM-kill the host.
+      # Nokia recommends 1.5–2 GB for ixrd3l; 2 GB gives headroom for EVPN/BGP.
+      memory: 2Gb
+      cpu: 1.0
     ceos:
       image: ceosimage:4.33.1F
       env:
         CLAB_MGMT_VRF: MGMT
         INTFTYPE: et
+      # cEOS is the heaviest control plane in this lab — observed runtime
+      # at 2.5–2.8 GiB unbounded; OOM cascade on leaf1/leaf4/spine2.
+      # 2.5 GiB matches the actual working set with ~10 % headroom.
+      memory: 2560Mb
+      cpu: 1.0
     linux:
       image: ghcr.io/hellt/network-multitool:latest
+      # FRR + hosts are lightweight; 512 MB is plenty and protects the host
+      # if a process leaks.
+      memory: 512Mb
+      cpu: 0.5
 
   nodes:
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
