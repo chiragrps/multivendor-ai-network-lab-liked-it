@@ -106,6 +106,12 @@ SRL_COMMANDS: dict[str, list[str]] = {
     "cpu":        ["info from state /platform control cpu"],
 }
 
+# Command tables are the single source of truth in drivers.commands. We prefer
+# those (so health.py and the telemetry collector never drift), and fall back to
+# the local literals above if the drivers package isn't importable (e.g. health.py
+# used standalone in a minimal environment). The local FRR/EOS/SRL/JUNOS_COMMANDS
+# above are verified-identical to drivers.commands and kept as the fallback +
+# reference for the parsers in this module.
 COMMAND_MAP: dict[str, dict[str, list[str]]] = {
     "frr":        FRR_COMMANDS,
     "eos":        EOS_COMMANDS,
@@ -116,6 +122,17 @@ COMMAND_MAP: dict[str, dict[str, list[str]]] = {
     "srl":        SRL_COMMANDS,
     "nokia":      SRL_COMMANDS,
 }
+
+try:  # prefer the shared driver command tables (single source of truth)
+    import os as _os
+    import sys as _sys
+    _src_dir = _os.path.dirname(__file__)
+    if _src_dir not in _sys.path:
+        _sys.path.insert(0, _src_dir)
+    from drivers.commands import COMMANDS_BY_VENDOR as _DRV_CMDS, VENDOR_ALIASES as _DRV_ALIASES
+    COMMAND_MAP = {alias: _DRV_CMDS[canon] for alias, canon in _DRV_ALIASES.items() if canon in _DRV_CMDS}
+except Exception:  # noqa: BLE001 — keep the local fallback map
+    pass
 
 # Per-command timeout — vtysh is fast, but if a remote routing daemon is wedged
 # we don't want one bad command to gate the whole snapshot.

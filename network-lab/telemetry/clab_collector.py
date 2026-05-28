@@ -24,6 +24,19 @@ from dataclasses import dataclass
 
 import requests
 
+# ── Driver abstraction layer (src/drivers) — single source of truth for
+#    per-vendor commands + parsers. Falls back to the legacy probe_* functions
+#    below if the package can't be imported (keeps the collector runnable
+#    standalone on a lab host without the full src/ tree).
+_SRC = os.path.join(os.path.dirname(__file__), "..", "..", "src")
+if os.path.isdir(_SRC) and _SRC not in sys.path:
+    sys.path.insert(0, _SRC)
+try:
+    from drivers import get_driver  # type: ignore[import-not-found]
+    _DRIVERS_AVAILABLE = True
+except Exception:  # noqa: BLE001
+    _DRIVERS_AVAILABLE = False
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("clab-collector")
 
@@ -393,17 +406,34 @@ def collect_once() -> None:
     lines: list[str] = []
     status: dict = {"updated_ns": ts_ns, "fabric": "clos-evpn", "site": "CLAB-DC1", "nodes": {}}
     for node in FABRIC:
-        probe = PROBES.get(node.vendor)
-        if probe is None:
-            continue
-        try:
-            metrics = probe(node)
-        except Exception as exc:  # noqa: BLE001
-            log.warning("  %s (%s) skipped: %s", node.hostname, node.vendor, exc)
-            continue
-        bgp_up, bgp_total = metrics.get("bgp", (0, 0))
-        ospf_full, ospf_total = metrics.get("ospf", (0, 0))
-        intf_up, intf_total = metrics.get("intf", (0, 0))
+        counter_rows: list[dict] = []
+        if _DRIVERS_AVAILABLE:
+            # Driver path — single source of truth for commands + parsers.
+            try:
+                drv = get_driver(node.vendor, container=node.container, hostname=node.hostname)
+                bgp_n = drv.get_bgp_summary().normalized
+                ospf_n = drv.get_ospf_neighbors().normalized
+                intf_n = drv.get_interface_status().normalized
+                counter_rows = drv.get_interface_counters().normalized.get("interfaces", [])
+                bgp_up, bgp_total = bgp_n.get("established", 0), bgp_n.get("total", 0)
+                ospf_full, ospf_total = ospf_n.get("full", 0), ospf_n.get("total", 0)
+                intf_up, intf_total = intf_n.get("up", 0), intf_n.get("total", 0)
+            except Exception as exc:  # noqa: BLE001
+                log.warning("  %s (%s) driver failed: %s", node.hostname, node.vendor, exc)
+                continue
+        else:
+            # Legacy fallback — standalone probe functions.
+            probe = PROBES.get(node.vendor)
+            if probe is None:
+                continue
+            try:
+                metrics = probe(node)
+            except Exception as exc:  # noqa: BLE001
+                log.warning("  %s (%s) skipped: %s", node.hostname, node.vendor, exc)
+                continue
+            bgp_up, bgp_total = metrics.get("bgp", (0, 0))
+            ospf_full, ospf_total = metrics.get("ospf", (0, 0))
+            intf_up, intf_total = metrics.get("intf", (0, 0))
         lines.append(make_line("bgp_session_count",   node, {"established": bgp_up,  "total": bgp_total},  ts_ns))
         lines.append(make_line("ospf_neighbor_count", node, {"full": ospf_full,      "total": ospf_total}, ts_ns))
         lines.append(make_line("interface_count",     node, {"up": intf_up,          "total": intf_total}, ts_ns))
@@ -416,18 +446,22 @@ def collect_once() -> None:
         }
         log.info("  %-7s %-10s bgp=%d/%d ospf=%d/%d intf=%d/%d",
                  node.hostname, node.vendor, bgp_up, bgp_total, ospf_full, ospf_total, intf_up, intf_total)
-        counter_probe = COUNTER_PROBES.get(node.vendor)
-        if counter_probe:
-            try:
-                for ctr in counter_probe(node):
-                    fields = {k: v for k, v in ctr.items() if k != "interface" and isinstance(v, int)}
-                    if fields:
-                        intf_name = tag_escape(ctr.get("interface", "unknown"))
-                        tags = f"source={tag_escape(node.hostname)},role={node.role},vendor={tag_escape(node.vendor)},interface_name={intf_name}"
-                        fld_str = ",".join(f"{k}={v}i" for k, v in fields.items())
-                        lines.append(f"intf-counters,{tags} {fld_str} {ts_ns}")
-            except Exception as exc:
-                log.debug("  %s counter probe failed: %s", node.hostname, exc)
+        # Interface traffic counters — from driver (preferred) or legacy probe.
+        if not _DRIVERS_AVAILABLE:
+            counter_probe = COUNTER_PROBES.get(node.vendor)
+            if counter_probe:
+                try:
+                    counter_rows = counter_probe(node)
+                except Exception as exc:  # noqa: BLE001
+                    log.debug("  %s counter probe failed: %s", node.hostname, exc)
+                    counter_rows = []
+        for ctr in counter_rows:
+            fields = {k: v for k, v in ctr.items() if k != "interface" and isinstance(v, int)}
+            if fields:
+                intf_name = tag_escape(ctr.get("interface", "unknown"))
+                tags = f"source={tag_escape(node.hostname)},role={node.role},vendor={tag_escape(node.vendor)},interface_name={intf_name}"
+                fld_str = ",".join(f"{k}={v}i" for k, v in fields.items())
+                lines.append(f"intf-counters,{tags} {fld_str} {ts_ns}")
     write_influx(lines)
     try:
         tmp = STATUS_FILE + ".tmp"
