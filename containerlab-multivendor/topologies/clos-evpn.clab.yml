@@ -32,11 +32,11 @@ topology:
       env:
         CLAB_MGMT_VRF: MGMT
         INTFTYPE: et
-      # cEOS is the heaviest control plane in this lab — observed runtime
-      # at 2.5–2.8 GiB unbounded; OOM cascade on leaf1/leaf4/spine2.
-      # 2.5 GiB matches the actual working set with ~10 % headroom.
-      memory: 2560Mb
-      cpu: 1.0
+      # cEOS is the heaviest control plane in this lab. A 2.5 GiB cap caused
+      # OOM-thrash (100% mem, empty CLI, agents unresponsive) — cEOS needs the
+      # full working set + headroom. 4 GiB is comfortable; host is M4 Max 36GB.
+      memory: 4Gb
+      cpu: 2.0
     linux:
       image: ghcr.io/hellt/network-multitool:latest
       # FRR + hosts are lightweight; 512 MB is plenty and protects the host

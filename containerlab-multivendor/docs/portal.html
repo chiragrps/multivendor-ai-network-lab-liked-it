@@ -83,7 +83,19 @@ tr:hover td{background:#1a284033}
 .cmd{background:#0a0e17;border:1px solid #1a2840;border-radius:8px;padding:14px 18px;font-family:'JetBrains Mono',monospace;font-size:13px;color:#00e87a;margin-bottom:10px;position:relative}
 .cmd .label{color:#8899aa;font-size:11px;margin-bottom:4px;display:block}
 .cmd code{color:#00d4ff}
+
+/* Mermaid diagrams */
+.diagram-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.diagram-tabs button{background:#0d1520;border:1px solid #1a2840;color:#8899aa;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+.diagram-tabs button:hover{border-color:#00d4ff44;color:#fff}
+.diagram-tabs button.active{background:#00d4ff22;color:#00d4ff;border-color:#00d4ff}
+.diagram-panel{display:none;background:#0d1520;border:1px solid #1a2840;border-radius:12px;padding:24px;overflow-x:auto}
+.diagram-panel.active{display:block}
+.diagram-panel .mermaid{background:transparent;text-align:center}
+.diagram-desc{font-size:13px;color:#8899aa;margin-bottom:16px;line-height:1.6}
+.diagram-desc b{color:#c8d6e5}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
 </head>
 <body>
 
@@ -92,7 +104,8 @@ tr:hover td{background:#1a284033}
   <nav>
     <a href="#" class="active" onclick="show('overview')">Overview</a>
     <a href="#" onclick="show('topology')">Topology</a>
-    <a href="#" onclick="show('diagram')">Diagram</a>
+    <a href="#" onclick="show('diagrams')">Diagrams</a>
+    <a href="#" onclick="show('diagram')">Live Map</a>
     <a href="#" onclick="show('configs')">Configurations</a>
     <a href="#" onclick="show('connectivity')">Connectivity</a>
     <a href="#" onclick="show('drivers')">Driver Layer</a>
@@ -253,6 +266,218 @@ tr:hover td{background:#1a284033}
     <tr><td>host6</td><td>active-backup</td><td>leaf5 (SRL) *</td><td>leaf6 (FRR)</td><td>00:33:33:33:33:33:33:33:22:22</td></tr>
   </table>
   <p style="font-size:12px;color:#8899aa;margin-top:-16px">* host6 uses active-backup with leaf5 (SRL) as primary because leaf6 FRR lacks kernel VRF for L3 VNI decapsulation</p>
+</div>
+
+<!-- ═══════════ DIAGRAMS (Mermaid) ═══════════ -->
+<div class="section" id="sec-diagrams">
+  <h2>Network Diagrams</h2>
+  <div class="diagram-tabs">
+    <button class="active" onclick="showDiagram('d-l1', this)">L1 · Physical</button>
+    <button onclick="showDiagram('d-l3', this)">L3 · Underlay (IP)</button>
+    <button onclick="showDiagram('d-bgp', this)">BGP Sessions</button>
+    <button onclick="showDiagram('d-evpn', this)">EVPN / VXLAN</button>
+    <button onclick="showDiagram('d-logical', this)">Logical · VLAN/VRF</button>
+    <button onclick="showDiagram('d-dcn', this)">DCN Backbone</button>
+  </div>
+
+  <!-- L1 PHYSICAL -->
+  <div class="diagram-panel active" id="d-l1">
+    <div class="diagram-desc">
+      <b>Layer 1 — Physical cabling.</b> Every spine-leaf veth link with interface names on both ends.
+      All links 9000–9214 MTU. Spine ports e1-1..6 / et1..6 / eth3..8; leaf uplinks et1-3 / e1-1..3 / eth1-3.
+    </div>
+    <pre class="mermaid">
+flowchart TB
+  subgraph SPINES["SPINE LAYER · AS 65100"]
+    S1["spine1 · Nokia SRL<br/>e1-1..e1-6"]
+    S2["spine2 · Arista cEOS<br/>et1..et6"]
+    S3["spine3 · FRR<br/>eth3..eth8"]
+  end
+  subgraph LEAFS["LEAF LAYER · VTEPs"]
+    L1["leaf1 cEOS<br/>et1/et2/et3"]
+    L2["leaf2 SRL<br/>e1-1/e1-2/e1-3"]
+    L3["leaf3 FRR<br/>eth1/eth2/eth3"]
+    L4["leaf4 cEOS<br/>et2/et3/et4"]
+    L5["leaf5 SRL<br/>e1-1/e1-2/e1-3"]
+    L6["leaf6 FRR<br/>eth1/eth2/eth3"]
+  end
+  S1 ---|e1-1 : et1| L1
+  S1 ---|e1-2 : e1-1| L2
+  S1 ---|e1-3 : eth1| L3
+  S1 ---|e1-4 : et2| L4
+  S1 ---|e1-5 : e1-1| L5
+  S1 ---|e1-6 : eth1| L6
+  S2 ---|et1 : et2| L1
+  S2 ---|et2 : e1-2| L2
+  S2 ---|et3 : eth2| L3
+  S2 ---|et4 : et3| L4
+  S2 ---|et5 : e1-2| L5
+  S2 ---|et6 : eth2| L6
+  S3 ---|eth3 : et3| L1
+  S3 ---|eth4 : e1-3| L2
+  S3 ---|eth5 : eth3| L3
+  S3 ---|eth6 : et4| L4
+  S3 ---|eth7 : e1-3| L5
+  S3 ---|eth8 : eth3| L6
+  L1 -.->|et4/et5 LACP| H12["host1+host2<br/>bond0 (eth1+eth2)"]
+  L2 -.->|e1-4/e1-5 LACP| H12
+  L3 -.->|eth4/eth5 LACP| H34["host3+host4<br/>bond0"]
+  L4 -.->|et5/et6 LACP| H34
+  L5 -.->|e1-4/e1-5 LACP| H56["host5+host6<br/>bond0"]
+  L6 -.->|eth4/eth5| H56
+    </pre>
+  </div>
+
+  <!-- L3 UNDERLAY -->
+  <div class="diagram-panel" id="d-l3">
+    <div class="diagram-desc">
+      <b>Layer 3 — eBGP underlay addressing.</b> P2P /31 IPv4 + /127 IPv6 (fd00:dc1:spine:leaf::/127).
+      Loopbacks /32 + /128. Each leaf has a unique ASN; spines share AS 65100. Dual-stack.
+    </div>
+    <pre class="mermaid">
+flowchart LR
+  S1["spine1 SRL · AS65100<br/>lo 10.255.0.1 · fd00:dc1::1"]
+  L1["leaf1 cEOS · AS65001<br/>lo 10.255.1.1 · fd00:dc1::11"]
+  L2["leaf2 SRL · AS65002<br/>lo 10.255.1.2 · fd00:dc1::12"]
+  L3["leaf3 FRR · AS65003<br/>lo 10.255.1.3 · fd00:dc1::13"]
+  S1 ---|"10.0.1.0/31 · fd00:dc1:1:1::/127"| L1
+  S1 ---|"10.0.1.2/31 · fd00:dc1:1:2::/127"| L2
+  S1 ---|"10.0.1.4/31 · fd00:dc1:1:3::/127"| L3
+  S2["spine2 cEOS · AS65100<br/>lo 10.255.0.2 · fd00:dc1::2"]
+  S2 ---|"10.0.2.0/31 · fd00:dc1:2:1::/127"| L1
+  S2 ---|"10.0.2.2/31 · fd00:dc1:2:2::/127"| L2
+  S2 ---|"10.0.2.4/31 · fd00:dc1:2:3::/127"| L3
+  S3["spine3 FRR · AS65100<br/>lo 10.255.0.3 · fd00:dc1::3"]
+  S3 ---|"10.0.3.0/31 · fd00:dc1:3:1::/127"| L1
+  S3 ---|"10.0.3.2/31 · fd00:dc1:3:2::/127"| L2
+  S3 ---|"10.0.3.4/31 · fd00:dc1:3:3::/127"| L3
+    </pre>
+    <div class="diagram-desc" style="margin-top:12px">
+      <b>Leaf P2P octets:</b> spine→leafN uses <code>10.0.{spine}.{(leaf-1)*2}/31</code> (spine side, even) ↔ <code>+1</code> (leaf side, odd).
+      leaf4–6 follow the same pattern on 10.0.{1,2,3}.{6,8,10}.
+    </div>
+  </div>
+
+  <!-- BGP -->
+  <div class="diagram-panel" id="d-bgp">
+    <div class="diagram-desc">
+      <b>BGP control plane.</b> Solid = eBGP underlay (IPv4/IPv6 unicast, per-leaf ASN ↔ AS65100).
+      Dashed = eBGP EVPN overlay (leaf loopback ↔ spine loopback, multihop, spines are route-reflector-clients/transit).
+    </div>
+    <pre class="mermaid">
+flowchart TB
+  S1(["spine1 RR<br/>AS65100"])
+  S2(["spine2 RR<br/>AS65100"])
+  S3(["spine3 RR<br/>AS65100"])
+  L1["leaf1 AS65001"]
+  L2["leaf2 AS65002"]
+  L3["leaf3 AS65003"]
+  L4["leaf4 AS65004"]
+  L5["leaf5 AS65005"]
+  L6["leaf6 AS65006"]
+  S1 --- L1 & L2 & L3 & L4 & L5 & L6
+  S2 --- L1 & L2 & L3 & L4 & L5 & L6
+  S3 --- L1 & L2 & L3 & L4 & L5 & L6
+  S1 -.EVPN.- L1 & L2 & L3 & L4 & L5 & L6
+  S2 -.EVPN.- L1 & L2 & L3 & L4 & L5 & L6
+  S3 -.EVPN.- L1 & L2 & L3 & L4 & L5 & L6
+    </pre>
+    <div class="diagram-desc" style="margin-top:12px">
+      18 underlay + 18 EVPN overlay sessions. Thresholds: raw_score ≥0.55 STRONG BUY n/a — this is BGP: established when OPEN/KEEPALIVE negotiated. BFD 100ms×3 = 300ms failover on FRR/SRL.
+    </div>
+  </div>
+
+  <!-- EVPN / VXLAN -->
+  <div class="diagram-panel" id="d-evpn">
+    <div class="diagram-desc">
+      <b>EVPN-VXLAN data plane.</b> L2 VNIs bridge each VLAN across the fabric; L3 VNI 50001 (TENANT-A VRF)
+      does symmetric IRB inter-VLAN routing. Anycast gateway MAC 00:00:5E:00:53:01 shared on all leafs.
+    </div>
+    <pre class="mermaid">
+flowchart TB
+  subgraph VNI10["VLAN 10 · VNI 10010 · 10.10.10.0/24"]
+    direction LR
+    H1["host1<br/>10.10.10.1"] --- P1["leaf1+leaf2<br/>ESI 00:11:..:11:11"]
+    H2["host2<br/>10.10.10.2"] --- P1
+  end
+  subgraph VNI20["VLAN 20 · VNI 10020 · 10.10.20.0/24"]
+    direction LR
+    H3["host3<br/>10.10.20.1"] --- P2["leaf3+leaf4<br/>ESI 00:22:..:22:22"]
+    H4["host4<br/>10.10.20.2"] --- P2
+  end
+  subgraph VNI30["VLAN 30 · VNI 10030 · 10.10.30.0/24"]
+    direction LR
+    H5["host5<br/>10.10.30.1"] --- P3["leaf5+leaf6<br/>ESI 00:33:..:33:33"]
+    H6["host6<br/>10.10.30.2"] --- P3
+  end
+  P1 --- VRF["TENANT-A VRF<br/>L3 VNI 50001<br/>anycast GW 00:00:5E:00:53:01"]
+  P2 --- VRF
+  P3 --- VRF
+    </pre>
+    <div class="diagram-desc" style="margin-top:12px">
+      Intra-VLAN = L2 VXLAN bridging. Inter-VLAN = ingress leaf routes into L3 VNI 50001, egress leaf
+      decaps and delivers locally (symmetric IRB). 30/30 host pings verified.
+    </div>
+  </div>
+
+  <!-- LOGICAL -->
+  <div class="diagram-panel" id="d-logical">
+    <div class="diagram-desc">
+      <b>Logical view — racks, VLANs, gateways.</b> 3 racks, each a dual-homed leaf pair serving one VLAN.
+      All hosts share the anycast default gateway .254 in their subnet.
+    </div>
+    <pre class="mermaid">
+flowchart TB
+  subgraph R1["RACK 1 · VLAN 10"]
+    R1GW["GW 10.10.10.254<br/>leaf1(cEOS)+leaf2(SRL)"]
+    R1H["host1 .1 · host2 .2"]
+    R1H --- R1GW
+  end
+  subgraph R2["RACK 2 · VLAN 20"]
+    R2GW["GW 10.10.20.254<br/>leaf3(FRR)+leaf4(cEOS)"]
+    R2H["host3 .1 · host4 .2"]
+    R2H --- R2GW
+  end
+  subgraph R3["RACK 3 · VLAN 30"]
+    R3GW["GW 10.10.30.254<br/>leaf5(SRL)+leaf6(FRR)"]
+    R3H["host5 .1 · host6 .2"]
+    R3H --- R3GW
+  end
+  R1GW --- T["TENANT-A VRF<br/>VNI 50001<br/>inter-VLAN routing"]
+  R2GW --- T
+  R3GW --- T
+    </pre>
+  </div>
+
+  <!-- DCN BACKBONE -->
+  <div class="diagram-panel" id="d-dcn">
+    <div class="diagram-desc">
+      <b>DCN Lab — multi-region FRR backbone.</b> 5 core routers (full-mesh-ish) + 5 edge/dist devices,
+      hub-and-spoke per region. eBGP between regions, mgmt 10.200.0.0/24. SNMP traps to 10.200.0.1:1162.
+    </div>
+    <pre class="mermaid">
+flowchart TB
+  subgraph CORE["CORE · multi-region eBGP"]
+    C1["de-fra-core-01<br/>AS65001 · .11"]
+    C2["de-fra-core-02<br/>AS65002 · .12"]
+    C3["uk-lon-core-01<br/>AS65003 · .13"]
+    C4["nl-ams-core-01<br/>AS65004 · .14"]
+    C5["us-nyc-core-01<br/>AS65005 · .15"]
+  end
+  C1 --- C2 & C3 & C4
+  C2 --- C4 & C5
+  C3 --- C4 & C5
+  C1 --- C5
+  C1 --- E1["de-fra-edge-01<br/>AS65006 · .21"]
+  C1 --- D1["de-fra-dist-01<br/>AS65009 · .33"]
+  C2 --- E1 & D1
+  C3 --- E2["uk-lon-edge-01<br/>AS65007 · .22"]
+  C3 --- DI2["uk-lon-dist-01<br/>AS65010 · .31"]
+  C4 --- E3["nl-ams-edge-01<br/>AS65008 · .23"]
+  C5 --- E2
+  D1 --- E1
+    </pre>
+  </div>
 </div>
 
 <!-- ═══════════ DIAGRAM ═══════════ -->
@@ -551,11 +776,29 @@ docker run --rm --privileged --network host --pid host \<br>
 </div>
 
 <script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'dark',
+  themeVariables: {
+    background: '#0d1520', primaryColor: '#0d1520', primaryBorderColor: '#00d4ff',
+    primaryTextColor: '#c8d6e5', lineColor: '#4a5568', fontSize: '13px',
+    clusterBkg: '#0a0e17', clusterBorder: '#1a2840',
+  },
+  flowchart: { curve: 'basis', nodeSpacing: 40, rankSpacing: 55 },
+});
+
 function show(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
   document.querySelectorAll('.topbar nav a').forEach(a => a.classList.remove('active'));
-  event.target.classList.add('active');
+  if (window.event && event.target) event.target.classList.add('active');
+}
+
+function showDiagram(id, btn) {
+  document.querySelectorAll('.diagram-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.diagram-tabs button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
 }
 
 function loadConfig(path, name) {
