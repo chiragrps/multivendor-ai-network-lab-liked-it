@@ -95,6 +95,7 @@ tr:hover td{background:#1a284033}
     <a href="#" onclick="show('diagram')">Diagram</a>
     <a href="#" onclick="show('configs')">Configurations</a>
     <a href="#" onclick="show('connectivity')">Connectivity</a>
+    <a href="#" onclick="show('drivers')">Driver Layer</a>
     <a href="#" onclick="show('operations')">Operations</a>
     <a href="#" onclick="show('docs')">Documentation</a>
   </nav>
@@ -355,6 +356,92 @@ tr:hover td{background:#1a284033}
     <tr><td>L3 Gateway</td><td>Anycast IRB</td><td>Virtual MAC 00:00:5E:00:53:01 shared across leaf pairs. Symmetric IRB via L3 VNI 50001</td></tr>
     <tr><td>Monitoring</td><td>SNMPv2c</td><td>Community GESH-DC1-RO, traps to 172.20.20.1:1162</td></tr>
   </table>
+</div>
+
+<!-- ═══════════ DRIVER LAYER ═══════════ -->
+<div class="section" id="sec-drivers">
+  <h2>Multi-Vendor Driver Abstraction (<code>src/drivers/</code>)</h2>
+
+  <div class="cards">
+    <div class="card">
+      <h3>Hybrid Architecture</h3>
+      <p>Deterministic per-vendor drivers handle data collection (no LLM guesses CLI syntax). The LLM only does what it's good at &mdash; root-cause synthesis on structured/raw output. This guarantees a predictable data frame before it ever reaches the analysis layer.</p>
+    </div>
+    <div class="card">
+      <h3>Dual Output</h3>
+      <p>Every driver method returns a <code>DriverResult</code> with <code>.normalized</code> (dict &rarr; Grafana/InfluxDB metrics) AND <code>.raw</code> (text &rarr; LLM context). Normalize for machines, raw for the model.</p>
+    </div>
+    <div class="card">
+      <h3>Single Source of Truth</h3>
+      <p>Command tables + parsers live once in <code>drivers/</code>. Both <code>health.py</code> (dashboard) and <code>clab_collector.py</code> (telemetry) consume them &mdash; no more drift between the two.</p>
+    </div>
+  </div>
+
+  <div class="topo"><pre>
+                    ┌──────────────────────────────────────────────┐
+                    │         get_driver(vendor, transport)        │
+                    │              factory.py + aliases            │
+                    └───────────────────┬──────────────────────────┘
+                                        ▼
+                    ┌──────────────────────────────────────────────┐
+                    │       <span class="leaf">BaseNetworkDriver</span> (ABC) — base.py        │
+                    │  get_bgp_summary() get_interface_counters()  │
+                    │  get_health()  run_command()  → <span class="host">DriverResult</span>  │
+                    │       (.normalized dict  +  .raw text)       │
+                    └───────┬──────────────┬──────────────┬────────┘
+            ┌───────────────┘              │              └───────────────┐
+            ▼                              ▼                              ▼
+   ┌────────────────┐          ┌────────────────┐          ┌────────────────┐
+   │  <span class="spine">FRRDriver</span>     │          │  <span class="spine">EOSDriver</span>     │          │  <span class="spine">SRLDriver</span>     │
+   │  _parse()      │          │  _parse()      │          │  _parse()      │
+   └───────┬────────┘          └───────┬────────┘          └───────┬────────┘
+           └────────────────────────────┼────────────────────────────┘
+                                        ▼
+                    ┌──────────────────────────────────────────────┐
+                    │    Transport (protocol) — transport.py       │
+                    │  DockerExecTransport  → vtysh / Cli / sr_cli │
+                    │  SSHRunnerTransport   → wraps run_command()  │
+                    │  ScrapliTransport     → (planned, SSH NOS)   │
+                    └──────────────────────────────────────────────┘
+
+   parsers.py: parse_bgp / ospf / interfaces / interface_counters / routes / version
+               vendor-tagged · soft-fail (never raise) · fixed normalized shapes
+  </pre></div>
+
+  <h2 style="margin-top:32px">Driver Methods</h2>
+  <table>
+    <tr><th>Method</th><th>Returns</th><th>Normalized shape</th></tr>
+    <tr><td><code>get_bgp_summary()</code></td><td>DriverResult</td><td>{peers[], established, total}</td></tr>
+    <tr><td><code>get_ospf_neighbors()</code></td><td>DriverResult</td><td>{neighbors[], full, total}</td></tr>
+    <tr><td><code>get_interface_status()</code></td><td>DriverResult</td><td>{list[], up, total}</td></tr>
+    <tr><td><code>get_interface_counters()</code></td><td>DriverResult</td><td>{interfaces[{in_octets, out_octets, in_packets, ...}]}</td></tr>
+    <tr><td><code>get_routes()</code></td><td>DriverResult</td><td>{total, by_protocol{}}</td></tr>
+    <tr><td><code>get_health()</code></td><td>dict</td><td>{meta, version, bgp, ospf, interfaces, routes}</td></tr>
+    <tr><td><code>run_command(cmd)</code></td><td>DriverResult</td><td>{} (raw passthrough)</td></tr>
+  </table>
+
+  <h2 style="margin-top:32px">Per-Vendor CLI Translation</h2>
+  <table>
+    <tr><th>Vendor</th><th>Driver</th><th>Transport argv</th><th>Output format</th></tr>
+    <tr><td><span class="tag srl">SRL</span> nokia-srl</td><td>SRLDriver</td><td><code>sr_cli -d "&lt;cmd&gt;"</code></td><td>flat tables (text parse)</td></tr>
+    <tr><td><span class="tag ceos">cEOS</span> arista-eos</td><td>EOSDriver</td><td><code>Cli -p 15 -c "&lt;cmd&gt; | json"</code></td><td>JSON</td></tr>
+    <tr><td><span class="tag frr">FRR</span> frr</td><td>FRRDriver</td><td><code>vtysh -c "&lt;cmd&gt; json"</code></td><td>JSON</td></tr>
+    <tr><td>Juniper (planned)</td><td>JunosDriver</td><td><code>cli "&lt;cmd&gt; | display json"</code></td><td>JSON (native)</td></tr>
+    <tr><td>Cisco IOS-XR (planned)</td><td>IOSXRDriver</td><td><code>"&lt;cmd&gt;"</code> via Scrapli</td><td>text / XML fallback</td></tr>
+  </table>
+
+  <h2 style="margin-top:32px">Why This Design</h2>
+  <table>
+    <tr><th>Decision</th><th>Choice</th><th>Rationale</th></tr>
+    <tr><td>Collection</td><td>Deterministic drivers</td><td>LLM guessing CLI syntax or touching devices is an operational liability. Drivers enforce predictable commands.</td></tr>
+    <tr><td>Analysis</td><td>LLM on raw + normalized</td><td>Model does pattern-matching / root-cause synthesis on a known data frame &mdash; what it's actually good at.</td></tr>
+    <tr><td>Abstraction</td><td>ABC class pattern (not Jinja2)</td><td>Jinja2 is for config patches. OO driver classes are cleaner for operational retrieval &mdash; drop in a new vendor class without touching core routing.</td></tr>
+    <tr><td>Transport</td><td>Injected (not imported)</td><td>Drivers never import flask/paramiko/scrapli at module top &mdash; collector runs on a lab host without them. Transport is a constructor arg.</td></tr>
+    <tr><td>New vendor</td><td>~24-line driver class</td><td>Add JunosDriver/IOSXRDriver: set vendor + commands, implement _parse(). Factory + registry pick it up.</td></tr>
+    <tr><td>Failure model</td><td>Soft-fail, never raise</td><td>Parsers return fixed empty shapes on bad input. One wedged command never gates the whole snapshot.</td></tr>
+  </table>
+
+  <p style="font-size:12px;color:#8899aa;margin-top:8px">61/61 driver tests pass. Wired into <code>health.py</code> (dashboard command tables) and <code>clab_collector.py</code> (telemetry probes + interface counters &rarr; InfluxDB).</p>
 </div>
 
 <!-- ═══════════ OPERATIONS ═══════════ -->
