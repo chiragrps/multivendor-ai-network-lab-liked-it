@@ -274,6 +274,86 @@ def probe_srl(node: Node) -> dict[str, tuple[int, int]]:
 PROBES = {"frr": probe_frr, "arista-eos": probe_arista, "nokia-srl": probe_srl}
 
 
+def probe_intf_counters_frr(node: Node) -> list[dict]:
+    raw = docker_run(node.container, "vtysh", "-c", "show interface json")
+    data = try_json(raw) or {}
+    results = []
+    for name, info in (data if isinstance(data, dict) else {}).items():
+        if not isinstance(info, dict) or name in ("lo", "lo0", "lo1", "eth0"):
+            continue
+        counters = info.get("inputPackets", info.get("rxCounters", {}))
+        results.append({
+            "interface": name,
+            "in_octets": info.get("inputBytes", 0),
+            "out_octets": info.get("outputBytes", 0),
+            "in_packets": info.get("inputPackets", 0),
+            "out_packets": info.get("outputPackets", 0),
+            "in_errors": info.get("inputErrors", 0),
+            "out_errors": info.get("outputErrors", 0),
+        })
+    return results
+
+
+def probe_intf_counters_arista(node: Node) -> list[dict]:
+    raw = docker_run(node.container, "Cli", "-p", "15", "-c", "show interfaces counters | json")
+    data = try_json(raw) or {}
+    intfs = data.get("interfaces", {})
+    results = []
+    for name, info in intfs.items():
+        if name.startswith(("Ma", "Lo")):
+            continue
+        results.append({
+            "interface": name,
+            "in_octets": info.get("inOctets", 0),
+            "out_octets": info.get("outOctets", 0),
+            "in_packets": info.get("inUcastPkts", 0) + info.get("inMulticastPkts", 0) + info.get("inBroadcastPkts", 0),
+            "out_packets": info.get("outUcastPkts", 0) + info.get("outMulticastPkts", 0) + info.get("outBroadcastPkts", 0),
+            "in_errors": info.get("inErrors", 0),
+            "out_errors": info.get("outErrors", 0),
+        })
+    return results
+
+
+def probe_intf_counters_srl(node: Node) -> list[dict]:
+    raw = docker_run(node.container, "sr_cli", "-d", "show interface detail")
+    results = []
+    current_intf = None
+    in_oct = out_oct = in_pkt = out_pkt = in_err = out_err = 0
+    for line in raw.splitlines():
+        stripped = line.strip()
+        if stripped.startswith(("ethernet-", "lag", "irb")):
+            if current_intf:
+                results.append({"interface": current_intf, "in_octets": in_oct, "out_octets": out_oct,
+                                "in_packets": in_pkt, "out_packets": out_pkt, "in_errors": in_err, "out_errors": out_err})
+            current_intf = stripped.split()[0]
+            in_oct = out_oct = in_pkt = out_pkt = in_err = out_err = 0
+        if "in-octets" in stripped:
+            try: in_oct = int(stripped.split()[-1])
+            except ValueError: pass
+        elif "out-octets" in stripped:
+            try: out_oct = int(stripped.split()[-1])
+            except ValueError: pass
+        elif "in-unicast-packets" in stripped:
+            try: in_pkt = int(stripped.split()[-1])
+            except ValueError: pass
+        elif "out-unicast-packets" in stripped:
+            try: out_pkt = int(stripped.split()[-1])
+            except ValueError: pass
+        elif "in-error-packets" in stripped:
+            try: in_err = int(stripped.split()[-1])
+            except ValueError: pass
+        elif "out-error-packets" in stripped:
+            try: out_err = int(stripped.split()[-1])
+            except ValueError: pass
+    if current_intf:
+        results.append({"interface": current_intf, "in_octets": in_oct, "out_octets": out_oct,
+                        "in_packets": in_pkt, "out_packets": out_pkt, "in_errors": in_err, "out_errors": out_err})
+    return results
+
+
+COUNTER_PROBES = {"frr": probe_intf_counters_frr, "arista-eos": probe_intf_counters_arista, "nokia-srl": probe_intf_counters_srl}
+
+
 # ─────────────────────────── line protocol ────────────────────────────────────
 
 
@@ -336,6 +416,18 @@ def collect_once() -> None:
         }
         log.info("  %-7s %-10s bgp=%d/%d ospf=%d/%d intf=%d/%d",
                  node.hostname, node.vendor, bgp_up, bgp_total, ospf_full, ospf_total, intf_up, intf_total)
+        counter_probe = COUNTER_PROBES.get(node.vendor)
+        if counter_probe:
+            try:
+                for ctr in counter_probe(node):
+                    fields = {k: v for k, v in ctr.items() if k != "interface" and isinstance(v, int)}
+                    if fields:
+                        intf_name = tag_escape(ctr.get("interface", "unknown"))
+                        tags = f"source={tag_escape(node.hostname)},role={node.role},vendor={tag_escape(node.vendor)},interface_name={intf_name}"
+                        fld_str = ",".join(f"{k}={v}i" for k, v in fields.items())
+                        lines.append(f"intf-counters,{tags} {fld_str} {ts_ns}")
+            except Exception as exc:
+                log.debug("  %s counter probe failed: %s", node.hostname, exc)
     write_influx(lines)
     try:
         tmp = STATUS_FILE + ".tmp"
