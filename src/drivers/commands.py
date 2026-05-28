@@ -43,6 +43,20 @@ JUNOS_COMMANDS: dict[str, list[str]] = {
     "cpu":                ["show system processes extensive"],
 }
 
+# Cisco IOS-XR. JSON support ("| json") is version-dependent (7.x+) and often
+# incomplete, so we lead with the JSON variant but always provide the text
+# command as a fallback — the parsers handle XR's standard Cisco-style tables.
+IOSXR_COMMANDS: dict[str, list[str]] = {
+    "version":            ["show version"],
+    "bgp":                ["show bgp summary | json", "show bgp summary"],
+    "ospf":               ["show ospf neighbor | json", "show ospf neighbor"],
+    "interfaces":         ["show ipv4 interface brief | json", "show ipv4 interface brief"],
+    "interface_counters": ["show interfaces"],
+    "routes":             ["show route summary | json", "show route summary"],
+    "memory":             ["show memory summary"],
+    "cpu":                ["show processes cpu"],
+}
+
 # Nokia SR Linux uses sr_cli with a completely different grammar. JSON output
 # isn't reliable across sr_cli commands; the text parsers handle these. Each
 # entry is one command (no fallback variants — sr_cli either parses fully or
@@ -64,6 +78,7 @@ COMMANDS_BY_VENDOR: dict[str, dict[str, list[str]]] = {
     "arista-eos": EOS_COMMANDS,
     "nokia-srl":  SRL_COMMANDS,
     "junos":      JUNOS_COMMANDS,
+    "cisco-iosxr": IOSXR_COMMANDS,
 }
 
 # Map every accepted spelling → canonical vendor key. Lower-cased lookups only.
@@ -76,6 +91,11 @@ VENDOR_ALIASES: dict[str, str] = {
     "srl":         "nokia-srl",
     "nokia":       "nokia-srl",
     "junos":       "junos",
+    "cisco-iosxr": "cisco-iosxr",
+    "iosxr":       "cisco-iosxr",
+    "ios-xr":      "cisco-iosxr",
+    "xr":          "cisco-iosxr",
+    "cisco":       "cisco-iosxr",
 }
 
 

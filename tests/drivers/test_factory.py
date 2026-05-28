@@ -54,6 +54,14 @@ def test_junos_resolves_to_driver(fake_transport_factory):
     assert drv.vendor == "junos"
 
 
+def test_iosxr_resolves_to_driver(fake_transport_factory):
+    from drivers.iosxr import IOSXRDriver
+    for alias in ("iosxr", "ios-xr", "xr", "cisco-iosxr"):
+        drv = get_driver(alias, transport=fake_transport_factory())
+        assert isinstance(drv, IOSXRDriver)
+        assert drv.vendor == "cisco-iosxr"
+
+
 # ─────────────────────── transport auto-selection ─────────────────────────────
 
 def test_container_selects_docker_transport():

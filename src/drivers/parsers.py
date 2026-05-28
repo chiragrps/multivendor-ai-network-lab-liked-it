@@ -77,6 +77,10 @@ def _is_junos(vendor: str) -> bool:
     return canonical_vendor(vendor) == "junos"
 
 
+def _is_iosxr(vendor: str) -> bool:
+    return canonical_vendor(vendor) == "cisco-iosxr"
+
+
 def _jv(node: object, default: object = None) -> object:
     """Extract a scalar from Junos's ``[{"data": X}]`` JSON wrapper.
 
@@ -396,6 +400,25 @@ def parse_interfaces(vendor: str, raw: str) -> dict:
                     out["up"] += 1
             out["total"] = len(out["list"])
             return out
+
+    # ── Cisco IOS-XR `show ipv4 interface brief` ─────────────────────────────
+    # Columns: Interface  IP-Address  Status  Protocol
+    if _is_iosxr(vendor) and _try_json(output) is None:
+        for line in output.splitlines():
+            parts = line.split()
+            if len(parts) < 4:
+                continue
+            if parts[0].lower() == "interface" or not re.match(r"^[A-Za-z]", parts[0]):
+                continue
+            name, ip, status = parts[0], parts[1], parts[2].lower()
+            is_up = status == "up"
+            addresses = [ip] if ip.lower() != "unassigned" else []
+            out["list"].append({"name": name, "status": "up" if is_up else status,
+                                "addresses": addresses})
+            if is_up:
+                out["up"] += 1
+        out["total"] = len(out["list"])
+        return out
 
     data = _try_json(output)
     if isinstance(data, dict):

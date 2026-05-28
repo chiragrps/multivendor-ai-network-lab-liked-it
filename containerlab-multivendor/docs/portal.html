@@ -427,7 +427,7 @@ tr:hover td{background:#1a284033}
     <tr><td><span class="tag ceos">cEOS</span> arista-eos</td><td>EOSDriver</td><td><code>Cli -p 15 -c "&lt;cmd&gt; | json"</code></td><td>JSON</td></tr>
     <tr><td><span class="tag frr">FRR</span> frr</td><td>FRRDriver</td><td><code>vtysh -c "&lt;cmd&gt; json"</code></td><td>JSON</td></tr>
     <tr><td><span class="tag" style="background:#c678dd22;color:#c678dd">JUNOS</span> junos</td><td>JunosDriver</td><td><code>cli -c "&lt;cmd&gt; | display json"</code></td><td>JSON (deeply nested [{data}])</td></tr>
-    <tr><td>Cisco IOS-XR (planned)</td><td>IOSXRDriver</td><td><code>"&lt;cmd&gt;"</code> via Scrapli</td><td>text / XML fallback</td></tr>
+    <tr><td><span class="tag" style="background:#00bcd422;color:#00bcd4">IOS-XR</span> cisco-iosxr</td><td>IOSXRDriver</td><td><code>"&lt;cmd&gt; | json"</code> &rarr; text fallback</td><td>Cisco text tables (JSON 7.x best-effort)</td></tr>
   </table>
 
   <h2 style="margin-top:32px">Why This Design</h2>

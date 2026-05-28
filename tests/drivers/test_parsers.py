@@ -343,3 +343,63 @@ def test_parse_interfaces_junos():
 def test_parse_junos_soft_fail():
     assert parsers.parse_bgp("junos", "") == {"peers": [], "established": 0, "total": 0}
     assert parsers.parse_ospf("junos", "garbage") == {"neighbors": [], "full": 0, "total": 0}
+
+
+# ─────────────────────────────── Cisco IOS-XR ─────────────────────────────────
+
+# IOS-XR `show bgp summary` — standard Cisco 11-column text table
+IOSXR_BGP_TEXT = """\
+BGP router identifier 1.1.1.1, local AS number 65000
+
+Neighbor        Spk    AS MsgRcvd MsgSent   TblVer  InQ OutQ  Up/Down  St/PfxRcd
+10.0.0.1          0 65001     100     100       50    0    0 01:23:45         12
+10.0.0.2          0 65002       0       0        0    0    0 00:00:00       Idle
+"""
+
+# IOS-XR `show ipv4 interface brief` — Interface / IP-Address / Status / Protocol
+IOSXR_INTF_TEXT = """\
+Interface                      IP-Address      Status          Protocol
+GigabitEthernet0/0/0/0         10.0.0.1        Up              Up
+Loopback0                      1.1.1.1         Up              Up
+MgmtEth0/RP0/CPU0/0            unassigned      Shutdown        Down
+"""
+
+IOSXR_VERSION_TEXT = "Cisco IOS XR Software, Version 7.5.2\n Copyright (c) 2022 by Cisco Systems, Inc."
+
+
+def test_parse_bgp_iosxr_text():
+    out = parsers.parse_bgp("cisco-iosxr", IOSXR_BGP_TEXT)
+    assert out["total"] == 2
+    assert out["established"] == 1            # 10.0.0.1 has pfxrcd=12 → established
+    p0 = next(p for p in out["peers"] if p["neighbor"] == "10.0.0.1")
+    assert p0["asn"] == "65001"
+    assert p0["prefixes"] == 12
+    idle = next(p for p in out["peers"] if p["neighbor"] == "10.0.0.2")
+    assert idle["state"] == "Idle"
+
+
+def test_parse_interfaces_iosxr_text():
+    out = parsers.parse_interfaces("cisco-iosxr", IOSXR_INTF_TEXT)
+    assert out["total"] == 3
+    assert out["up"] == 2                      # two Up, one Shutdown
+    gi = next(i for i in out["list"] if i["name"] == "GigabitEthernet0/0/0/0")
+    assert gi["status"] == "up"
+    assert gi["addresses"] == ["10.0.0.1"]
+    mg = next(i for i in out["list"] if i["name"].startswith("MgmtEth"))
+    assert mg["addresses"] == []               # 'unassigned' dropped
+
+
+def test_parse_version_iosxr():
+    out = parsers.parse_version("cisco-iosxr", IOSXR_VERSION_TEXT)
+    assert out["version"] == "7.5.2"
+
+
+def test_parse_iosxr_soft_fail():
+    assert parsers.parse_bgp("cisco-iosxr", "") == {"peers": [], "established": 0, "total": 0}
+    assert parsers.parse_interfaces("cisco-iosxr", "") == {"list": [], "up": 0, "total": 0}
+
+
+def test_iosxr_aliases_resolve():
+    from drivers.commands import canonical_vendor
+    for alias in ("iosxr", "ios-xr", "xr", "cisco-iosxr", "cisco"):
+        assert canonical_vendor(alias) == "cisco-iosxr"

@@ -33,6 +33,7 @@ _DOCKER_ARGV: dict[str, list[str]] = {
     "arista-eos": ["Cli", "-p", "15", "-c"],
     "nokia-srl":  ["sr_cli", "-d"],
     "junos":      ["cli", "-c"],   # cRPD / vJunos-router container CLI
+    "cisco-iosxr": ["xrcmd"],      # cisco/iosxr container helper; SSH otherwise
 }
 
 

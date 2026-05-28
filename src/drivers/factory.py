@@ -18,6 +18,7 @@ from .base import BaseNetworkDriver
 from .commands import canonical_vendor
 from .eos import EOSDriver
 from .frr import FRRDriver
+from .iosxr import IOSXRDriver
 from .junos import JunosDriver
 from .srl import SRLDriver
 from .transport import DockerExecTransport, SSHRunnerTransport, Transport
@@ -33,6 +34,7 @@ _REGISTRY: dict[str, type[BaseNetworkDriver]] = {
     "arista-eos": EOSDriver,
     "nokia-srl": SRLDriver,
     "junos": JunosDriver,
+    "cisco-iosxr": IOSXRDriver,
 }
 
 
