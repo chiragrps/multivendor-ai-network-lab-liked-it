@@ -32,6 +32,7 @@ _DOCKER_ARGV: dict[str, list[str]] = {
     "frr":        ["vtysh", "-c"],
     "arista-eos": ["Cli", "-p", "15", "-c"],
     "nokia-srl":  ["sr_cli", "-d"],
+    "junos":      ["cli", "-c"],   # cRPD / vJunos-router container CLI
 }
 
 

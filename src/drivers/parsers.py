@@ -73,6 +73,28 @@ def _is_frr(vendor: str) -> bool:
     return canonical_vendor(vendor) == "frr"
 
 
+def _is_junos(vendor: str) -> bool:
+    return canonical_vendor(vendor) == "junos"
+
+
+def _jv(node: object, default: object = None) -> object:
+    """Extract a scalar from Junos's ``[{"data": X}]`` JSON wrapper.
+
+    Junos ``| display json`` wraps every leaf as a single-element list of
+    ``{"data": value}`` dicts (and attributes as ``{"attributes": {...}}``).
+    This unwraps the common shapes to the underlying scalar.
+    """
+    if isinstance(node, list):
+        if not node:
+            return default
+        node = node[0]
+    if isinstance(node, dict):
+        if "data" in node:
+            return node["data"]
+        return default
+    return node if node is not None else default
+
+
 def _to_int(token: str) -> int:
     try:
         return int(token)
@@ -145,6 +167,31 @@ def parse_bgp(vendor: str, raw: str) -> dict:
         out["total"] = len(out["peers"])
         return out
 
+    # ── Junos `show bgp summary | display json` ──────────────────────────────
+    if _is_junos(vendor):
+        data = _try_json(output)
+        if isinstance(data, dict) and "bgp-information" in data:
+            info = data["bgp-information"]
+            info = info[0] if isinstance(info, list) and info else info
+            peers = (info or {}).get("bgp-peer", []) if isinstance(info, dict) else []
+            for p in peers if isinstance(peers, list) else []:
+                if not isinstance(p, dict):
+                    continue
+                addr = str(_jv(p.get("peer-address"), "")).split("+")[0]  # strip +port
+                state = str(_jv(p.get("peer-state"), "")).lower()
+                established = state == "established"
+                out["peers"].append({
+                    "neighbor": addr,
+                    "asn": _to_int(str(_jv(p.get("peer-as"), 0))) or None,
+                    "state": "Established" if established else (state.title() or "Down"),
+                    "uptime": _fmt_uptime(_jv(p.get("elapsed-time"))),
+                    "prefixes": _to_int(str(_jv(p.get("bgp-rib", p.get("received-prefix-count")), 0))),
+                })
+                if established:
+                    out["established"] += 1
+            out["total"] = len(out["peers"])
+            return out
+
     data = _try_json(output)
     if isinstance(data, dict):
         peers_block = None
@@ -210,6 +257,27 @@ def parse_ospf(vendor: str, raw: str) -> dict:
 
     data = _try_json(output)
     if isinstance(data, dict):
+        # Junos: {"ospf-neighbor-information": [{"ospf-neighbor": [{...}]}]}
+        if "ospf-neighbor-information" in data:
+            info = data["ospf-neighbor-information"]
+            info = info[0] if isinstance(info, list) and info else info
+            nbrs = (info or {}).get("ospf-neighbor", []) if isinstance(info, dict) else []
+            for n in nbrs if isinstance(nbrs, list) else []:
+                if not isinstance(n, dict):
+                    continue
+                state = str(_jv(n.get("ospf-neighbor-state"), "")).lower()
+                is_full = "full" in state
+                out["neighbors"].append({
+                    "neighbor": _jv(n.get("neighbor-address")) or _jv(n.get("neighbor-id")),
+                    "state": "Full" if is_full else (state.title() or "Init"),
+                    "interface": _jv(n.get("interface-name")),
+                    "dead_time": _jv(n.get("activity-timer")),
+                })
+                if is_full:
+                    out["full"] += 1
+            out["total"] = len(out["neighbors"])
+            return out
+
         # FRR: {"neighbors": {"<router-id>": [{...}]}}
         if "neighbors" in data and isinstance(data["neighbors"], dict):
             for router_id, entries in data["neighbors"].items():
@@ -302,6 +370,32 @@ def parse_interfaces(vendor: str, raw: str) -> dict:
                 current["addresses"].append(m2.group(1))
         out["total"] = len(out["list"])
         return out
+
+    # ── Junos `show interfaces terse | display json` ─────────────────────────
+    if _is_junos(vendor):
+        data = _try_json(output)
+        if isinstance(data, dict) and "interface-information" in data:
+            info = data["interface-information"]
+            info = info[0] if isinstance(info, list) and info else info
+            phys = (info or {}).get("physical-interface", []) if isinstance(info, dict) else []
+            for p in phys if isinstance(phys, list) else []:
+                if not isinstance(p, dict):
+                    continue
+                status = str(_jv(p.get("oper-status"), "")).lower()
+                addrs = []
+                for li in p.get("logical-interface", []) if isinstance(p.get("logical-interface"), list) else []:
+                    af = li.get("address-family", [])
+                    for fam in (af if isinstance(af, list) else [af]):
+                        for a in (fam or {}).get("interface-address", []) if isinstance(fam, dict) else []:
+                            ip = _jv((a or {}).get("ifa-local")) if isinstance(a, dict) else None
+                            if ip:
+                                addrs.append(ip)
+                entry = {"name": _jv(p.get("name")), "status": status or "down", "addresses": addrs}
+                out["list"].append(entry)
+                if status == "up":
+                    out["up"] += 1
+            out["total"] = len(out["list"])
+            return out
 
     data = _try_json(output)
     if isinstance(data, dict):

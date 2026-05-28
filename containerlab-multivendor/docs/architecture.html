@@ -431,6 +431,26 @@
     </div>
 
     <div class="info-card">
+      <h3>Vendor Driver Layer (src/drivers/)</h3>
+      <p style="color:#8899aa;font-size:13px;margin-bottom:10px">
+        Deterministic per-vendor drivers collect data (no LLM guesses CLI syntax);
+        the LLM only synthesizes on the structured result. Single source of truth
+        for commands + parsers, consumed by both the health dashboard and the
+        telemetry collector.</p>
+      <table>
+        <tr><th>Vendor</th><th>Driver</th><th>CLI</th></tr>
+        <tr><td style="color:#4a9eff">Nokia SRL</td><td>SRLDriver</td><td>sr_cli -d</td></tr>
+        <tr><td style="color:#00c46a">Arista cEOS</td><td>EOSDriver</td><td>Cli -p 15 -c … | json</td></tr>
+        <tr><td style="color:#ffaa33">FRR</td><td>FRRDriver</td><td>vtysh -c … json</td></tr>
+        <tr><td style="color:#c678dd">Juniper</td><td>JunosDriver</td><td>cli -c … | display json</td></tr>
+      </table>
+      <p style="color:#8899aa;font-size:12px;margin-top:8px">
+        BaseNetworkDriver (ABC) → DriverResult (.normalized dict + .raw text) ·
+        Transport: DockerExec / SSHRunner / Scrapli · 65/65 tests pass ·
+        full diagram in <span style="color:#00d4ff">portal.html → Driver Layer</span>.</p>
+    </div>
+
+    <div class="info-card">
       <h3>Quick Commands</h3>
       <table>
         <tr><th>Action</th><th>Command</th></tr>

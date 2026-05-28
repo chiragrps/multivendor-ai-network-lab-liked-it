@@ -46,10 +46,12 @@ def test_unknown_vendor_raises(fake_transport_factory):
         get_driver("cisco-ios", transport=fake_transport_factory())
 
 
-def test_junos_alias_known_but_no_driver(fake_transport_factory):
-    # junos is in VENDOR_ALIASES but not in the driver registry yet.
-    with pytest.raises(UnsupportedVendorError):
-        get_driver("junos", transport=fake_transport_factory())
+def test_junos_resolves_to_driver(fake_transport_factory):
+    # junos now has a registered JunosDriver.
+    from drivers.junos import JunosDriver
+    drv = get_driver("junos", transport=fake_transport_factory())
+    assert isinstance(drv, JunosDriver)
+    assert drv.vendor == "junos"
 
 
 # ─────────────────────── transport auto-selection ─────────────────────────────

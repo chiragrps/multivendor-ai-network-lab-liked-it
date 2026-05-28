@@ -272,3 +272,74 @@ def test_parsers_never_raise_on_none(fn):
     # Defensive: raw may arrive as None from a failed transport.
     result = fn("frr", None)  # type: ignore[arg-type]
     assert isinstance(result, dict)
+
+
+# ─────────────────────────────── Junos ────────────────────────────────────────
+
+import json as _json
+
+JUNOS_BGP_JSON = _json.dumps({
+    "bgp-information": [{
+        "bgp-peer": [
+            {"peer-address": [{"data": "10.0.0.1+179"}], "peer-as": [{"data": "65001"}],
+             "peer-state": [{"data": "Established"}], "elapsed-time": [{"data": "1d 2h"}],
+             "received-prefix-count": [{"data": "12"}]},
+            {"peer-address": [{"data": "10.0.0.2"}], "peer-as": [{"data": "65002"}],
+             "peer-state": [{"data": "Active"}]},
+        ]
+    }]
+})
+
+JUNOS_OSPF_JSON = _json.dumps({
+    "ospf-neighbor-information": [{
+        "ospf-neighbor": [
+            {"neighbor-address": [{"data": "10.0.0.1"}], "ospf-neighbor-state": [{"data": "Full"}],
+             "interface-name": [{"data": "ge-0/0/0.0"}], "activity-timer": [{"data": "38"}]},
+            {"neighbor-address": [{"data": "10.0.0.2"}], "ospf-neighbor-state": [{"data": "Init"}],
+             "interface-name": [{"data": "ge-0/0/1.0"}]},
+        ]
+    }]
+})
+
+JUNOS_INTF_JSON = _json.dumps({
+    "interface-information": [{
+        "physical-interface": [
+            {"name": [{"data": "ge-0/0/0"}], "oper-status": [{"data": "up"}],
+             "logical-interface": [{"address-family": [{"interface-address": [{"ifa-local": [{"data": "10.0.0.1/31"}]}]}]}]},
+            {"name": [{"data": "ge-0/0/1"}], "oper-status": [{"data": "down"}]},
+        ]
+    }]
+})
+
+
+def test_parse_bgp_junos():
+    out = parsers.parse_bgp("junos", JUNOS_BGP_JSON)
+    assert out["total"] == 2
+    assert out["established"] == 1
+    p0 = out["peers"][0]
+    assert p0["neighbor"] == "10.0.0.1"      # +port stripped
+    assert p0["asn"] == 65001
+    assert p0["state"] == "Established"
+    assert p0["prefixes"] == 12
+    assert out["peers"][1]["state"] == "Active"
+
+
+def test_parse_ospf_junos():
+    out = parsers.parse_ospf("junos", JUNOS_OSPF_JSON)
+    assert out["total"] == 2
+    assert out["full"] == 1
+    assert out["neighbors"][0]["neighbor"] == "10.0.0.1"
+    assert out["neighbors"][0]["interface"] == "ge-0/0/0.0"
+
+
+def test_parse_interfaces_junos():
+    out = parsers.parse_interfaces("junos", JUNOS_INTF_JSON)
+    assert out["total"] == 2
+    assert out["up"] == 1
+    assert out["list"][0]["name"] == "ge-0/0/0"
+    assert out["list"][0]["addresses"] == ["10.0.0.1/31"]
+
+
+def test_parse_junos_soft_fail():
+    assert parsers.parse_bgp("junos", "") == {"peers": [], "established": 0, "total": 0}
+    assert parsers.parse_ospf("junos", "garbage") == {"neighbors": [], "full": 0, "total": 0}

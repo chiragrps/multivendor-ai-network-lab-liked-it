@@ -426,7 +426,7 @@ tr:hover td{background:#1a284033}
     <tr><td><span class="tag srl">SRL</span> nokia-srl</td><td>SRLDriver</td><td><code>sr_cli -d "&lt;cmd&gt;"</code></td><td>flat tables (text parse)</td></tr>
     <tr><td><span class="tag ceos">cEOS</span> arista-eos</td><td>EOSDriver</td><td><code>Cli -p 15 -c "&lt;cmd&gt; | json"</code></td><td>JSON</td></tr>
     <tr><td><span class="tag frr">FRR</span> frr</td><td>FRRDriver</td><td><code>vtysh -c "&lt;cmd&gt; json"</code></td><td>JSON</td></tr>
-    <tr><td>Juniper (planned)</td><td>JunosDriver</td><td><code>cli "&lt;cmd&gt; | display json"</code></td><td>JSON (native)</td></tr>
+    <tr><td><span class="tag" style="background:#c678dd22;color:#c678dd">JUNOS</span> junos</td><td>JunosDriver</td><td><code>cli -c "&lt;cmd&gt; | display json"</code></td><td>JSON (deeply nested [{data}])</td></tr>
     <tr><td>Cisco IOS-XR (planned)</td><td>IOSXRDriver</td><td><code>"&lt;cmd&gt;"</code> via Scrapli</td><td>text / XML fallback</td></tr>
   </table>
 
