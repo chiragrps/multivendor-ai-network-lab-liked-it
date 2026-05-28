@@ -776,8 +776,11 @@ docker run --rm --privileged --network host --pid host \<br>
 </div>
 
 <script>
+// startOnLoad:false — Mermaid must NOT render blocks while their panels are
+// display:none (zero-width container -> "Syntax error" bomb). We render each
+// diagram lazily the first time its panel becomes visible (see renderDiagram).
 mermaid.initialize({
-  startOnLoad: true,
+  startOnLoad: false,
   theme: 'dark',
   themeVariables: {
     background: '#0d1520', primaryColor: '#0d1520', primaryBorderColor: '#00d4ff',
@@ -787,11 +790,24 @@ mermaid.initialize({
   flowchart: { curve: 'basis', nodeSpacing: 40, rankSpacing: 55 },
 });
 
+// Render the mermaid block inside a now-visible panel, once.
+async function renderDiagram(panel) {
+  if (!panel) return;
+  const pre = panel.querySelector('.mermaid');
+  if (!pre || pre.dataset.rendered === '1') return;
+  try {
+    await mermaid.run({ nodes: [pre] });
+    pre.dataset.rendered = '1';
+  } catch (e) { /* leave source visible if render fails */ }
+}
+
 function show(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
   document.querySelectorAll('.topbar nav a').forEach(a => a.classList.remove('active'));
   if (window.event && event.target) event.target.classList.add('active');
+  // when the Diagrams section opens, render whichever panel is active
+  if (id === 'diagrams') renderDiagram(document.querySelector('.diagram-panel.active'));
 }
 
 function showDiagram(id, btn) {
@@ -799,6 +815,7 @@ function showDiagram(id, btn) {
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.diagram-tabs button').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
+  renderDiagram(document.getElementById(id));
 }
 
 function loadConfig(path, name) {
